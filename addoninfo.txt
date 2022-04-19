@@ -1,0 +1,80 @@
+// The addoninfo.txt file is a metadata file that is required by all Source Engine Add-ons.
+
+"AddonInfo"
+{
+	addonSteamAppID		550							// 500 is the app ID for Left 4 Dead, 550 for Left 4 Dead 2
+	addontitle		"[Advanced Bot AI]给bot加智"						// Add-on title that shows up in Add-ons list. ~20 chars max
+	addonversion		3.1						// Add-on version.
+	addonauthor		"RogoShum"						// Name/alias of the author
+	addonauthorSteamID	"RogoShum"						// (Optional) Steam ID of author. We use this to construct a URL to the author's page.
+
+	addonDescription	"[仅在本地服务器有效]
+[当bot的行为卡住，不知道他在发什么呆，一直不走的时候，同时下蹲和跳再推一下bot可以让bot传送到自己位置上，并重置bot的状态]
+
+各种奇怪的功能：
+1. Bot的战斗方式有整体的提升，提升清特感和清小僵尸能力(优化一部分被包围后处理小僵尸能力)。
+2. 更快的救人速度。
+3. Bot能够丢一部分的投掷物。
+4. Bot能够使用除颤器。
+5. Bot能够使用弹药升级包。
+6. 手持投掷物右键Bot可以交换Bot身上的投掷物。
+7. 如果玩家没药没包的时候，Bot还会主动把自己的资源递给玩家，不管是药，包，或是投掷物。
+8. 避免一些Bot踩痰救人的情况。
+9. 更快的反应速度。
+10. 玩家死了之后又没有包，Bot就会plan b（会自己按一部分的按钮）。
+
+11. 在某些地图会帮助玩家寻油，把油带到灌油机器（基于原版四人考虑，当人类玩家小于两人时触发，另外两个bot负责防守，如果都去找油有可能被控翻车，所以这里设置为两个人去找油就好）。
+
+↑ 因为当bot处于战斗状态时不会去找油 ↑
+
+
+小指令:
+指令不带冒号
+
+1. 聊天窗输入 "!morebot" 可以原地生成一只佐伊，因为l4d1的战役无法拥有多个佐伊，所以会把原有佐伊变为比尔，然后再生成新的佐伊。 注：别弄太多bot，不然会卡，还容易崩溃。
+
+2. 当所有玩家阵亡，而bot自身无法自己完成战役时（刁钻的第三方图），可以输入 "!botstop" 去强行伤血bot重开这局。
+
+3. 自用玩耍用指令，输入两次 "!botaitest" 可以开启bot暴躁老哥模式，再次输入关闭。（仅玩耍用0-0
+
+其他：
+增加后备加载方式，应该不会被其他vscript模组覆盖掉了，也兼容管理员系统和CSS武器解锁
+
+他们处于战斗状态时不太会跑路（尤其是无限尸潮+需要快速跑图的关卡），所以需要玩家带着他们浪。
+
+以及解放双手让bot自己打的操作是不存在的（虽然我测试的时候经常抱着吃的看他们自己打，挺好玩的2333）主要是官方的寻路系统就不是让bot自己打图的，是让bot能跟上玩家的，所以说好好带他们打就行了，他们也会尽可能帮你的
+
+以及我timer方法用的很多，所以后台会报一堆SCRIPT PERF WARNING，可以直接忽略掉。
+
+具体效果就看自己测试了，如果喜欢的话就用用吧
+
+
+[Only works on local server]
+[when bot is in a daze, if player shove bot and duck and jump at same time, bot will teleport to player and reset it's state.]
+
+Feature:
+1. Improved bot combat skill.
+2. Improve the speed of save player.
+3. And bots can throw grenade when they need(all three kinds.
+4. Bots can use defib.
+5. Bots can use upgrade pack, useless function.
+6. Bots can give the player their first aid kit、 grenade、 pills、 etc.
+7. You can exchange the grenade you are holding by shove bots(if they have one .
+8. They can continue the game when you dead(if no defib here).
+9. In certain map, when the number of players is less than two, bots will try to find gas can by its own, and take gas can back to machine.
+
+↑ bot will not try to finding gas can while he was combat. ↑
+
+Command:
+!morebot Input to the chat box, then send it to use. Will spawn a new zoey to the player team. If it's l4d1 campaign, will trans old zoey to bill, then spawn a new zoey. ps: Do NOT spawn too much bot.
+
+!botstop When all human players are dead, and bots can't finished this campaign by their own, will force to make all bots falling down.
+
+!botaitest Fun command, only for play fun, input twice to switch on BOT ANGRY MODE. more once to switch off.
+
+This is a vscript addon, and I use repeat scripts heavily, the console will show a lot of SCRIPT PERF WARNING, just ignore it.
+
+If you think this addon is suitable for you, enjoy it."
+
+	addonContent_Script 1								// Has Scripts
+}
