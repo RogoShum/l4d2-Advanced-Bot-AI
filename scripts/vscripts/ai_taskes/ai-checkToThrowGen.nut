@@ -37,7 +37,7 @@ class ::AITaskCheckToThrowGen extends AITaskGroup
 			if(BotAI.IsAlive(entT) && entT.GetZombieType() == 8) {
 				gettank = true;
 				if(entT.GetHealth() > aliveFactor && cooldown < 1) {
-					if(!BotAI.IsOnFire(entT))
+					if(!BotAI.IsOnFire(entT) && !(entT in BotAI.dontYouWannaExtinguish))
 						searchGen(entT, "weapon_molotov");
 					
 					if(needVomitjar && !hasMolotov && !BotAI.isVomited(entT))
@@ -51,7 +51,7 @@ class ::AITaskCheckToThrowGen extends AITaskGroup
 		if(!BotAI.NeedThrowGrenade)
 			return false;
 		
-		local infectedJudge = 0 + stasis.len() * 6;
+		local infectedJudge = 0 + stasis.len() * 3;
 		local checlAmount = 25 - (BotAI.playerFallDown * 3);
 		if(Director.GetCommonInfectedCount() > checlAmount) {
 			local infec = null;
@@ -59,8 +59,6 @@ class ::AITaskCheckToThrowGen extends AITaskGroup
 				if(infec.IsValid() && BotAI.IsAlive(infec)) {
 					if(BotAI.IsEntitySurvivor(BotAI.GetTarget(infec)))
 						infectedJudge+=1.15;
-					else
-						infectedJudge+=0.3;
 				}
 			}
 		}

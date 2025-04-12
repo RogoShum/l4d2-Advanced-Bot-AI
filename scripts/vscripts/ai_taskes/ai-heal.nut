@@ -11,6 +11,7 @@ class ::AITaskHeal extends AITaskSingle
 	
 	function singleUpdateChecker(player)
 	{
+		if(BotAI.playerDominated > 0) return false;
 		local needHealing = BotAI.getPlayerTotalHealth(player) <= 35 || player.IsOnThirdStrike();
 		local hasTreatmentItems = BotAI.HasItem(player, "weapon_first_aid_kit");
 		local safeCheck = !BotAI.IsInCombat(player) && !BotAI.validVector(BotAI.getBotDedgeVector(player)) && !BotAI.IsPlayerClimb(player);

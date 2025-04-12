@@ -15,7 +15,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 		{
 			local wep = player.GetActiveWeapon();
 			local ename = " ";
-				
+
 			if(BotAI.IsEntityValid(wep))
 				ename = wep.GetClassname();
 			
@@ -33,6 +33,11 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			if(ename == "weapon_pain_pills" || ename == "weapon_adrenaline" || ename == "weapon_first_aid_kit") {
 				NetProps.SetPropFloat(wep, "m_flNextPrimaryAttack", Time() - 1);
 			}
+
+			if(player in BotAI.targetLocked && BotAI.IsAlive(BotAI.targetLocked[player])) {
+				BotAI.setBotTarget(player, BotAI.targetLocked[player]);
+				return true;
+			}
 			
 			local target = BotAI.getBotTarget(player);
 			if(BotAI.IsEntityValid(target) && target.GetClassname() == "tank_rock")
@@ -43,10 +48,6 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				return true;
 			else
 				BotAI.setSmokerTarget(player, null);
-
-			target = BotAI.GetTarget(player);
-			if(BotAI.IsAlive(target))
-				return true;
 
 			local startPt = player.EyePosition();
 			local endPt = startPt + player.EyeAngles().Forward().Scale(999999);
@@ -79,8 +80,6 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 		local target = BotAI.getBotTarget(player);
 		if(!BotAI.IsEntityValid(target))
 			target = BotAI.getSmokerTarget(player);
-		if(!BotAI.IsEntityValid(target))
-			target = BotAI.GetTarget(player);
 			
 		if(!(player in BotAI.FullPress))
 			BotAI.FullPress[player] <- 0;
@@ -153,12 +152,11 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			}
 
 			if(isKnife && targetName == "player" && target.GetZombieType() == 1 && target.GetEntityIndex() in BotAI.smokerTongue){
-				local tongueLength = Convars.GetFloat("tongue_fly_speed") / 10 * BotAI.smokerTongue[target.GetEntityIndex()];
-				local hitFactor = 300;
-				local tongueRange = Convars.GetFloat("tongue_range");
+				local tongueLength = BotAI.tongueSpeed / 9 * BotAI.smokerTongue[target.GetEntityIndex()];
+				local hitFactor = 420;
+				local tongueRange = BotAI.tongueRange;
 				//local additionFactor = distance / tongueRange * 50;
 				//hitFactor += additionFactor;
-
 				if(distance - tongueLength <= hitFactor){
 					BotAI.setSmokerTarget(player, target);
 					BotAI.setBotTarget(player, null);
@@ -170,6 +168,9 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				BotAI.ReloadPrimaryClip(player);
 			}
 			
+			if(player in BotAI.targetLocked && BotAI.targetLocked[player] == target)
+				Shot = true;
+
 			if(targetName == "infected" && BotAI.IsAlive(target) && distance < shotDis)
 				Shot = true;
 			
@@ -177,10 +178,9 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				if(target.GetZombieType() != 2)
 					Shot = true;
 				else {
-					local splatRange = Convars.GetFloat("z_exploding_splat_radius") + 1;
 					local rangePlayer = null;
 					local playerInside = false;
-					while(rangePlayer = Entities.FindByClassnameWithin(rangePlayer, "player", target.GetOrigin(), splatRange)) {
+					while(rangePlayer = Entities.FindByClassnameWithin(rangePlayer, "player", target.GetOrigin(), BotAI.splatRange)) {
 						if(BotAI.IsEntitySurvivor(rangePlayer))
 							playerInside = true;
 					}

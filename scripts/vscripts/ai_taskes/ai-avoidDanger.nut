@@ -21,19 +21,20 @@ class ::AITaskAvoidDanger extends AITaskSingle
 	playerTick = {};
 	enumGround = {};
 	enumProjectile = {};
+	tankReallyHere = {};
 	
 	function singleUpdateChecker(player)
 	{
 		local dangerous = {};
 		
 		if(BotAI.IsPlayerClimb(player) || player.IsIncapacitated() || player.IsDominatedBySpecialInfected() || player.IsStaggering()) {
-			BotAI.setBotAvoid(player, dangerous);
+			//BotAI.setBotAvoid(player, dangerous);
 			BotAI.setBotDedgeVector(player, null);
 			return false;
 		}
 		
-		if(!BotAI.IsOnGround(player)) {//
-			BotAI.setBotAvoid(player, dangerous);
+		if(!BotAI.IsOnGround(player) && (!(player in tankReallyHere) || !tankReallyHere[player])) {//
+			//BotAI.setBotAvoid(player, dangerous);
 			local dodgeVec = BotAI.getBotDedgeVector(player);
 			if(BotAI.validVector(dodgeVec)) {
 				dodgeVec = dodgeVec.Scale(0.01);
@@ -43,7 +44,7 @@ class ::AITaskAvoidDanger extends AITaskSingle
 					player.ApplyAbsVelocityImpulse(dodgeVec);
 				//BotAI.setBotDedgeVector(player, null);
 				return false;
-			} 
+			}
 		}
 		local isHealing = BotAI.IsBotHealing(player);
 		/*
@@ -80,26 +81,12 @@ class ::AITaskAvoidDanger extends AITaskSingle
 		}
 
 		foreach(entW in BotAI.WitchList) {
-			local WitchState = NetProps.GetPropInt(entW, "m_nSequence");
-			if (BotAI.IsAlive(entW) && BotAI.distanceof(player.GetOrigin(), entW.GetOrigin()) < 600 && (WitchState == ANIM_WITCH_WANDER_ACQUIRE || WitchState == ANIM_WITCH_KILLING_BLOW || WitchState == ANIM_WITCH_KILLING_BLOW_TWO))
+			if (BotAI.IsAlive(entW) && BotAI.distanceof(player.GetOrigin(), entW.GetOrigin()) < 600 && !BotAI.witchRetreat(entW) && BotAI.CanSeeOtherEntityWithoutLocation(player, entW, 0, false, MASK_UNTHROUGHABLE))
 				dangerous[dangerous.len()] <- entW;
 		}
 		
 		BotAI.setBotAvoid(player, dangerous);
-		local lastArea = player.GetLastKnownArea();
-		if(lastArea && lastArea.IsDamaging()) {
-			local areas = {};
-			NavMesh.GetNavAreasInRadius(player.GetOrigin(), 300, areas);
-			local moving = false;
-			foreach(area in areas) {
-				if(moving)
-					continue;
-				if(!area.IsDamaging() && !BotAI.IsBotGasFinding(player)) {
-					BotAI.botMovePos(player, area.FindRandomSpot());
-					moving = true;
-				}
-			}
-		}
+		
 		if(dangerous.len() > 0)
 			return true;
 		else {
@@ -110,6 +97,7 @@ class ::AITaskAvoidDanger extends AITaskSingle
 	
 	function playerUpdate(player)
 	{
+		tankReallyHere[player] <- false;
 		local dangerous = BotAI.getBotAvoid(player);
 		if(dangerous.len() > 0) {
 			local vec3d = Vector(0, 0, 0);
@@ -122,10 +110,35 @@ class ::AITaskAvoidDanger extends AITaskSingle
 
 				local name = danger.GetClassname();
 				
-				//if(BotAI.BOT_AI_TEST_MOD == 1)
-					//printl("[Bot AI] Avoid " + name);
-				if(name in enumGround)
-					vecList[vecList.len()] <- BotAI.fakeTwoD(BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(251));
+				if(BotAI.BOT_AI_TEST_MOD == 1)
+					printl("[Bot AI] Avoid " + name);
+				if(name in enumGround) {
+					local lastArea = player.GetLastKnownArea();
+					local function feelSafe() {
+						return !player.GetLastKnownArea().IsDamaging();
+					}
+					if(lastArea && lastArea.IsDamaging()) {
+						local follow = false;
+						foreach(humanPlayer in BotAI.SurvivorHumanList) {
+							if(!follow && BotAI.distanceof(player.GetOrigin(), humanPlayer.GetOrigin()) < 300) {
+								BotAI.botRunPos(player, humanPlayer, "followPlayer", 4, feelSafe);
+								follow = true;
+							}
+						}
+						if(!follow) {
+							local areas = {};
+							NavMesh.GetNavAreasInRadius(player.GetOrigin(), 300, areas);
+							local safeArea = null;
+							foreach(area in areas) {
+								if(!area.IsDamaging() && (safeArea == null || BotAI.distanceof(player.GetOrigin(), safeArea.GetCenter()) > BotAI.distanceof(player.GetOrigin(), area.GetCenter()))) {
+									safeArea = area;
+								}
+							}
+							if(safeArea != null)
+								BotAI.botRunPos(player, safeArea.FindRandomSpot(), "avoidDanger#", 5, feelSafe);
+						}
+					}
+				}
 
 				if(name in enumProjectile){
 					//250 100 400
@@ -154,27 +167,51 @@ class ::AITaskAvoidDanger extends AITaskSingle
 						/*if(BotAI.GetEntitySpeedVector(danger) > 230 && BotAI.distanceof(player.GetOrigin(), danger.GetOrigin()) < 400 && !BotAI.IsTargetStaggering(danger))
 							tankTest = true;
 						*/
-						if(BotAI.nextTickDistance(player, danger) > 120)
+						if(BotAI.nextTickDistance(player, danger) > 220)
 							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 240, 50, 240);
 						else
-							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 220, 220, 220, 800);
+							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 420, 220, 420, 800);
 					}
 					else if(danger.GetZombieType() == 8) {
-						if(BotAI.nextTickDistance(player, danger) > 100)
+						BotAI.BotRetreatFrom(player, danger);
+						local nexDis = BotAI.nextTickDistance(player, danger);
+						if(nexDis > 100) {
 							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 230, 230, 230);
+							local isTarget = BotAI.IsTarget(player, danger);
+							if(!isTarget || nexDis > 200) {
+								local closest = null;
+								foreach(humanPlayer in BotAI.SurvivorHumanList) {
+									if(humanPlayer.IsIncapacitated() || humanPlayer.IsHangingFromLedge()) continue;
+									if(closest == null || BotAI.distanceof(player.GetOrigin(), closest.GetOrigin()) > BotAI.distanceof(player.GetOrigin(), humanPlayer.GetOrigin()))
+										closest = humanPlayer;
+								}
+								if(BotAI.IsEntityValid(closest))
+									BotAI.botRunPos(player, closest, "followPlayer", 4, "change");
+							} else {
+								local navigator = BotAI.getNavigator(player);
+								navigator.clearPath("followPlayer");
+							}
+						}
 						else {
-							tankTest = true;
+							if(BotAI.IsPressingAttack(danger)) {
+								tankTest = true;
+								//tankReallyHere[player] = true;
+							}
+							
+							local navigator = BotAI.getNavigator(player);
+							navigator.clearPath("followPlayer");
+							
 							if(BotAI.HasTank && BotAI.playerFallDown > 0)
-								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 350, 350, 350, 600, false);
+								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 250, 150, 250, 600, false);
 							else
-								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 350, 250, 350, 600, false);
+								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 230, 100, 230, 600, false);
 						}
 					}
 					else {
 						if(BotAI.nextTickDistance(player, danger) < 260)
 							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 150, 100, 300);
 						else
-							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 125, 50, 300);
+							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 225, 50, 300);
 					}
 					
 					//BotAttack(player, danger);
@@ -183,28 +220,48 @@ class ::AITaskAvoidDanger extends AITaskSingle
 				
 				if(name == "infected"){
 					if(BotAI.IsTarget(player, danger))
-						vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 75, 245, 300, 150);
+						vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 150, 245, 300);
 					else
-						vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 35, 145, 300, 150);
+						vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 35, 145, 300);
 				}
 				
 				if(name == "witch") {
-						player.SetFriction(1.9);
-						if(!BotAI.CanSeeOtherEntityWithoutLocation(player, danger, 0, false, MASK_UNTHROUGHABLE)){
-							if(!BotAI.IsInCombat(player))
-								BotAI.BotMove(player, danger);
+					local helper = null;
+					foreach(human in BotAI.SurvivorHumanList) {
+						if(helper == null || BotAI.distanceof(helper.GetOrigin(), player.GetOrigin()) > BotAI.distanceof(human.GetOrigin(), player.GetOrigin()))
+							helper = human;
+					}
+					
+					local function untilWitchDie() {
+						if(!BotAI.IsEntityValid(danger) || !BotAI.IsAlive(danger)) return true;
+						if(BotAI.witchRetreat(danger)) return true;
+						if(BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) > 600) return true;
+						return false;
+					}
+
+					if(BotAI.IsEntityValid(helper) && BotAI.distanceof(helper.GetOrigin(), player.GetOrigin()) < 1000)
+						BotAI.botRunPos(player, helper, "farAwayWitch", 4, untilWitchDie);
+					else if(BotAI.witchKilling(danger) || BotAI.witchRunning(danger)){
+						local dirction = BotAI.normalize(BotAI.fakeTwoD(player.GetOrigin() - danger.GetOrigin()));
+						local isTarget = BotAI.witchRunning(danger) && BotAI.xyDotProduct(dirction, BotAI.normalize(BotAI.fakeTwoD(danger.GetForwardVector()))) >= 0.85;
+						if(isTarget) {
+							if(BotAI.distanceof(player.GetOrigin(), danger.GetOrigin()) <= 150)
+								tankTest = true;
+								
+							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 270, 220, 270);
 						}
 						else {
-							BotAI.BotAttack(player, danger);
-							if(BotAI.IsTarget(danger, player)) {
-								if(BotAI.distanceof(player.GetOrigin(), danger.GetOrigin()) <= 350)
-									tankTest = true;
-								
-								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 270, 220, 270);
+							local function changeOrDieOrRun() {
+								if(!BotAI.IsEntityValid(danger) || !BotAI.IsAlive(danger)) return true;
+								if(BotAI.witchRetreat(danger)) return true;
+								local navigator = BotAI.getNavigator(player);
+								if(!navigator.isMoving("killWItch"))
+									return true;
+								return false;
 							}
-							else
-								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, -200, -200, 220);
+							BotAI.botRunPos(player, danger, "killWItch", 4, changeOrDieOrRun);
 						}
+					}
 				}
 				
 				if(BotAI.getIsMelee(player) && (BotAI.IsTargetStaggering(danger) || (BotAI.IsEntitySI(danger) && danger.IsStaggering())) && BotAI.distanceof(player.GetOrigin(), danger.GetOrigin()) >= 200)
@@ -215,12 +272,12 @@ class ::AITaskAvoidDanger extends AITaskSingle
 				vec3d += vector;
 				if(length < vector.Length())
 					length = vector.Length();
-			}	
+			}
 
 			if(vecList.len() > 1)
 				vec3d = vec3d.Scale(1 / vecList.len());
 
-			if(vec3d.Length() < 10) {
+			if(vecList.len() > 0 && (!BotAI.validVector(vec3d) || vec3d.Length() < 10)) {
 				vec3d = player.EyeAngles().Forward().Scale(-500);
 			}
 			
@@ -243,9 +300,17 @@ class ::AITaskAvoidDanger extends AITaskSingle
 			local finalVec = Vector(vec3d.x * vecScale + velocity.x * velocityScale, vec3d.y * vecScale + velocity.y * velocityScale, velocity.z);
 			if(finalVec.Length() < length)
 				finalVec = BotAI.fakeTwoD(BotAI.normalize(finalVec).Scale(length));
+			if(vecList.len() > 0 && (!BotAI.validVector(finalVec) || finalVec.Length() < 10)) {
+				finalVec = player.EyeAngles().Forward().Scale(-500);
+			}
+
 			// && BotAI.CanGetWithoutDanger(player, null, player.GetOrigin() + finalVec + Vector(0, 0, -300))
-			if(!BotAI.isPlayerNearLadder(player)){
-				player.SetVelocity(finalVec);
+			if(BotAI.validVector(finalVec) && !BotAI.isPlayerNearLadder(player)) {
+				if(BotAI.IsOnGround(player))
+					player.SetVelocity(finalVec);
+				else 
+					player.ApplyAbsVelocityImpulse(finalVec.Scale(0.01));
+				
 				BotAI.setBotDedgeVector(player, finalVec);
 				if(BotAI.BOT_AI_TEST_MOD == 1)
 					DebugDrawLine(player.GetOrigin() + Vector(0, 0, 20), player.GetOrigin() + finalVec + Vector(0, 0, 20), 255, 255, 255, true, 0.2);

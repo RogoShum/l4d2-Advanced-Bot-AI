@@ -85,9 +85,8 @@ class ::AITaskSearchBody extends AITaskGroup
 
 		local distance = 5000;
 		local findBody = null;
-		foreach(body in fallen)
-		{
-			if(!BotAI.CanGetWithoutDanger(player, body) || BotAI.distanceof(player.GetOrigin(), body.GetOrigin()) > distance)
+		foreach(body in fallen) {
+			if(!BotAI.IsEntityValid(body) || BotAI.distanceof(player.GetOrigin(), body.GetOrigin()) > distance)
 				continue;
 			distance = BotAI.distanceof(player.GetOrigin(), body.GetOrigin());
 			findBody = body;
@@ -128,7 +127,12 @@ class ::AITaskSearchBody extends AITaskGroup
 					if(!BotAI.IsInCombat(player)) {
 						if(BotAI.BOT_AI_TEST_MOD == 1)
 							printl("[Bot AI] Found defib");
-						BotAI.BotMove(player, findDef, 2);
+						local bo = ironBanner;
+						local function needSearch() {
+							return !BotAI.IsEntityValid(bo);
+						}
+						
+						BotAI.botRunPos(player, findDef, "searchBody", 3, needSearch);
 						return false;
 					}
 				}
@@ -159,13 +163,16 @@ class ::AITaskSearchBody extends AITaskGroup
 				BotAI.setBotLockTheard(player, -1);
 				return;
 			}
-				
-			if (distance > 50 && !BotAI.IsBotGasFinding(player)) {
-				BotAI.BotMove(player, ironBanner, 2);
+
+			if (distance > 50) {
+				local bo = ironBanner;
+				local function needSearch() {
+					return !BotAI.IsEntityValid(bo);
+				}
+						
+				BotAI.botRunPos(player, ironBanner, "searchBody", 3, needSearch);
 			}
 			else if (distance <= 50) {
-				if(BotAI.IsBotGasFinding(player))
-					BotAI.BotReset(player);
 				BotAI.lookAtEntity(player, ironBanner, true, 4);
 				BotAI.hookViewEntity(player, ironBanner);
 				local weapon = player.GetActiveWeapon();

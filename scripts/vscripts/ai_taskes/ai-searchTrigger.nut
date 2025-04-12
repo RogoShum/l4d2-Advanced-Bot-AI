@@ -17,7 +17,7 @@ class ::AITaskSearchTrigger extends AITaskGroup {
 		foreach(idx, value in BotAI.TriggerList) {
 			local trigger = EntIndexToHScript(idx);
 			
-			if(IsTriggerUsable(trigger))
+			if(BotAI.IsTriggerUsable(trigger))
 				triggerChecked[triggerChecked.len()] <- trigger;
 		}
 		
@@ -29,37 +29,8 @@ class ::AITaskSearchTrigger extends AITaskGroup {
 		return false;
 	}
 	
-	function IsTriggerUsable(trigger) {
-		if(BotAI.IsEntityValid(trigger)) {
-			local m_usable = NetProps.GetPropInt(trigger, "m_usable");
-				
-			if(trigger.GetClassname() == "func_button")
-			{
-				local glowEntity = NetProps.GetPropEntity(trigger, "m_glowEntity");
-
-				if (m_usable == 1 && BotAI.IsEntityValid(glowEntity))
-					return true;
-			}
-			else if(trigger.GetClassname() == "func_button_timed")
-			{
-				if (m_usable == 1 && !BotAI.IsButtonPressed(trigger))
-					return true;
-			}
-			else if(trigger.GetClassname() == "trigger_finale")
-			{
-				if(!BotAI.FinaleStart && !BotAI.IsButtonPressed(trigger))
-					return true;
-			}
-		}
-		
-		return false;
-	}
-	
 	function GroupUpdateChecker(player)
-	{
-		if(BotAI.IsInCombat(player) || BotAI.IsPressingAttack(player) || BotAI.IsPressingUse(player) || BotAI.IsPressingShove(player) || BotAI.IsBotGasFinding(player))
-			return false;
-		
+	{	
 		local dis = 3500;
 		local cloest = null;
 		
@@ -91,15 +62,6 @@ class ::AITaskSearchTrigger extends AITaskGroup {
 	{
 		if(!BotAI.IsPlayerEntityValid(player)) return;
 		
-		if(BotAI.IsInCombat(player) && BotAI.IsBotGasFinding(player))
-		{
-			BotAI.BotReset(player);
-			return;
-		}
-		
-		if(BotAI.IsInCombat(player) || BotAI.IsPressingAttack(player) || BotAI.IsPressingShove(player))
-			return;
-		
 		foreach(trigger, link in triggerLinks)
 		{
 			if(!BotAI.IsEntityValid(link))
@@ -108,7 +70,7 @@ class ::AITaskSearchTrigger extends AITaskGroup {
 				continue;
 			}
 			
-			if(!IsTriggerUsable(trigger))
+			if(!BotAI.IsTriggerUsable(trigger))
 			{
 				delete triggerLinks[trigger];
 				BotAI.setBotLockTheard(link, -1);
@@ -116,29 +78,67 @@ class ::AITaskSearchTrigger extends AITaskGroup {
 			}
 			
 			if(link != player) continue;
-
-			if(BotAI.distanceof(player.GetOrigin(), trigger.GetOrigin()) > 100)
-			{
-				if(!BotAI.IsBotGasFinding(player)) {
-					BotAI.BotMove(player, trigger, 2);
-					if(BotAI.BOT_AI_TEST_MOD == 1)
-						printl("[Bot AI] Trying go to " + trigger.GetClassname() + " named: " + trigger.GetName() + "[" + trigger.GetEntityIndex() + "]");
-				}
+			local needFind = trigger;
+			local hasGlow = false;
+			local glow = NetProps.GetPropEntity(trigger, "m_glowEntity");
+			if(BotAI.IsEntityValid(glow)) {
+				hasGlow = true;
+				needFind = glow;
 			}
-			else if(!BotAI.IsPressingUse(player))
-			{
+			if(BotAI.distanceof(player.GetOrigin(), needFind.GetOrigin()) > 150) {
+				local tr = trigger
+				local function needTrigger() {
+					return !BotAI.IsTriggerUsable(tr);
+				}
+				local glow = NetProps.GetPropEntity(trigger, "m_glowEntity");
+				if(BotAI.IsEntityValid(glow)) {
+					local navigator = BotAI.getNavigator(player);
+					local glowPos = glow.GetOrigin() + Vector(0, 0, 100);
+					local direcVec = Vector(50, 0, 0);
+					if(!BotAI.botRunPos(player, glowPos, "searchTrigger", 1, needTrigger) && !navigator.hasPath("searchTrigger")) {
+						for(local i = 0; i < 8; ++i) {
+							local angleVec = BotAI.rotateVector(direcVec, i * 45);
+							if(BotAI.BOT_AI_TEST_MOD == 1) {
+								DebugDrawCircle(glowPos + angleVec, Vector(0, 0, 255), 1.0, 5, true, 1.0);
+								DebugDrawText(glowPos + angleVec, "goal", false, 1.0);
+							}
+							
+							if(BotAI.botRunPos(player, glowPos + angleVec, "searchTrigger", 1, needTrigger) || navigator.hasPath("searchTrigger"))
+								break;
+						}
+					}
+				}
+				else {
+					local navigator = BotAI.getNavigator(player);
+					local triggerPos = trigger.GetOrigin() + Vector(0, 0, 100);
+					local direcVec = Vector(50, 0, 0);
+					if(!BotAI.botRunPos(player, triggerPos, "searchTrigger", 1, needTrigger) && !navigator.hasPath("searchTrigger")) {
+						for(local i = 0; i < 8; ++i) {
+							local angleVec = BotAI.rotateVector(direcVec, i * 45);
+							if(BotAI.BOT_AI_TEST_MOD == 1) {
+								DebugDrawCircle(triggerPos + angleVec, Vector(0, 0, 255), 1.0, 5, true, 1.0);
+								DebugDrawText(triggerPos + angleVec, "goal", false, 1.0);
+							}
+							if(BotAI.botRunPos(player, triggerPos + angleVec, "searchTrigger", 1, needTrigger) || navigator.hasPath("searchTrigger"))
+								break;
+						}
+					}
+				}
+					
+				if(BotAI.BOT_AI_TEST_MOD == 1)
+					printl("[Bot AI] Trying go to " + trigger.GetClassname() + " named: " + trigger.GetName() + "[" + trigger.GetEntityIndex() + "]");
+			}
+			else if(!BotAI.IsPressingUse(player)) {
 				if(trigger.GetClassname() == "func_button_timed")
 					trigger.__KeyValueFromInt("use_time", -1);
 
-				BotAI.lookAtEntity(player, trigger);
-				BotAI.hookViewEntity(player, trigger);
-				DoEntFire("!self", "Use", "", 0, player, trigger);
+				BotAI.lookAtEntity(player, needFind);
+				BotAI.hookViewEntity(player, needFind);
+				DoEntFire("!self", "Use", "", 0, player, needFind);
 				BotAI.ForceButton(player, 32 , 1);
 				BotAI.SetButtonPressed(trigger);
 				
-				printl("[Bot AI] Try Trigger  " + trigger.GetName());				
-				if(BotAI.IsBotGasFinding(player))
-					BotAI.BotReset(player);
+				printl("[Bot AI] Try Trigger  " + trigger.GetName());
 				BotAI.setBotLockTheard(player, -1);
 			}
 		}

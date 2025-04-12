@@ -18,8 +18,7 @@ class ::AITaskDoUpgrades extends AITaskGroup
 		
 		hasPlayer = false;
 		
-		foreach(player in BotAI.SurvivorList)
-		{
+		foreach(player in BotAI.SurvivorList) {
 			if(BotAI.IsPlayerEntityValid(player) && player.IsSurvivor() && BotAI.IsAlive(player))
 			{
 				if(BotAI.GetPrimaryUpgrades(player) == 1 || BotAI.GetPrimaryUpgrades(player) == 2)
@@ -66,7 +65,10 @@ class ::AITaskDoUpgrades extends AITaskGroup
 			{
 				if(BotAI.distanceof(player.GetOrigin(), playerB.GetOrigin()) > 150)
 				{
-					BotAI.BotMove(player, playerB);
+					local function needUse() {
+						return !BotAI.IsAlive(playerB);
+					}
+					BotAI.botRunPos(player, playerB, "upgrade", 0, needUse);
 					return;
 				}
 				else

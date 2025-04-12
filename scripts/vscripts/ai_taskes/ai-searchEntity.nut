@@ -4,94 +4,117 @@ class ::AITaskSearchEntity extends AITaskSingle
     {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
 		
-		fakeEnumUpgradePack["weapon_upgradepack_incendiary_spawn"] <- 1;
-		fakeEnumUpgradePack["weapon_upgradepack_explosive_spawn"] <- 1;
-		fakeEnumUpgradePack["weapon_upgradepack_incendiary"] <- 1;
-		fakeEnumUpgradePack["weapon_upgradepack_explosive"] <- 1;
+		enumUpgradePack["weapon_upgradepack_incendiary_spawn"] <- 1;
+		enumUpgradePack["weapon_upgradepack_explosive_spawn"] <- 1;
+		enumUpgradePack["weapon_upgradepack_incendiary"] <- 1;
+		enumUpgradePack["weapon_upgradepack_explosive"] <- 1;
 
-		fakeEnumWeaponSpawn["weapon_pistol_magnum_spawn"] <- 1;
-		fakeEnumWeaponSpawn["weapon_pistol_magnum"] <- 1;
+		enumWeaponSpawn["weapon_pistol_magnum_spawn"] <- 1;
+		enumWeaponSpawn["weapon_pistol_magnum"] <- 1;
 		
-		fakeEnumPills["weapon_pain_pills_spawn"] <- 1;
-		fakeEnumPills["weapon_adrenaline_spawn"] <- 1;
-		fakeEnumPills["weapon_pain_pills"] <- 1;
-		fakeEnumPills["weapon_adrenaline"] <- 1;
+		enumPills["weapon_pain_pills_spawn"] <- 1;
+		enumPills["weapon_adrenaline_spawn"] <- 1;
+		enumPills["weapon_pain_pills"] <- 1;
+		enumPills["weapon_adrenaline"] <- 1;
 		
-		fakeEnumBombSpawn["weapon_pipe_bomb_spawn"] <- 1;
-		fakeEnumBombSpawn["weapon_molotov_spawn"] <- 1;
-		fakeEnumBombSpawn["weapon_vomitjar_spawn"] <- 1;
-		fakeEnumBombSpawn["weapon_pipe_bomb"] <- 1;
-		fakeEnumBombSpawn["weapon_molotov"] <- 1;
-		fakeEnumBombSpawn["weapon_vomitjar"] <- 1;
+		enumBombSpawn["weapon_pipe_bomb_spawn"] <- 1;
+		enumBombSpawn["weapon_molotov_spawn"] <- 1;
+		enumBombSpawn["weapon_vomitjar_spawn"] <- 1;
+		enumBombSpawn["weapon_pipe_bomb"] <- 1;
+		enumBombSpawn["weapon_molotov"] <- 1;
+		enumBombSpawn["weapon_vomitjar"] <- 1;
 		
-		fakeEnumWeaponSpawn["weapon_defibrillator_spawn"] <- 1;
-		fakeEnumWeaponSpawn["weapon_defibrillator"] <- 1;
+		enumDefibrillator["weapon_defibrillator_spawn"] <- 1;
+		enumDefibrillator["weapon_defibrillator"] <- 1;
     }
 
 	single = true;
 	updating = {};
 	playerTick = {};
-	fakeEnumUpgradePack = {};
-	fakeEnumWeaponSpawn = {};
-	fakeEnumPills = {};
-	fakeEnumBombSpawn = {};
-	fakeEnumDefibrillator = {};
+	enumUpgradePack = {};
+	enumWeaponSpawn = {};
+	enumPills = {};
+	enumBombSpawn = {};
+	enumDefibrillator = {};
 
 	items = {};
-	
-	function singleUpdateChecker(player)
-	{
+	searched = [];
+
+	function singleUpdateChecker(player) {
 		local entityList = {};
 		local invPlayer = BotAI.GetHeldItems(player);
-		local item = null;
-		while (Entities.FindInSphere(item, player.GetOrigin(), 150) != null) 
-		{
-			item = Entities.FindInSphere(item, player.GetOrigin(), 150);
-			local ename = item.GetClassname();
-			
-			if(BotAI.IsEntityValid(item) && item.GetOwnerEntity() == null)
-			{
-				if(!("slot3" in invPlayer)) {
-					if (ename in fakeEnumUpgradePack) {
-						entityList[ename] <- item;
-						continue;
-					}
-					
-					if (ename in fakeEnumWeaponSpawn || (ename == "weapon_spawn" && NetProps.GetPropInt(item, "m_weaponID") == 32)) {
-						entityList[ename] <- item;
-						continue;
-					}
-				}
+		local navigator = BotAI.getNavigator(player);
+		local runningPath = navigator.getRunningPathData();
+		if(typeof runningPath == "PathData" && runningPath.priority > 0)
+			return false;
 
-				if (ename in fakeEnumPills && !("slot4" in invPlayer)) {
-					entityList[ename] <- item;
-					continue;
-				}
-
-				if (!("slot2" in invPlayer) && ename in fakeEnumBombSpawn) {
-					entityList[ename] <- item;
-					continue;
-				}
-					
-				if (!BotAI.HasItem(player, "first_aid_kit") && ename in fakeEnumDefibrillator) {
-					entityList[ename] <- item;
-					continue;
+		if(navigator.isMoving("findEntity"))
+			return false;
+		local function search(enumTable) {
+			foreach(idx, val in enumTable) {
+				local item = null;
+				while (item = Entities.FindByClassnameWithin(item, idx, player.GetOrigin(), 500)) {
+					if(BotAI.IsEntityValid(item) && item.GetOwnerEntity() == null && searched.find(item) == null) {
+						items[player] <- item;
+						searched.append(item);
+						return true;
+					}
 				}
 			}
 		}
 
-		if(entityList.len() > 0)
-		{
-			items = entityList;
-			return true;
+		if(!BotAI.HasItem(player, "weapon_melee") && !BotAI.HasItem(player, "weapon_pistol_magnum")) {
+			local item = null;
+			while (item = Entities.FindByClassnameWithin(item, "weapon_spawn", player.GetOrigin(), 500)) {
+				if(BotAI.IsEntityValid(item) && item.GetOwnerEntity() == null && searched.find(item) == null && NetProps.GetPropInt(item, "m_weaponID") == 32){
+					items[player] <- item;
+					searched.append(item);
+					return true;
+				}
+			}
+			if(search(enumWeaponSpawn))
+				return true;
 		}
+
+		if(!("slot2" in invPlayer) && search(enumBombSpawn))
+			return true;
+
+		if(!("slot3" in invPlayer) && search(enumUpgradePack))
+			return true;
+
+		if(!("slot4" in invPlayer) && search(enumPills))
+			return true;
+
+		if(!BotAI.HasItem(player, "first_aid_kit") && search(enumDefibrillator))
+			return true;
 		
-		items = {};
+		items[player] <- null;
 		return false;
 	}
 	
 	function playerUpdate(player)
 	{
+		local entity = items[player];
+		if(!BotAI.IsEntityValid(entity) || entity.GetOwnerEntity() != null) return;
+
+		local function changeAndUse() {
+			if(!BotAI.IsEntityValid(entity) || entity.GetOwnerEntity() != null) return true;
+			if(!BotAI.IsAlive(player)) return true;
+			local navigator = BotAI.getNavigator(player);
+			if(!navigator.isMoving("findEntity"))
+				return true;
+			local data = navigator.getRunningPathData();
+			if(data.paths.len() < 1)
+				DoEntFire("!self", "Use", "", 0, player, entity);
+			if(BotAI.distanceof(entity.GetOrigin(), player.GetOrigin()) <= 100) {
+				DoEntFire("!self", "Use", "", 0, player, entity);
+				return true;
+			}
+			return false;
+		}
+		BotAI.botRunPos(player, entity, "findEntity", 0, changeAndUse);
+
+		/*
 		foreach(item in items)
 		{
 			if(!BotAI.IsEntityValid(item) || item.GetOwnerEntity() != null || item.GetHealth() == 12450)
@@ -99,7 +122,7 @@ class ::AITaskSearchEntity extends AITaskSingle
 				
 			local name = item.GetClassname();
 
-			if(name in fakeEnumBombSpawn)
+			if(name in enumBombSpawn)
 			{
 				if(NetProps.GetPropInt(item, "m_spawnflags") >= 8)
 				{
@@ -124,7 +147,7 @@ class ::AITaskSearchEntity extends AITaskSingle
 					}
 				}
 			}
-			else if(name in fakeEnumDefibrillator)
+			else if(name in enumDefibrillator)
 			{
 				BotAI.doAmmoUpgrades(player);
 				DoEntFire("!self", "Use", "", 0, player, item);
@@ -135,6 +158,7 @@ class ::AITaskSearchEntity extends AITaskSingle
 				item.SetHealth(12450);
 			}
 		}
+		*/
 
 		updating[player] <- false;
 	}
@@ -143,5 +167,6 @@ class ::AITaskSearchEntity extends AITaskSingle
 	{
 		base.taskReset(player);
 		items = {};
+		searched = [];
 	}
 }

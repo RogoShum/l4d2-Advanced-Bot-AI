@@ -70,6 +70,10 @@ function I18n::init() {
 		botai_immunity_on = "Bot Immunity player damage on.",
 		botai_balance_mode_off = "Bot Balance Mode off.",
 		botai_balance_mode_on = "Bot Balance Mode on.",
+		botai_bot_alive_on = "Bots will keep going even all players are dead.",
+		botai_bot_alive_off = "Bots will not keep going when all players are dead.",
+		botai_bot_carry_on = "Bots will carry some supplies.",
+		botai_bot_carry_off = "Bots will not carry supplies anymore.",
 		botai_path_finding_off = "Bot Path Finding off.",
 		botai_path_finding_on = "Bot Path Finding on.",
 		botai_unstick_off = "Disabled Bots teleport function.",
@@ -95,9 +99,19 @@ function I18n::init() {
 		menu_throw = "Bot throw grenades",
 		menu_follow = "Bot follow player",
 		menu_immunity = "Bot immunity player-damage",
+		menu_carry = "Bot carry supplies",
+		menu_alive = "Bot keep going",
 		menu_balance = "Balance Mode",
 		menu_fullpower = "Full Power Mode",
-		menu_exit = "Exit"
+		menu_exit = "Cancel"
+
+		ping_menu = "Ping Menu"
+		ping_move = "Move"
+		ping_use = "Use"
+		ping_attack = "Attack"
+		ping_stay = "Stay"
+		ping_follow = "Follow"
+		ping_follow_me = "Follow Me"
 	};
 	
 	addTranslationTable("english", english);
@@ -114,8 +128,12 @@ function I18n::init() {
 		botai_immunity_on = "AI免疫玩家伤害开启。",
 		botai_balance_mode_off = "AI平衡模式关闭。",
 		botai_balance_mode_on = "AI平衡模式开启。",
-		botai_path_finding_off = "AI跟随模式关闭。",
-		botai_path_finding_on = "AI跟随模式开启。",
+		botai_bot_alive_on = "AI将在玩家死后继续跑图。",
+		botai_bot_alive_off = "AI将不再在玩家死后继续跑图。",
+		botai_bot_carry_on = "AI携带物资功能开启。",
+		botai_bot_carry_off = "AI携带物资功能关闭。",
+		botai_path_finding_off = "AI跟随模式开启。",
+		botai_path_finding_on = "AI跟随模式关闭。",
 		botai_unstick_off = "关闭AI卡住时传送。",
 		botai_unstick_on = "允许AI卡住时传送。",
 		botai_melee_off = "阻止AI使用近战武器。",
@@ -139,9 +157,19 @@ function I18n::init() {
 		menu_throw = "开关Bot丢投掷",
 		menu_follow = "开关Bot跟随",
 		menu_immunity = "开关Bot免疫黑枪",
+		menu_carry = "开关Bot携带物资",
+		menu_alive = "开关Bot死后跑图",
 		menu_balance = "开关平衡模式",
 		menu_fullpower = "开关Full Power",
-		menu_exit = "退出"
+		menu_exit = "取消"
+
+		ping_menu = "标点菜单"
+		ping_move = "移动"
+		ping_use = "使用"
+		ping_attack = "攻击"
+		ping_stay = "等待"
+		ping_follow = "跟随"
+		ping_follow_me = "跟随我"
 	};
 	
 	addTranslationTable("schinese", schinese);
@@ -158,8 +186,12 @@ function I18n::init() {
 		botai_immunity_on = "AI免疫玩家傷害開啟。",
 		botai_balance_mode_off = "AI平衡模式關閉。",
 		botai_balance_mode_on = "AI平衡模式開啟。",
-		botai_path_finding_off = "AI跟隨模式關閉。",
-		botai_path_finding_on = "AI跟隨模式開啟。",
+		botai_bot_alive_on = "AI將在玩家死後繼續跑圖。",
+		botai_bot_alive_off = "AI將不再在玩家死後繼續跑圖。",
+		botai_bot_carry_on = "AI攜帶物資功能開啟。",
+		botai_bot_carry_off = "AI攜帶物資功能關閉。",
+		botai_path_finding_off = "AI跟隨模式開啟。",
+		botai_path_finding_on = "AI跟隨模式關閉。",
 		botai_unstick_off = "關閉AI卡住時傳送。",
 		botai_unstick_on = "允許AI卡住時傳送。",
 		botai_melee_off = "阻止AI使用近戰武器。",
@@ -183,9 +215,19 @@ function I18n::init() {
 		menu_throw = "開關Bot丟投擲",
 		menu_follow = "開關Bot跟隨",
 		menu_immunity = "開關Bot免疫黑槍",
-		menu_balance = "開關平衡模式",
+		menu_follow = "開關Bot跟隨",
+		menu_carry = "開關Bot攜帶物資",
+		menu_alive = "開關Bot死後跑圖",
 		menu_fullpower = "開關Full Power",
-		menu_exit = "退出"
+		menu_exit = "取消"
+
+		ping_menu = "標點菜單"
+		ping_move = "移動"
+		ping_use = "使用"
+		ping_attack = "攻擊"
+		ping_stay = "等待"
+		ping_follow = "跟隨"
+		ping_follow_me = "跟隨我"
 	};
 	
 	addTranslationTable("tchinese", tchinese);

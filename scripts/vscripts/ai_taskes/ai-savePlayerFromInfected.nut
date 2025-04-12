@@ -34,31 +34,24 @@ class ::AITaskSavePlayer extends AITaskGroup
 	function GroupUpdateChecker(player) {
 		if(!BotAI.IsAlive(player) || BotAI.IsPlayerClimb(player) || player.IsDominatedBySpecialInfected() || player.IsStaggering() || player.IsIncapacitated() || player.IsHangingFromLedge()) return false;
 
-		local iWantSaveHim = null;
-		local distance = 1200;
-
-		foreach(victim in victims) {
+		foreach(idx, victim in victims) {
 			if(victim == null || !BotAI.IsAlive(victim))
 				continue;
-			local signed = false;
-			foreach(cache in whoSaveMe) {
-				if(cache == victim)
-					signed = true;
+			local distance = 9999;
+			local _hero = null;
+			foreach(hero in BotAI.SurvivorBotList) {
+				if(BotAI.IsPlayerClimb(hero) || hero.IsDominatedBySpecialInfected() || hero.IsStaggering() || hero.IsIncapacitated() || hero.IsHangingFromLedge()) continue;
+				local dis = BotAI.distanceof(hero.GetOrigin(), victim.GetOrigin());
+				if(_hero == null || dis < distance) {
+					_hero = hero;
+					distance = dis;
+				}
 			}
-
-			if(signed)
-				continue;
-			
-			local dis = BotAI.distanceof(player.GetOrigin(), victim.GetOrigin());
-			if(iWantSaveHim == null || dis < distance) {
-				iWantSaveHim = victim;
-				distance = dis;
+			if(_hero == player) {
+				whoSaveMe[player.GetEntityIndex()] <- victim;
+				delete victims[idx];
+				return true;
 			}
-		}
-
-		if(iWantSaveHim != null) {
-			whoSaveMe[player.GetEntityIndex()] <- iWantSaveHim;
-			return true;
 		}
 
 		return false;
@@ -94,21 +87,19 @@ class ::AITaskSavePlayer extends AITaskGroup
 			smoker = NetProps.GetPropEntity(victim, "m_jockeyAttacker");
 			
 		if(BotAI.IsEntityValid(smoker) && BotAI.CanSeeOtherEntityWithoutLocation(player, smoker)) {
-			local vec = BotAI.normalize(smoker.GetOrigin() - player.GetOrigin()).Scale(350);
-			if(BotAI.IsBotGasFinding(player))
-				BotAI.BotReset(player);
+			local function needSave() {
+				if(!BotAI.IsAlive(smoker)) return true;
 				
-			if(!BotAI.isPlayerNearLadder(player) && !BotAI.IsOnGround(player))
-				player.SetVelocity(BotAI.fakeTwoD(Vector(vec.x, vec.y, 0)));
-		} else if(BotAI.CanSeeOtherEntityWithoutLocation(player, victim)) {
-			local vec = BotAI.normalize(victim.GetOrigin() - player.GetOrigin()).Scale(350);
-			if(BotAI.IsBotGasFinding(player))
-				BotAI.BotReset(player);
-			if(!BotAI.isPlayerNearLadder(player) && !BotAI.IsOnGround(player))
-				player.SetVelocity(BotAI.fakeTwoD(Vector(vec.x, vec.y, 0)));
-		} else if(!BotAI.IsInCombat(player) && !BotAI.IsBotGasFinding(player)) {
-			BotAI.BotMove(player, victim);
-			player.SetFriction(0.5);
+				return false;
+			}
+			BotAI.botRunPos(player, smoker, "savePlayer", 5, needSave);
+		} else {
+			local function needSave() {
+				if(!BotAI.IsAlive(victim) || victim.IsGettingUp()) return true;
+				
+				return !victim.IsDominatedBySpecialInfected() && !victim.IsIncapacitated() && !victim.IsHangingFromLedge();
+			}
+			BotAI.botRunPos(player, victim, "savePlayer", 5, needSave);
 		}
 		
 		updating = false;

@@ -3,6 +3,8 @@ class ::AITaskGroup extends AITask
 	constructor(orderIn, tickIn, compatibleIn, forceIn)
     {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
+		playerList = {}
+		updating = false;
     }
 	
 	playerList = {}
@@ -23,10 +25,8 @@ class ::AITaskGroup extends AITask
 	{
 		local flag = false;
 		
-		if(preCheck())
-		{
-			foreach(player in BotAI.SurvivorBotList)
-			{
+		if(preCheck()) {
+			foreach(player in BotAI.SurvivorBotList) {
 				if(!BotAI.IsPlayerEntityValid(player)) continue;
 				if(BotAI.isBotTheardLocking(player, getOrder())) {
 					printl("[BotAI] Can't check bot " + name + " update due to theard locking on " + BotAI.getBotPropertyMap(player).taskLock);
@@ -45,10 +45,8 @@ class ::AITaskGroup extends AITask
 				}
 			}
 		}
-		else 
-		{
-			foreach(player in BotAI.SurvivorBotList)
-			{
+		else {
+			foreach(player in BotAI.SurvivorBotList) {
 				BotAI.expiredBotTheard(player, getOrder());
 			}
 		}
@@ -67,10 +65,8 @@ class ::AITaskGroup extends AITask
 	//abstract
 	function playerUpdate(player) {}
 	
-	function taskUpdate(player = null)
-	{
-		foreach(player, bool in playerList)
-		{
+	function taskUpdate(player = null) {
+		foreach(player, bool in playerList) {
 			if(bool && BotAI.IsPlayerEntityValid(player)) playerUpdate(player);
 		}
 	}

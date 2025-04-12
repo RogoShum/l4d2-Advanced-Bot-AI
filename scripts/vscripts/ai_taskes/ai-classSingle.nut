@@ -1,7 +1,6 @@
 class ::AITaskSingle extends AITask
 {
-	constructor(orderIn, tickIn, compatibleIn, forceIn)
-    {
+	constructor(orderIn, tickIn, compatibleIn, forceIn) {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
 
@@ -32,17 +31,27 @@ class ::AITaskSingle extends AITask
 			playerTick[player] <- tickTimeIn;
 	}
 
-	function shouldUpdate(player = null)
-	{
-		if(BotAI.IsPlayerEntityValid(player))
-		{
-			if(singleUpdateChecker(player))
-			{
+	//abstract
+	function singleUpdateChecker(player = null) {}
+
+	function shouldUpdate(player = null) {
+		if(BotAI.IsPlayerEntityValid(player)) {
+			local needUpdate = false;
+			needUpdate = singleUpdateChecker(player);
+			try{
+				
+			} catch(excaption) {
+				BotAI.EasyPrint("botai_report", 0.1);
+				BotAI.EasyPrint(excaption.tostring(), 0.2);
+				local deadTask = singleUpdateChecker;
+                local deadPlayer = player;
+				BotAI.throwTask(this, player, true);
+			}
+			if(needUpdate) {
 				updating[player] <- true;
 				return true;
 			}
-			else
-			{
+			else {
 				updating[player] <- false;
 				return false;
 			}
@@ -50,28 +59,31 @@ class ::AITaskSingle extends AITask
 		
 		return false;
 	}
-	
-	//abstract
-	function singleUpdateChecker(player) {}
 
 	//abstract
-	function playerUpdate(player) {}
+	function playerUpdate(player = null) {}
 	
-	function isUpdating(player = null)
-	{
+	function isUpdating(player = null) {
 		return BotAI.IsPlayerEntityValid(player) && player in updating && updating[player];
 	}
 	
 	function taskUpdate(player = null) {
 		if(BotAI.IsPlayerEntityValid(player)) {
 			playerUpdate(player);
+			try{
+				
+			} catch(excaption) {
+				BotAI.EasyPrint("botai_report", 0.1);
+				BotAI.EasyPrint(excaption.tostring(), 0.2);
+				local deadTask = playerUpdate;
+                local deadPlayer = player;
+                BotAI.throwTask(this, player, false);
+			}
 		}
 	}
 	
-	function taskReset(player = null) 
-	{
-		if(BotAI.IsPlayerEntityValid(player))
-		{
+	function taskReset(player = null) {
+		if(BotAI.IsPlayerEntityValid(player)) {
 			updating[player] <- false;
 		}
 	}

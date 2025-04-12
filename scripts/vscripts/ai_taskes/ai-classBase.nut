@@ -58,7 +58,9 @@ class ::AITask
 	function taskUpdate(player = null) {}
 	
 	//abstract
-	function playerUpdate(player) {}
+	function playerUpdate(player = null) {}
+	//abstract
+	function singleUpdateChecker(player = null) {}
 	
 	//abstract
 	function taskReset(player = null) { updating = false; }

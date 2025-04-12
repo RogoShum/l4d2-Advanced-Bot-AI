@@ -3,6 +3,12 @@ class ::AITaskHitInfected extends AITaskSingle
 	constructor(orderIn, tickIn, compatibleIn, forceIn)
     {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
+		name = "hitinfected";
+		single = true;
+		updating = {};
+		playerTick = {};
+		infectedList = {}
+		danger = {};
     }
 	
 	name = "hitinfected";
@@ -10,19 +16,27 @@ class ::AITaskHitInfected extends AITaskSingle
 	updating = {};
 	playerTick = {};
 	infectedList = {}
-	danger = false;
+	danger = {};
 	
 	function singleUpdateChecker(player)
 	{
-		danger = false;
+		danger[player] <- false;
 		
+		if(player in BotAI.targetLocked && BotAI.IsAlive(BotAI.targetLocked[player])) {
+			infectedList[player] <- BotAI.targetLocked[player];
+			return true;
+		}
+
 		local dist = 800;
 		
 		local rock = null;
 		local nearestRock = null;
 		local RockDis = 800;
 		
-		while(rock = Entities.FindByClassnameWithin(rock, "tank_rock", player.GetOrigin(), dist)) {
+		foreach(idx, pro in BotAI.projectileList) {
+			local rock = null;
+			if(BotAI.IsEntityValid(pro) && pro.GetClassname() == "tank_rock")
+				rock = pro;
 			if (BotAI.IsEntityValid(rock) && BotAI.CanHitOtherEntity(rock, player, g_MapScript.TRACE_MASK_SHOT) && BotAI.distanceof(player.GetOrigin(), rock.GetOrigin()) < RockDis) {
 				RockDis = BotAI.distanceof(player.GetOrigin(), rock.GetOrigin());
 				nearestRock = rock;
@@ -32,6 +46,22 @@ class ::AITaskHitInfected extends AITaskSingle
 		if(nearestRock != null){
 			infectedList[player] <- nearestRock;
 			BotAI.setBotTarget(player, nearestRock);
+			return true;
+		}
+
+		dist = 700;
+		local witch = null;
+		foreach(infected in BotAI.WitchList) {
+			if (BotAI.IsAlive(infected) && (BotAI.witchKilling(infected) || BotAI.witchRunning(infected) && !BotAI.witchRetreat(infected)) && (BotAI.CanSeeOtherEntityWithoutLocation(player, infected, 0, true))) {
+				if (BotAI.distanceof(player.GetOrigin(), infected.GetOrigin()) < dist) {
+					dist = BotAI.distanceof(player.GetOrigin(), infected.GetOrigin());
+					witch = infected;
+				}
+			}
+		}
+		
+		if (witch != null) {
+			infectedList[player] <- witch;
 			return true;
 		}
 
@@ -48,31 +78,38 @@ class ::AITaskHitInfected extends AITaskSingle
 			}
 		}
 		
-		if (playerNeedSave != null) {
-			danger = true;
+		if (playerNeedSave != null && !BotAI.HasTank) {
+			danger[player] = true;
 			infectedList[player] <- playerNeedSave;
 			return true;
 		}
 
 		local gasFinding = BotAI.getBotGasFinding(player);
 		local selected = null;
-		if(player in BotAI.dangerInfected && (gasFinding > 0 || playerFallingDown != null))
+		if(player in BotAI.dangerInfected && playerFallingDown == null)
 			selected = BotAI.dangerInfected[player];
 		
+		/*
 		local playerReviving = BotAI.IsPlayerReviving(player);
 
-		if(!playerReviving && !BotAI.IsAlive(selected) && gasFinding < 2 && playerFallingDown == null) {
-			local closestCom = Entities.FindByClassnameNearest("infected", player.GetOrigin(), 1500);
-			if(BotAI.IsAlive(closestCom) && !BotAI.IsEntitySI(BotAI.GetTarget(closestCom))) {
-				if(BotAI.CanSeeOtherEntityWithoutLocation(player, closestCom))
-					selected = closestCom;
-				else if(BotAI.BOT_AI_TEST_MOD == 1) {
-					DebugDrawBox(closestCom.GetBoneOrigin(14), Vector(-10, -10, -10), Vector(10, 10, 10), 0, 100, 255, 0.2, 0.2);
-					DebugDrawText(closestCom.GetBoneOrigin(14), BotAI.getPlayerBaseName(player) + " need aim", false, 0.2);
+		if(!playerReviving && !BotAI.IsAlive(selected) && playerFallingDown == null) {
+			local closestCom = null;
+			local distance = 1200;
+			foreach(sur in BotAI.SurvivorList) {
+				local othersTarget = BotAI.GetTarget(sur);
+				
+				if(BotAI.IsAlive(othersTarget) && BotAI.isEntityInfected(othersTarget) && !BotAI.IsEntitySI(BotAI.GetTarget(othersTarget)) && BotAI.CanSeeOtherEntityWithoutLocation(player, othersTarget)) {
+					local tDis = BotAI.distanceof(othersTarget.GetOrigin(), player.GetOrigin());
+					if(closestCom == null || tDis < distance) {
+						closestCom = othersTarget;
+						distance = tDis;
+					}
 				}
 			}
+			if(closestCom != null)
+				selected = closestCom;
 		}
-		
+		*/
 		dist = 1000;
 		local entS = null;
 		foreach(infected in BotAI.SpecialList) {
@@ -95,15 +132,15 @@ class ::AITaskHitInfected extends AITaskSingle
 			local siDistance = BotAI.nextTickDistance(player, entS, 5.0);
 			local coDistance = BotAI.nextTickDistance(player, selected, 5.0);
 
-			if(siDistance < 350) {
+			if(siDistance < 270) {
 				if(siDistance < 90)
-					danger = true;
+					danger[player] = true;
 				finalEntity = entS;
 			}
 			else {
 				finalEntity = selected;
 				if(coDistance < 90)
-					danger = true;
+					danger[player] = true;
 			}
 	
 			infectedList[player] <- finalEntity;
@@ -114,7 +151,7 @@ class ::AITaskHitInfected extends AITaskSingle
 			infectedList[player] <- entS;
 			local siDistance = BotAI.nextTickDistance(player, entS, 5.0);
 			if(siDistance < 90)
-				danger = true;
+				danger[player] = true;
 			return true;
 		}
 
@@ -122,28 +159,9 @@ class ::AITaskHitInfected extends AITaskSingle
 			infectedList[player] <- selected;
 			local coDistance = BotAI.nextTickDistance(player, selected, 5.0);
 			if(coDistance < 90) {
-				danger = true;
+				danger[player] = true;
 			}
 			return true;
-		}
-		
-		dist = 700;
-		local witch = null;
-		foreach(infected in BotAI.WitchList) {
-			if (BotAI.IsAlive(infected) && (BotAI.CanSeeOtherEntityWithoutLocation(player, infected, 0, true))) {
-				if (BotAI.distanceof(player.GetOrigin(), infected.GetOrigin()) < dist) {
-					dist = BotAI.distanceof(player.GetOrigin(), infected.GetOrigin());
-					witch = infected;
-				}
-			}
-		}
-		
-		if (witch != null) {
-			local WitchState = NetProps.GetPropInt(witch, "m_nSequence");
-			if(WitchState != ANIM_WITCH_LOSE_TARGET && WitchState != ANIM_WITCH_RUN_AWAY && WitchState != ANIM_SITTING_CRY && WitchState != ANIM_SITTING_STARTLED && WitchState != ANIM_SITTING_AGGRO && WitchState != ANIM_WALK && WitchState != ANIM_WANDER_WALK) {
-				infectedList[player] <- witch;
-				return true;
-			}
 		}
 		
 		NetProps.SetPropInt(player, "m_hViewEntity", -1);
@@ -154,7 +172,7 @@ class ::AITaskHitInfected extends AITaskSingle
 		if(player in infectedList && infectedList[player] != null) {
 			local val = infectedList[player];
 			if(BotAI.IsAlive(val)) {
-				if(danger) {
+				if(danger[player]) {
 					//if(BotAI.IsBotGasFinding(player))
 						//BotAI.BotReset(player);
 					//BotAI.lookAtEntity(player, val, true, 0.3);

@@ -11,10 +11,8 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 	
 	function preCheck()
 	{
-
 		local display = null;
-		while(display = Entities.FindByClassname(display, "terror_gamerules"))
-		{
+		while(display = Entities.FindByClassname(display, "terror_gamerules")) {
 			if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") >= NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal"))
 				return false;
 		}
@@ -22,8 +20,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 		if(BotAI.UseTarget == null || BotAI.HasTank || !BotAI.NeedGasFinding)
 			return false;
 			
-		foreach(idx, gascan in cabal_oil)
-		{
+		foreach(idx, gascan in cabal_oil) {
 			if(!BotAI.IsEntityValid(gascan))
 				delete cabal_oil[idx];
 		}
@@ -36,8 +33,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 
 		local gas = null;
 		local hasGasCan = false;
-		while (gas = Entities.FindByClassname(gas, BotAI.BotsNeedToFind))
-		{
+		while (gas = Entities.FindByClassname(gas, BotAI.BotsNeedToFind)) {
 			hasGasCan = true;
 			break;
 		}
@@ -50,20 +46,13 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 
 	function GroupUpdateChecker(player)
 	{
-		//if(BotAI.IsInCombat(player) || BotAI.IsPressingAttack(player) || BotAI.IsPressingUse(player) || BotAI.IsPressingShove(player))
-			//return false;
-
 		if(BotAI.HasItem(player, BotAI.BotsNeedToFind)) {
 			if(player.GetEntityIndex() in cabal_oil)
 				delete cabal_oil[player.GetEntityIndex()];
 			return false;
 		}
-
-		if(BotAI.IsBotGasFinding(player))
-			return false;
 		
-		if(player.GetEntityIndex() in cabal_oil)
-		{
+		if(player.GetEntityIndex() in cabal_oil) {
 			local gas_can = cabal_oil[player.GetEntityIndex()];
 			if(BotAI.IsEntityValid(gas_can) && (gas_can.GetOwnerEntity() == null || gas_can.GetOwnerEntity() == player))
 				return true;
@@ -72,8 +61,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 		}
 		
 		local GasTryFind = null;
-		while (GasTryFind = Entities.FindByClassnameWithin(GasTryFind, BotAI.BotsNeedToFind, player.GetOrigin(), 4000))
-		{
+		while (GasTryFind = Entities.FindByClassnameWithin(GasTryFind, BotAI.BotsNeedToFind, player.GetOrigin(), 4000)) {
 			local flag = true;
 			foreach(idx, gascan in cabal_oil)
 			{
@@ -96,18 +84,24 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 		if(player.GetEntityIndex() in cabal_oil)
 		{
 			local gas_can = cabal_oil[player.GetEntityIndex()];
-			if(BotAI.IsEntityValid(gas_can) && gas_can.GetOwnerEntity() != player)
-			{
+			if(BotAI.IsEntityValid(gas_can) && gas_can.GetOwnerEntity() != player) {
 				if(BotAI.distanceof(player.GetOrigin(), gas_can.GetOrigin()) < 100) {
 					BotAI.BotTakeGasCan(player, gas_can);
 					BotAI.setBotLockTheard(player, -1);
 					updating = false;
 				}
-				else if(!BotAI.IsBotGasFinding(player))
-				{
+				else if(!BotAI.IsBotGasFinding(player)) {
 					if(BotAI.BOT_AI_TEST_MOD == 1)
 						printl("[Bot AI] Try Retake gas can " + gas_can);
-					BotAI.BotMove(player, gas_can, 2);
+					local gas = gas_can;
+					local function needGasCan() {
+						foreach(link in BotAI.BotLinkGasCan) {
+							if(link == gas)
+								return true;
+						}
+						return !BotAI.IsEntityValid(gas) || gas.GetOwnerEntity() != null;
+					}
+					BotAI.botRunPos(player, gas_can, "searchGascan", 2, needGasCan);
 				}
 			}
 			else
