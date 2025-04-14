@@ -2,44 +2,74 @@
 
 class ::Navigator {
     pathCache = {};
+    seachingPath = {};
     player = null;
     movingID = null;
     lastArea = null;
     buildCoolDown = {};
     faildTimes = {};
+    posCheck = null;
+    checkTime = Time();
+    timeOut = Time();
+    pathFlat = true;
+    SEARCH_LIMIT = 256;
+    TIME_OUT_LIMIT = 5;
+    JUMP_HIGHT = 50;
 
 	constructor(playerIn) {
         player = playerIn;
         movingID = null;
         pathCache = {};
+        seachingPath = {};
         lastArea = playerIn.GetLastKnownArea();
         buildCoolDown = {};
         faildTimes = {};
+        posCheck = playerIn.GetOrigin();
+        checkTime = Time();
+        timeOut = Time();
     }
 	
     function _typeof () {
         return "Navigator";
     }
 
-	function buildPath(goal, id, priority = 0, discardFunc = BotAI.trueDude, previousPath = null, aStar = false) {
+	function buildPath(goal, id, priority = 0, discardFunc = BotAI.trueDude, previousPath = null, aStar = false, distance = 4000) {
+        if(timeOut > Time())
+            return false;
         local goalArea = null;
         local goalPos = null;
         if(typeof goal == "Vector") {
             goalPos = goal;
-        } else if(BotAI.IsEntityValid(goal)){
+        } else if(BotAI.IsEntityValid(goal)) {
             if("GetLastKnownArea" in goal)
                 goalArea = goal.GetLastKnownArea();
             goalPos = goal.GetOrigin();
         } else 
             return false;
         
-        if(goalArea == null)
-            goalArea = NavMesh.GetNavArea(goalPos, 200);
-        
+        if(goalArea == null) {
+            goalArea = NavMesh.GetNavArea(goalPos, 150);
+            if(goalArea == null && BotAI.IsTriggerUsable(goal)) {
+                local direcVec = Vector(120, 0, 0);
+                for(local i = 0; i < 8; ++i) {
+					local angleVec = BotAI.rotateVector(direcVec, i * 45);
+                    local targetPos = goalPos + angleVec;
+					if(BotAI.BotDebugMode) {
+						DebugDrawCircle(targetPos, Vector(0, 0, 255), 1.0, 5, true, 1.0);
+						DebugDrawText(targetPos, "goal", false, 1.0);
+					}
+
+                    goalArea = NavMesh.GetNavArea(targetPos, 150);
+                    if(goalArea != null) break;
+				}
+            }
+        }
+            
         if(typeof previousPath == "table") {
             local newPaths = [];
             for(local i = 0; i < previousPath.len(); ++i) {
-               	newPaths.append(previousPath["area" + i.tostring()]);
+                if(("area" + i.tostring()) in previousPath)
+                	newPaths.append(previousPath["area" + i.tostring()]);
             }
             previousPath = newPaths;
         }
@@ -47,45 +77,70 @@ class ::Navigator {
         local paths = {};
         local build = false;
         local buildAStar = false;
-        if(!(goal in buildCoolDown)) {
+        local goalInCoolDown = goal in buildCoolDown;
+        if(!goalInCoolDown)
+        foreach(object, cooldown in buildCoolDown) {
+            if(BotAI.isEntityEqual(object, goal))
+                goalInCoolDown = true;
+        }
+
+        local pathSearch = null;
+        local newPath = true;
+        if(id in seachingPath) {
+            newPath = false;
+            pathSearch = seachingPath[id];
+        } else {
+            pathSearch = PathSearch(goal);
+            pathSearch.allowDanger = id.find("%") != null;
+            pathSearch.dataPaths = paths;
+            pathSearch.dataGoal = goal;
+            pathSearch.dataPriority = priority;
+            pathSearch.dataDiscardFunc = discardFunc;
+            pathSearch.dataDistance = distance;
+            pathSearch.dataGoalPos = goalPos;
+            pathSearch.dataGoalArea = goalArea;
+        }
+            
+        if(newPath && !goalInCoolDown) {
             if(aStar) {
                 try {
-                    build = createPath(goalPos, goalArea, paths, previousPath);
+                    build = createPath(pathSearch, goalPos, goalArea, distance, paths, previousPath);
                 }
                 catch(e) {
-
+                    timeOut = Time() + 1;
+                    printl("[Navigator] Path build time out.");
                 }
-            }
-            else {
+            } else {
                 try {
-                    build = createPath(goalPos, goalArea, paths);
+                    build = createPath(pathSearch, goalPos, goalArea, distance, paths);
                 }
                 catch(e) {
-
+                    timeOut = Time() + 1;
+                    printl("[Navigator] Path build time out.");
                 }
             }
         }
 
         if(!build) {
-            if(!(goal in buildCoolDown)) {
-                local count = 100;
-                if(goal in faildTimes) {
-                    faildTimes[goal] <- faildTimes[goal] + 1;
-                    count *= faildTimes[goal];
-                }
-                else
-                    faildTimes[goal] <- 1;
-                buildCoolDown[goal] <- count;
+            if(!(id in seachingPath)) {
+                seachingPath[id] <- pathSearch;
             }
-               
+
+            local faildBuild = false;
+            //if(navAPI)
+                //faildBuild = !createPath(goalPos, goalArea, paths);
             
-            if(BotAI.BOT_AI_TEST_MOD == 1) {
-                printl(id + " build faild." + " goal " + goal);
+            /*
+            if(!faildBuild && navAPI) {
+                paths = {};
+                build = NavMesh.GetNavAreasFromBuildPath(player.GetLastKnownArea(), null, goalPos, 9999, 2, false, paths);
+                printl("build: " + build);
             }
-            build = NavMesh.GetNavAreasFromBuildPath(player.GetLastKnownArea(), goalArea, goalPos, 999999, 2, false, paths);
+            */
         } else {
-            if(BotAI.BOT_AI_TEST_MOD == 1)
+            if(BotAI.BotDebugMode)
                 printl("A-Star build success.");
+            
             buildAStar = true;
             if(goal in faildTimes)
                 delete faildTimes[goal];
@@ -101,14 +156,13 @@ class ::Navigator {
         }
         */
         if(build) {
-            if(BotAI.BOT_AI_TEST_MOD == 1)
+            if(BotAI.BotDebugMode)
                 printl(id + " build complete.");
-            local data = PathData(paths, goal, priority, discardFunc);
+            local data = PathData(paths, goal, priority, discardFunc, distance);
+
             if(buildAStar)
                 data.aStar = true;
             pathCache[id] <- data;
-        } else if(id.find("ping") != null) {
-            player.SetOrigin(goalPos);
         }
 
         return build;
@@ -116,15 +170,77 @@ class ::Navigator {
 
     function shouldDiscard() {
         if(!moving()) return;
-        if(getRunningPathData().discardFunc())
+        if(getRunningPathData().discardFunc()) {
+            if(BotAI.BotDebugMode)
+                printl("[Navigator] Discard: " + movingID);
             stop();
+        }
     }
 
     function onUpdate() {
-        if(BotAI.BOT_AI_TEST_MOD == 1) {
-            if(buildCoolDown.len() > 0)
-                printl("===buildCoolDown===");
-            BotAI.printTable(buildCoolDown);
+        if(BotAI.BotDebugMode) {
+            local height = 20;
+            if(moving()) {
+                DebugDrawText(player.EyePosition() + Vector(0, 0, height), "running " + movingID + " priority: " + pathCache[movingID].priority, false, 0.2);
+                height += 10;
+            }
+
+            foreach(name, pathGet in pathCache) {
+                if(moving() && name == movingID) continue;
+                DebugDrawText(player.EyePosition() + Vector(0, 0, height), name.tostring() + " priority: " + pathGet.priority + " wating", false, 0.2);
+                height += 10;
+            }
+        }
+
+        foreach(id, pathFinding in seachingPath) {
+            if(Time() - pathFinding.timeOut >= TIME_OUT_LIMIT || pathFinding.fail) {
+                local inCoolDown = pathFinding.dataGoal in buildCoolDown;
+                if(!inCoolDown)
+                foreach(object, cooldown in buildCoolDown) {
+                    if(BotAI.isEntityEqual(object, pathFinding.dataGoal))
+                        inCoolDown = true;
+                    }
+                if(!inCoolDown) {
+                    local count = 200;
+                    if(pathFinding.dataGoal in faildTimes) {
+                        faildTimes[pathFinding.dataGoal] <- faildTimes[pathFinding.dataGoal] + 1;
+                        count *= faildTimes[pathFinding.dataGoal];
+                    } else
+                    faildTimes[pathFinding.dataGoal] <- 1;
+
+                    buildCoolDown[pathFinding.dataGoal] <- count;
+                }
+                if( BotAI.BotDebugMode) {
+                    printl(id + " A-Star build faild." + " goal " + pathFinding.dataGoal);
+                }
+                delete seachingPath[id];
+            } else {
+                local success = createPath(pathFinding, pathFinding.dataGoalPos, pathFinding.dataGoalArea, pathFinding.dataDistance, pathFinding.paths);
+                if(success) {
+                    if(BotAI.BotDebugMode) {
+                        DebugDrawBox(pathFinding.dataGoalPos, Vector(-10, -10, -10), Vector(10, 10, 10), 100, 255, 0, 0.2, 5);
+                        DebugDrawText(pathFinding.dataGoalPos, id, true, 5);
+                        printl(id + " build complete.");
+                        if(id == "buildTest") {
+                            foreach(idx, path in pathFinding.paths) {
+                                path.DebugDrawFilled(0, 255, 0, 50, 5, true);
+                                DebugDrawText(path.GetCenter(), idx.tostring(), true, 5);
+                            }
+                        }
+                    }
+                    
+                    local data = PathData(pathFinding.paths, pathFinding.dataGoal, pathFinding.dataPriority, pathFinding.dataDiscardFunc, pathFinding.dataDistance);
+                    data.aStar = true;
+                    if(BotAI.BotDebugMode)
+                        printl("A-Star build success.");
+
+                    if(pathFinding.dataGoal in faildTimes)
+                        delete faildTimes[pathFinding.dataGoal];
+                    pathCache[id] <- data;
+                    run(id);
+                    delete seachingPath[id];
+                }
+            }
         }
 
         foreach(idx, val in buildCoolDown) {
@@ -133,51 +249,59 @@ class ::Navigator {
                 delete buildCoolDown[idx];
         }
 
-        foreach(func in NavigatorPause) {
+        foreach(idx, func in NavigatorPause) {
             if(func(player)) {
                 return;
             } 
         }
+
         if(pathCache.len() < 1) {
             return;
         }
         
         reRun();
-        if(BotAI.BOT_AI_TEST_MOD == 1) {
-            local height = 20;
-            if(moving()) {
-                DebugDrawText(player.EyePosition() + Vector(0, 0, height), "running " + movingID + " priority: " + pathCache[movingID].priority, false, 0.2);
-                height += 10;
-            }
-            foreach(name, pathGet in pathCache) {
-                if(moving() && name == movingID) continue;
-                DebugDrawText(player.EyePosition() + Vector(0, 0, height), name.tostring() + " priority: " + pathGet.priority + " wating", false, 0.2);
-                height += 10;
-            }
-        }
         
         shouldDiscard();
         if(!moving()) {
             return;
         }
-        if(BotAI.BOT_AI_TEST_MOD != 2 && !BotAI.HasTank)
-            player.OverrideFriction(0.5, 0.8);
-		recordLastArea();
+
+        if(!BotAI.BotFullPower && !BotAI.HasTank) {
+            local friction = 0.8;
+            player.OverrideFriction(0.5, friction);
+        }
+
+		if(!recordLastArea())
+            return;
+
 		local paths = getRunningPathData().paths;
         local offset = 25;
-		if(paths != null && BotAI.validVector(getRunningPathData().getPos())) {
-			if(BotAI.IsOnGround(player)) {
-                BotAI.DisableButton(player, BUTTON_WALK, 1.0);
+		if(paths != null && BotAI.validVector(getRunningPathData().getPos(null))) {
+			local goalPos = getRunningPathData().getPos(null);
+            if(goalPos == null || goalPos.Length() == 0) {
+                stop();
+                return;
             }
-			local goalPos = getRunningPathData().getPos();
 			local xyGoalPos = goalPos;
 			local xyTracePos = BotAI.tracePos(player, goalPos, true);
-			 if(BotAI.BOT_AI_TEST_MOD == 1) {
-			    DebugDrawCircle(xyGoalPos, Vector(0, 255, 255), 1.0, 5, true, 0.2);
-			    DebugDrawLine(player.EyePosition(), xyGoalPos, 0, 255, 255, true, 0.2);
+            local addition = Vector(0, 0, 5);
+			if(BotAI.BotDebugMode) {
+			    DebugDrawCircle(xyGoalPos, Vector(0, 0, 255), 1.0, 5, true, 0.2);
+			    DebugDrawLine(player.EyePosition(), xyGoalPos, 0, 0, 255, true, 0.2);
             }
             
-			if(BotAI.distanceof(xyGoalPos, xyTracePos)<= offset) {
+            if(BotAI.BotDebugMode && BotAI.validVector(xyTracePos)) {
+				DebugDrawCircle(xyTracePos + addition, Vector(0, 255, 0), 1.0, 10, true, 0.2);
+				DebugDrawLine(player.EyePosition() + addition, xyTracePos + addition, 0, 255, 0, true, 0.2);
+			}
+
+            local canTrace = false;
+            if(BotAI.distanceof(xyGoalPos, xyTracePos) <= offset) {
+                //if(xyGoalPos.z <= xyTracePos.z)
+                    //canTrace = true;
+            }
+
+			if(canTrace) {
                 if(BotAI.distanceof(player.GetOrigin(), goalPos) > 10)
 				    BotAI.botRun(player, goalPos, 400);
                 else if(movingID.find("#") != null) {
@@ -191,64 +315,99 @@ class ::Navigator {
 				return;
 			}
 
-			if(paths.len() <= 0){
-                if((goalPos.z - player.GetOrigin().z) >= 56)
-				    player.SetOrigin(goalPos);
+			if(paths.len() <= 0) {
+                if((goalPos.z - player.GetOrigin().z) >= JUMP_HIGHT) {
+                    BotAI.IsOnGround(player)
+                }
                 return;
             }
 
-			if(BotAI.BOT_AI_TEST_MOD == 1) {
+            try {
+                local throwError = paths["area0"];
+            } catch(e) {
+                printl("[the index 'area' does not exist]");
+                printl("[index size]: " + paths.len());
+                BotAI.printTable(paths)
+            }
+
+			if(BotAI.BotDebugMode) {
 			    for(local i = 0; i < paths.len(); ++i) {
-            	    local path = paths["area" + i];
-            	    path.DebugDrawFilled(0, 255, 0, 15, 0.2, true);
-            	    DebugDrawText(path.GetCenter(), i.tostring(), false, 0.2);
+                    if(("area" + i) in paths) {
+                        local path = paths["area" + i];
+            	        path.DebugDrawFilled(0, 255, 0, 15, 0.2, true);
+                        if(!path.IsFlat())
+                            DebugDrawText(path.GetCenter(), "!Flat", false, 0.2);
+                        else
+            	            DebugDrawText(path.GetCenter(), i.tostring(), false, 0.2);
+                    }
         	    }
             }
-            
-            try {
-                paths["area0"]
-            }
-            catch(e) {
-                BotAI.printArray(paths)
-            }
 
-			local firstArea = paths["area" + (paths.len() - 1)];
+			local firstArea = ("area" + (paths.len() - 1)) in paths ? paths["area" + (paths.len() - 1)] : paths["area" + paths.len()];
 			
-			if(firstArea.IsDamaging()) {
+			if(firstArea.IsDamaging() && movingID.find("%") == null) {
                 return;
             }
-			if(BotAI.BOT_AI_TEST_MOD == 1 && BotAI.validVector(xyTracePos)) {
-				DebugDrawCircle(xyTracePos, Vector(255, 0, 255), 1.0, 5, true, 0.2);
-				DebugDrawLine(player.EyePosition(), xyTracePos, 255, 0, 255, true, 0.2);
-			}
 
 			if(firstArea != player.GetLastKnownArea()) {
-				local xyCenter = firstArea.GetCenter();
-				local xyAreaPos = BotAI.tracePos(player, firstArea.GetCenter());
-                if(BotAI.BOT_AI_TEST_MOD == 1) {
-				    DebugDrawCircle(xyCenter, Vector(0, 255, 255), 1.0, 5, true, 0.2);
-				    DebugDrawLine(player.EyePosition(), xyCenter, 0, 255, 255, true, 0.2);
+                if((player in BotAI.BotStuckCount && BotAI.BotStuckCount[player] >= 3) || (!BotAI.CanHumanSeePlace(player.GetOrigin()) && !BotAI.CanHumanSeePlace(firstArea.GetCenter()))) {
+                    if(BotAI.BotDebugMode) {
+                        printl("stuck or can't see me. Teleport!");
+                    }
+                    player.SetOrigin(firstArea.GetCenter()+Vector(0, 0, 5));
+                }
+
+                local lastArea = player.GetLastKnownArea();
+                local direc = firstArea.ComputeDirection(lastArea.GetCenter());
+                local lowCorner = BotAI.getLowOriginFromArea(firstArea, direc);
+                local highCorner = BotAI.getHighOriginFromArea(lastArea, lastArea.ComputeDirection(firstArea.GetCenter()));
+                local bottleneckLowCorner = BotAI.getLowOriginFromArea(lastArea, lastArea.ComputeDirection(firstArea.GetCenter()));
+                local bottleneckHighCorner = BotAI.getHighOriginFromArea(firstArea, direc);
+                local height = lowCorner.z - highCorner.z;
+                local isTargetJump = BotAI.IsAlive(getRunningPathData().pos) && (!BotAI.IsOnGround(getRunningPathData().pos) || BotAI.IsPlayerClimb(getRunningPathData().pos));
+                if(height >= JUMP_HIGHT && lastArea.IsFlat()) {
+                    if(BotAI.BotDebugMode)
+                        printl("[Nagigator] lowCorner height: " + height);
+                    BotAI.ForceButton(player, 2 , 0.2);
+                    local jumpHigh = player;
+                    local function move() {
+						jumpHigh.SetOrigin(firstArea.GetCenter()+Vector(0, 0, 5));
+					}
+                    if(!isTargetJump)
+					    BotAI.delayTimer(move, 0.5);
+                } else if(lastArea.IsFlat() && height > 10 && BotAI.distanceof(lowCorner, player.GetOrigin()) < 20 && BotAI.IsOnGround(player)) {
+                    BotAI.ForceButton(player, 2 , 0.2);
+                } else if(lastArea.IsFlat() && height < -JUMP_HIGHT && BotAI.IsOnGround(player)) {
+                    local jumpHigh = player;
+                    local function move() {
+						jumpHigh.SetOrigin(firstArea.GetCenter()+Vector(0, 0, 5));
+					}
+                    if(!isTargetJump)
+					    BotAI.delayTimer(move, 0.5);
+                }
+
+                local origins = BotAI.getDirectionOriginFromArea(firstArea, direc);
+	            local origin0 = origins[0];
+	            local origin1 = origins[1];
+                local origin = Vector((origin0.x + origin1.x) * 0.5, (origin0.y + origin1.y) * 0.5, (origin0.z + origin1.z) * 0.5);
+                local xyCenter = Vector((firstArea.GetCenter().x + origin.x) * 0.5, (firstArea.GetCenter().y + origin.y) * 0.5, (firstArea.GetCenter().z + origin.z) * 0.5);
+				local xyAreaPos = BotAI.tracePos(player, xyCenter);
+
+                if(BotAI.BotDebugMode) {
+				    DebugDrawCircle(xyCenter, Vector(255, 255, 0), 1.0, 5, true, 0.2);
+				    DebugDrawLine(player.EyePosition(), xyCenter, 255, 255, 0, true, 0.2);
 				    if(BotAI.validVector(xyAreaPos)) {
-					    DebugDrawCircle(xyAreaPos, Vector(255, 0, 255), 1.0, 5, true, 0.2);
-					    DebugDrawLine(player.EyePosition(), xyAreaPos, 255, 0, 255, true, 0.2);
+					    DebugDrawCircle(xyAreaPos + addition, Vector(255, 0, 255), 1.0, 5, true, 0.2);
+					    DebugDrawLine(player.EyePosition() + addition, xyAreaPos + addition, 255, 0, 255, true, 0.2);
 				    }
                 }
 
-                if(firstArea.IsBottleneck() && BotAI.IsOnGround(player)) {
-		            BotAI.ForceButton(player, 2 , 0.2);
-                }
-
-                if(firstArea.GetCenter().z - player.GetOrigin().z >= 56)
-					player.SetOrigin(firstArea.GetCenter());
-                if(player.GetLastKnownArea().IsBottleneck() || player.GetOrigin().z - firstArea.GetCenter().z >= 100) {
-                    player.SetOrigin(firstArea.GetCenter());
-                }
-
 				local traceFirst = BotAI.distanceof(xyCenter, xyAreaPos) <= offset;
+                
 				if(traceFirst)
-					BotAI.botRun(player, firstArea.GetCenter(), 400);
+					BotAI.botRun(player, xyCenter, 250);
 				else
-					BotAI.botRun(player, player.GetLastKnownArea().GetCenter(), 400);
+					BotAI.botRun(player, lastArea.GetCenter(), 250);
 			}
 		}
     }
@@ -262,6 +421,10 @@ class ::Navigator {
 
     function moving() {
         return movingID != null && movingID != "";
+    }
+
+    function isPathFlat() {
+        return pathFlat;
     }
 
     function isMoving(id) {
@@ -325,19 +488,182 @@ class ::Navigator {
     function recordLastArea() {
         if(lastArea != player.GetLastKnownArea()) {
             lastArea = player.GetLastKnownArea();
-            if(moving()) {
+            local highCorner = BotAI.getHighOriginFromArea(lastArea, lastArea.ComputeDirection(lastArea.GetCenter() + (lastArea.GetCenter() - player.GetOrigin())));
+            if(highCorner.z-player.GetOrigin().z > 8) {
+                pathFlat = false;
+            } else {
+                pathFlat = true;
+            }
+            if(moving() && !(movingID in seachingPath)) {
                 local data = getRunningPathData();
                 local discard = data.discard;
+                local previousPath = data.paths;
+                if(typeof previousPath == "table") {
+                    local newPaths = [];
+                    for(local i = 0; i < previousPath.len(); ++i) {
+                        if(("area" + i.tostring()) in previousPath)
+                            newPaths.append(previousPath["area" + i.tostring()]);
+                    }
+                    previousPath = newPaths;
+                }
 
-                if("func" in discard)
-                    buildPath(data.pos, movingID, data.priority, discard["func"], data.paths, data.aStar);
-                else
-                    buildPath(data.pos, movingID, data.priority, BotAI.trueDude, data.paths, data.aStar);
+                local function printArea(areaIn) {
+                    return areaIn.GetID().tostring();
+                }
+
+                local centerPaths = [];
+                if(previousPath.find(lastArea)) {
+                    local idx = previousPath.find(lastArea);
+                    local function filter(index, val) {
+                        return index < idx;
+                    }
+                    previousPath = previousPath.filter(filter);
+                }
+
+                local goalArea = null;
+                local goalPos = null;
+                if(typeof data.pos == "Vector") {
+                    goalPos = data.pos;
+                } else if(BotAI.IsEntityValid(data.pos)) {
+                    if("GetLastKnownArea" in data.pos)
+                        goalArea = data.pos.GetLastKnownArea();
+                    goalPos = data.pos.GetOrigin();
+                } else {
+                    stop();
+                    return false;
+                }
+                
+                if(goalArea == null) {
+                    goalArea = NavMesh.GetNavArea(goalPos, 150);
+                    if(goalArea == null && BotAI.IsTriggerUsable(data.pos)) {
+                        local direcVec = Vector(120, 0, 0);
+                        for(local i = 0; i < 8; ++i) {
+                            local angleVec = BotAI.rotateVector(direcVec, i * 45);
+                            local targetPos = goalPos + angleVec;
+                            if(BotAI.BotDebugMode) {
+                                DebugDrawCircle(targetPos, Vector(0, 0, 255), 1.0, 5, true, 1.0);
+                                DebugDrawText(targetPos, "goal", false, 1.0);
+                            }
+
+                            goalArea = NavMesh.GetNavArea(targetPos, 150);
+                            if(goalArea != null) break;
+                        }
+                    }
+                }
+
+                if(previousPath.find(goalArea)) {
+                    local idx = previousPath.find(goalArea);
+                    local function filter(index, val) {
+                        return index > idx;
+                    }
+                    previousPath = previousPath.filter(filter);
+                }
+                centerPaths.extend(previousPath);
+                local startPaths = {};
+                local endPaths = {};
+                if(centerPaths.len() > 0) {
+                    local startArea = centerPaths[centerPaths.len()-1];
+                    local endArea = centerPaths[0];
+                    
+                    if(!createPath(PathSearch(startArea.GetCenter()), startArea.GetCenter(), startArea, 1000, startPaths)) {
+                        stop();
+                        return false;
+                    }
+
+                    if(!createPath(PathSearch(goalPos), goalPos, goalArea, 1000, endPaths, {}, endArea.GetCenter(), endArea)) {
+                        stop();
+                        return false;
+                    }
+                }
+
+                local newPaths = {};
+
+                for(local i = 0; i < endPaths.len(); ++i) {
+                    local _area = endPaths["area" + i.tostring()];
+               		newPaths["area" + newPaths.len().tostring()] <- endPaths["area" + i.tostring()];
+            	}
+
+                local preArea = null;
+                if(newPaths.len() > 0)
+                    preArea = newPaths["area" + (newPaths.len()-1).tostring()];
+
+                for(local i = 0; i < centerPaths.len(); ++i) {
+                    local _area = centerPaths[i];
+                    if(preArea == null || _area.GetID() != preArea.GetID()) {
+                        newPaths["area" + newPaths.len().tostring()] <- _area;
+                        preArea = _area;
+                    }
+            	}
+
+                for(local i = 0; i < startPaths.len(); ++i) {
+                    local _area = startPaths["area" + i.tostring()];
+               		if(preArea == null || _area.GetID() != preArea.GetID()) {
+                        newPaths["area" + newPaths.len().tostring()] <- _area;
+                        preArea = _area;
+                    }
+            	}
+
+                data.paths = newPaths;
+            }
+        }
+
+        return true;
+    }
+
+    function addLadder(ladderArea, adjacentAreas, dir) {
+        if(ladderArea == null) return;
+        local ladders = {};
+        ladderArea.GetLadders(dir, ladders);
+        foreach(ladder in ladders) {
+            if(ladder.IsValid() && ladder.IsUsableByTeam(2)) {
+                local areaIn = null;
+                local areaOut = null;
+                if("GetID" in ladder.GetBottomArea() && ladder.GetBottomArea().GetID() == ladderArea.GetID() && ladder.GetTopArea() != null && ladder.GetTopArea().IsValid()) {
+                    adjacentAreas[ladder.GetTopArea().GetID()] <- ladder.GetTopArea();
+                    areaIn = ladder.GetBottomArea();
+                    areaOut = ladder.GetTopArea();
+                } else if("GetID" in ladder.GetTopArea() && ladder.GetTopArea().GetID() == ladderArea.GetID() && ladder.GetBottomArea() != null && ladder.GetBottomArea().IsValid()) {
+                    adjacentAreas[ladder.GetBottomArea().GetID()] <- ladder.GetBottomArea();
+                    areaIn = ladder.GetTopArea();
+                    areaOut = ladder.GetBottomArea();
+                }
+                if(BotAI.BotDebugMode) {
+                    local height = ladder.GetLength()/2;
+                    local width = ladder.GetWidth()/2;
+                    DebugDrawBox(ladder.GetBottomOrigin() + Vector(0, 0, height), Vector(-width, -width, -height), Vector(width, width, height), 0, 255, 255, 0.2, 5);
+                    DebugDrawText(ladder.GetBottomOrigin() + Vector(0, 0, height), "ladder", true, 5);
+                    if(areaIn != null) {
+                        if(areaIn == ladder.GetBottomArea()) {
+                            BotAI.drawArrow(ladder.GetBottomArea().GetCenter(), ladder.GetBottomOrigin(), Vector(0, 255, 255), 5);
+                        } else if(areaIn == ladder.GetTopArea()) {
+                            BotAI.drawArrow(ladder.GetTopArea().GetCenter(), ladder.GetTopOrigin(), Vector(0, 255, 255), 5);
+                        }
+                    }
+                    if(areaOut != null) {
+                        if(areaOut == ladder.GetBottomArea()) {
+                            BotAI.drawArrow(ladder.GetBottomOrigin(), ladder.GetBottomArea().GetCenter(), Vector(0, 255, 255), 5);
+                        } else if(areaOut == ladder.GetTopArea()) {
+                            BotAI.drawArrow(ladder.GetTopOrigin(), ladder.GetTopArea().GetCenter(), Vector(0, 255, 255), 5);
+                        }
+                    }
+                }
+
+                local had = false;
+                foreach(idx, val in adjacentAreas) {
+                    if(val == areaOut)
+                        had = true;
+                }
+
+                if(!had && areaOut != null) {
+                    for(local i = 0; i < 4; ++i) {
+                        addLadder(areaOut, adjacentAreas, i);
+                    }
+                }
             }
         }
     }
 
-    function createPath(pos, endArea, paths, previousPath = null, startPos = null, startArea = null) {
+    function createPath(pathSearch, pos, endArea, distance, paths, previousPath = null, startPos = null, startArea = null) {
         if(endArea == null)
             endArea = NavMesh.GetNavArea(pos + Vector(0, 0, 50), 200);
         if(endArea == null)
@@ -346,89 +672,74 @@ class ::Navigator {
         if(endArea == null)
             return false;
         //endArea.DebugDrawFilled(0, 0, 255, 100, 10, true);
-        local re = false;
-        local checked = {};
-        local needCheack = {};
-        local deleteFirstArea = false;
+        local checked = pathSearch.checked;
+        local needCheack = pathSearch.needCheack;
         if(startPos == null && startArea == null) {
             startPos = player.GetOrigin();
             startArea = player.GetLastKnownArea();
-            deleteFirstArea = true;
-        } else
-            re = true;
+        }
+
+        if(startArea == endArea) {
+            return true;
+        }
+
+        if(startArea.IsConnected(endArea, -1)) {
+            paths["area0"] <- endArea;
+            return true;
+        }
 
 		local playerArea = AreaData(startArea, null, 0, BotAI.distanceof(startPos, pos));
         if(startArea != null)
             needCheack[startArea.GetID()] <- playerArea;
 
+        local searchCount = 0;
+        local reachLimit = false;
 		while(needCheack.len() > 0) {
             local mostSuitable = null;
             foreach(idx, areaData in needCheack) {
 			    if(mostSuitable == null || (areaData.exactCost + areaData.estimatedCost) < (mostSuitable.exactCost + mostSuitable.estimatedCost))
                     mostSuitable = areaData;
             }
-
-            if(typeof previousPath == "array" && previousPath.find(mostSuitable.area)) {
-                local idx = previousPath.find(mostSuitable.area);
-                local cachePaths = [];
-                local newPaths = [];
-                local function filter(index, val) {
-                    return index < idx;
-                }
-                previousPath = previousPath.filter(filter);
-                local areaData = mostSuitable;
-                while(areaData != null) {
-                    cachePaths.append(areaData.area);
-                    areaData = areaData.lastArea;
-                }
-
-                local len = cachePaths.len() + previousPath.len();
-
-                newPaths.extend(previousPath);
-                newPaths.extend(cachePaths);
-
-                if(re) {
-                    newPaths.reverse();
-                    foreach(idx, path in newPaths) {
-                        if(path != player.GetLastKnownArea())
-                            paths["area" + idx] <- path;
-                    }
-                    return true;
-                }
-                else {
-                    newPaths.reverse();
-                    local build = createPath(player.GetOrigin(), player.GetLastKnownArea(), paths, newPaths, pos, endArea);
-                    if(build)
-                        return true;
-                }
-            }
             
 			for(local i = 0; i < 4; ++i) {
-                local adjacentAreas = {};
-				mostSuitable.area.GetAdjacentAreas(i, adjacentAreas);
-                //if( i < 2 ) {
+                local adjacentAreas = BotAI.areaAdjacent(mostSuitable.area, i);
                 local ladders = {};
-                mostSuitable.area.GetLadders(i, ladders);
+                addLadder(mostSuitable.area, ladders, i);
                 foreach(ladder in ladders) {
-                    if(ladder.IsValid() && ladder.IsUsableByTeam(2)) {
-                        if("GetID" in ladder.GetBottomArea() && ladder.GetBottomArea().GetID() == mostSuitable.area.GetID())
-                            adjacentAreas["area" + adjacentAreas.len()] <- ladder.GetTopArea();
-                        else if("GetID" in ladder.GetTopArea() && ladder.GetTopArea().GetID() == mostSuitable.area.GetID())
-                            adjacentAreas["area" + adjacentAreas.len()] <- ladder.GetBottomArea();
-                    }
+                    adjacentAreas["area" + adjacentAreas.len()] <- ladder;
                 }
 
-                //}
 				foreach(adjacent in adjacentAreas) {
-				    if(!adjacent.IsValid() || adjacent.IsBlocked(2, false) || adjacent.IsDamaging()) continue;
+				    if(!adjacent.IsValid() || adjacent.IsBlocked(2, false) || (adjacent.IsDamaging() && !pathSearch.allowDanger)) continue;
+                    local dir = 0;
+                    if(i == 0)
+                        dir = 2;
+                    if(i == 1)
+                        dir = 3;
+                    if(i == 3)
+                        dir = 1;
+                    local lowCorner = BotAI.getLowOriginFromArea(adjacent, dir);
+                    local highCorner = BotAI.getHighOriginFromArea(mostSuitable.area, i);
+                    if(lowCorner.z - highCorner.z > JUMP_HIGHT && !(adjacent.GetID() in ladders)) {
+                        continue;
+                    }
+
+                    local exactCost = mostSuitable.exactCost + BotAI.distanceof(adjacent.GetCenter(), mostSuitable.area.GetCenter());
+                    if(exactCost > distance)
+                        continue;
+
                     if(adjacent.GetID() in checked) {
                         if(mostSuitable.lastArea == null)
                             continue;
                         local checkedArea = checked[adjacent.GetID()];
                         if(checkedArea.exactCost < mostSuitable.lastArea.exactCost) {
-                            local updatePath = AreaData(mostSuitable.area, checkedArea, checkedArea.exactCost + BotAI.distanceof(mostSuitable.area.GetCenter(), checkedArea.area.GetCenter()), mostSuitable.estimatedCost);
-                            mostSuitable = updatePath;
-                            checked[mostSuitable.area.GetID()] <- updatePath;
+                            local highLayer = BotAI.getHighOriginFromArea(checkedArea.area, dir);
+                            local lowLayer = BotAI.getLowOriginFromArea(mostSuitable.area, i);
+                            if(lowLayer.z - highLayer.z <= JUMP_HIGHT || adjacent in ladders) {
+                                local updatePath = AreaData(mostSuitable.area, checkedArea, checkedArea.exactCost + BotAI.distanceof(mostSuitable.area.GetCenter(), checkedArea.area.GetCenter()), mostSuitable.estimatedCost);
+                                mostSuitable = updatePath;
+                                checked[mostSuitable.area.GetID()] <- updatePath;
+                            }
                         }
                         continue;
                     }
@@ -440,13 +751,21 @@ class ::Navigator {
                             pathBack = areaData.area;
                             areaData = areaData.lastArea;
                         }
+                        if(BotAI.BotDebugMode) {
+                            printl("[Navigator] search area: " + checked.len());
+                            printl("[Navigator] search distance: " + mostSuitable.exactCost + mostSuitable.estimatedCost);
+                        }
+                        pathSearch.done = true;
+                        pathSearch.paths = paths;
                         return true;
                     }
-                    local area = AreaData(adjacent, mostSuitable, mostSuitable.exactCost + BotAI.distanceof(adjacent.GetCenter(), mostSuitable.area.GetCenter()), BotAI.distanceof(adjacent.GetCenter(), pos));
-                    //local area = AreaData(adjacent, BotAI.distanceof(adjacent.GetCenter(), pos), mostSuitable);
+                    local area = AreaData(adjacent, mostSuitable, exactCost, BotAI.distanceof(adjacent.GetCenter(), pos));
 					needCheack[adjacent.GetID()] <- area;
                     checked[adjacent.GetID()] <- area;
-                    //adjacent.DebugDrawFilled(0, 0, 255, 30, 10, true);
+                    searchCount++;
+                    if(searchCount >= SEARCH_LIMIT) {
+                        reachLimit = true;
+                    }
 				}
 			}
 
@@ -454,8 +773,17 @@ class ::Navigator {
                 delete needCheack[mostSuitable.area.GetID()];
                 //mostSuitable.area.DebugDrawFilled(255, 0, 0, 30, 10, true);
             }
+            
+            if(reachLimit) {
+                if(BotAI.BotDebugMode) {
+                    printl("[Navigator] searching over " + SEARCH_LIMIT + " area, wait a tick...");
+                    printl("[Navigator] searched area size: " + checked.len());
+                    printl("[Navigator] searched distance: " + mostSuitable.exactCost + mostSuitable.estimatedCost);
+                }
+                return false;
+            }
 		}
-
+        pathSearch.fail = true;
         return false;
     }
 }
@@ -466,22 +794,24 @@ class ::PathData {
     priority = 0;
     discard = {};
     aStar = false;
+    distance = 1500;
 
-	constructor(pathsIn, posIn, priorityIn, discardFuncIn) {
+	constructor(pathsIn, posIn, priorityIn, discardFuncIn, distanceIn) {
         paths = pathsIn;
         pos = posIn;
         priority = priorityIn;
         discard = {};
         discard["func"] <- discardFuncIn;
         aStar = false;
+        distance = distanceIn;
     }
 
-    function getPos() {
+    function getPos(originalPos) {
         if(BotAI.validVector(pos))
             return pos;
         if(BotAI.IsEntityValid(pos) && "GetOrigin" in pos)
             return pos.GetOrigin();
-        return Vector(0, 0, 0);
+        return originalPos;
     }
 
     function discardFunc() {
@@ -492,6 +822,62 @@ class ::PathData {
 
     function _typeof () {
         return "PathData";
+    }
+}
+
+class ::PathSearch {
+    paths = {};
+    checked = {};
+    needCheack = {};
+    pos = Vector(0, 0, 0);
+    timeOut = Time();
+    allowDanger = false;
+    done = false;
+    fail = false;
+    dataPaths = {};
+    dataGoal = null;
+    dataPriority = 0;
+    dataDiscardFunc = null;
+    dataDistance = 1000;
+    dataGoalPos = null;
+    dataGoalArea = null;
+
+	constructor(posIn) {
+        paths = {};
+        checked = {};
+        needCheack = {};
+        pos = posIn;
+        timeOut = Time();
+        allowDanger = false;
+        done = false;
+        fail = false;
+        dataPaths = {};
+        dataGoal = null;
+        dataPriority = 0;
+        dataDiscardFunc = BotAI.trueDude;
+        dataDistance = 1000;
+        dataGoalPos = null;
+        dataGoalArea = null;
+    }
+
+    function isSamePath(posIn) {
+        if(posIn == pos) return true;
+
+        local realPos = null;
+        if(BotAI.validVector(pos))
+            realPos = pos;
+        if(BotAI.IsEntityValid(pos) && "GetOrigin" in pos)
+            realPos = pos.GetOrigin();
+        
+        if(BotAI.validVector(posIn))
+            return posIn == realPos;
+        if(BotAI.IsEntityValid(posIn) && "GetOrigin" in posIn)
+            return posIn.GetOrigin() == realPos;
+        return false;
+    }
+
+    function _typeof () {
+        return "PathSearch";
     }
 }
 

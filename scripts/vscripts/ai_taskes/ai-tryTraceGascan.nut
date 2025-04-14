@@ -71,8 +71,15 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 			
 			if(flag && GasTryFind.GetOwnerEntity() == null)
 			{
-				cabal_oil[player.GetEntityIndex()] <- GasTryFind; 
-				return true;
+				local bool = false;
+				foreach(link in BotAI.BotLinkGasCan) {
+					if(link == GasTryFind)
+						bool = true;
+				}
+				if(!bool) {
+					cabal_oil[player.GetEntityIndex()] <- GasTryFind; 
+					return true;
+				}
 			}
 		}
 
@@ -81,17 +88,15 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 	
 	function playerUpdate(player)
 	{
-		if(player.GetEntityIndex() in cabal_oil)
-		{
+		if(player.GetEntityIndex() in cabal_oil) {
 			local gas_can = cabal_oil[player.GetEntityIndex()];
 			if(BotAI.IsEntityValid(gas_can) && gas_can.GetOwnerEntity() != player) {
 				if(BotAI.distanceof(player.GetOrigin(), gas_can.GetOrigin()) < 100) {
 					BotAI.BotTakeGasCan(player, gas_can);
 					BotAI.setBotLockTheard(player, -1);
 					updating = false;
-				}
-				else if(!BotAI.IsBotGasFinding(player)) {
-					if(BotAI.BOT_AI_TEST_MOD == 1)
+				} else {
+					if(BotAI.BotDebugMode)
 						printl("[Bot AI] Try Retake gas can " + gas_can);
 					local gas = gas_can;
 					local function needGasCan() {
@@ -106,8 +111,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 			}
 			else
 				updating = false;
-		}
-		else
+		} else
 			updating = false;
 	}
 	

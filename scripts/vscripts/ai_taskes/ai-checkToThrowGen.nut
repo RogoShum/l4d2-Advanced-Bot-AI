@@ -11,8 +11,7 @@ class ::AITaskCheckToThrowGen extends AITaskGroup
 	lament = {};
 	cooldown = 0;
 	
-	function preCheck()
-	{
+	function preCheck() {
 		if(cooldown > 0)
 			cooldown--;
 		
@@ -51,44 +50,6 @@ class ::AITaskCheckToThrowGen extends AITaskGroup
 		if(!BotAI.NeedThrowGrenade)
 			return false;
 		
-		local infectedJudge = 0 + stasis.len() * 3;
-		local checlAmount = 25 - (BotAI.playerFallDown * 3);
-		if(Director.GetCommonInfectedCount() > checlAmount) {
-			local infec = null;
-			while(infec = Entities.FindByClassname(infec, "infected")) {
-				if(infec.IsValid() && BotAI.IsAlive(infec)) {
-					if(BotAI.IsEntitySurvivor(BotAI.GetTarget(infec)))
-						infectedJudge+=1.15;
-				}
-			}
-		}
-		
-		
-		infectedJudge += BotAI.playerFallDown * 3;
-		//infectedJudge += BotAI.SpecialList.len() * 1;
-		local hasPipe = false;
-
-		if(infectedJudge >= BotAI.playerLive * 4) {
-			foreach(player in BotAI.SurvivorList) {
-				if(hasPipe)
-					continue;
-
-				if(BotAI.HasItem(player, "weapon_pipe_bomb")) {
-					local inf = Entities.FindByClassnameNearest("infected", player.GetOrigin(), 1000);
-					if(inf != null) {
-						hasPipe = true;
-						stasis[inf] <- "weapon_pipe_bomb";
-					}
-				} else if (BotAI.HasItem(player, "weapon_vomitjar")) {
-					local inf = Entities.FindByClassnameNearest("infected", player.GetOrigin(), 1000);
-					if(inf != null) {
-						hasPipe = true;
-						stasis[inf] <- "weapon_vomitjar";
-					}
-				}
-			}
-		}
-		
 		local bungie = {};
 		foreach(bungie_mama, val in stasis) {
 			if(val == "weapon_molotov")
@@ -108,8 +69,7 @@ class ::AITaskCheckToThrowGen extends AITaskGroup
 			return false;
 	}
 	
-	function GroupUpdateChecker(player)
-	{
+	function GroupUpdateChecker(player) {
 		foreach(riven, val in ahamkara) {
 			if(riven in lament) {
 				if(lament[riven] == player) 

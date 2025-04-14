@@ -9,7 +9,7 @@ class ::AITaskShoveInfected extends AITaskSingle {
 	playerTick = {};
 	
 	function singleUpdateChecker(player) {
-		if(!player.IsDead()) {
+		if(!player.IsDead() && !BotAI.isPlayerFall(player)) {
 			local flag = false;
 			if(BotAI.getBotShoveTarget(player) != null)
 				flag = true;
@@ -69,24 +69,58 @@ class ::AITaskShoveInfected extends AITaskSingle {
 			if(needShove) {
 				BotAI.SetTarget(player, target);
 
-				/*if(!BotAI.Versus_Mode && target.GetClassname() == "player" && !target.IsSurvivor() && (target.GetZombieType() == 1 || target.GetZombieType() == 3 || target.GetZombieType() == 5) && !player.IsDominatedBySpecialInfected()) {
-					//target.Stagger(player.GetOrigin());
-					BotAI.applyPushVelocity(player, target, 251);
-				}*/
+				local chance = 0;
+				local function reassess() {
+					if(BotAI.getPlayerTotalHealth(player) <= 60 && chance > 0)
+						chance -= 1;
+					if(BotAI.getPlayerTotalHealth(player) <= 40 && chance > 0)
+						chance -= 1;
+					if(BotAI.getPlayerTotalHealth(player) <= 30 && chance > 0)
+						chance -= 1;
+					if(BotAI.getPlayerTotalHealth(player) <= 20 && chance > 0)
+						chance -= 1;
+				}
+				if(target.GetClassname() == "player" && !target.IsSurvivor() && (target.GetZombieType() == 1 || target.GetZombieType() == 3 || target.GetZombieType() == 5)) {
+					if(BotAI.Versus_Mode)
+						chance += 2;
+					if(BotAI.BotDebugMode)
+						chance += 2;
+					reassess();
+					if(RandomInt(0, chance) == 0)
+						target.Stagger(player.GetOrigin());
+					local function resetMoveType() {
+						if(BotAI.getMoveType(target) == 2)
+							return true;
+						BotAI.setMoveType(target, 2);
+						return false;
+					} 
+					BotAI.conditionTimer(resetMoveType, 0.1);
+				}
 
-				if(target.GetClassname() == "infected" && BotAI.IsPressingShove(player))
-					BotAI.applyPushVelocity(player, target);
+				if(target.GetClassname() == "infected") {
+					if(BotAI.Versus_Mode)
+						chance += 1;
+					reassess();
+					if(RandomInt(0, chance) == 0)
+						BotAI.shoveCommon(target);
+				}
 				
 				NetProps.SetPropInt(player, "m_iShovePenalty", 0);
 				local wep = player.GetActiveWeapon();
 				if (wep)
 					NetProps.SetPropFloat(wep, "m_flNextSecondaryAttack", Time() - 1);
 				BotAI.ForceButton(player, 2048 , 0.1);
-			}
-			else
+				local playerIn = player;
+				local function breakTongue() {
+					if(BotAI.IsEntitySurvivor(target) && BotAI.CanSeeLocation(playerIn, target.GetOrigin(), 75)&& target.IsDominatedBySpecialInfected() 
+					&& target.GetSpecialInfectedDominatingMe().GetZombieType() == 1) {
+						BotAI.breakTongue(target.GetSpecialInfectedDominatingMe());
+					}
+				}
+				BotAI.delayTimer(breakTongue, 1.2);
+			} else
 				BotAI.UnforceButton(player, 2048 );
-		}
-		else {
+		} else {
 			BotAI.setBotTarget(player, null);
 			BotAI.UnforceButton(player, 2048 );
 			updating[player] <- false;

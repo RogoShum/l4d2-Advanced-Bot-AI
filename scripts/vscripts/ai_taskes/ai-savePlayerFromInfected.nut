@@ -6,54 +6,78 @@ class ::AITaskSavePlayer extends AITaskGroup
 	
 	updating = false;
 	playerList = {};
-	victims = {};
-	whoSaveMe = {};
+	dominated = {};
+	falled = {};
+	rescuers = {};
 	
 	function preCheck() {
-		local victimList = {};
-		whoSaveMe = {};
-		BotAI.HasTank
+		dominated = {};
+		falled = {};
+		rescuers = {};
+
+		if(BotAI.playerFallDown < 1 && BotAI.playerDominated < 1) {
+			return false;
+		}
+
 		foreach(victim in BotAI.SurvivorList) {
 			if(victim != null && BotAI.IsEntityValid(victim) && BotAI.IsAlive(victim)) {
 				if(victim.IsDominatedBySpecialInfected())
-					victimList[victimList.len()] <- victim
+					dominated[dominated.len()] <- victim;
 				else if(!BotAI.HasTank && (victim.IsIncapacitated() || victim.IsHangingFromLedge()))
-					victimList[victimList.len()] <- victim
+					falled[falled.len()] <- victim;
 			}
 		}
 		
-		if(victimList.len() > 0) {
-			victims = victimList;
+		if(dominated.len() > 0 || falled.len() > 0) {
 			return true;
 		}
-		
-		victims = {};
+
 		return false;
 	}
 	
 	function GroupUpdateChecker(player) {
 		if(!BotAI.IsAlive(player) || BotAI.IsPlayerClimb(player) || player.IsDominatedBySpecialInfected() || player.IsStaggering() || player.IsIncapacitated() || player.IsHangingFromLedge()) return false;
+		
+		local navigator = BotAI.getNavigator(player);
+		if(navigator.isMoving("savePlayer"))
+			return false;
 
-		foreach(idx, victim in victims) {
+		if(player in rescuers) {
+			return true;
+		}
+
+		if(selectRescuer(player, dominated)) {
+			return true;
+		}
+
+		if(selectRescuer(player, falled)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	function selectRescuer(player, table) {
+		foreach(idx, victim in table) {
 			if(victim == null || !BotAI.IsAlive(victim))
 				continue;
 			local distance = 9999;
 			local _hero = null;
 			foreach(hero in BotAI.SurvivorBotList) {
-				if(BotAI.IsPlayerClimb(hero) || hero.IsDominatedBySpecialInfected() || hero.IsStaggering() || hero.IsIncapacitated() || hero.IsHangingFromLedge()) continue;
+				if(hero in rescuers || BotAI.IsPlayerClimb(hero) || hero.IsDominatedBySpecialInfected() || hero.IsStaggering() || hero.IsIncapacitated() || hero.IsHangingFromLedge()) continue;
 				local dis = BotAI.distanceof(hero.GetOrigin(), victim.GetOrigin());
 				if(_hero == null || dis < distance) {
 					_hero = hero;
 					distance = dis;
 				}
 			}
+
 			if(_hero == player) {
-				whoSaveMe[player.GetEntityIndex()] <- victim;
-				delete victims[idx];
+				rescuers[player] <- victim;
+				delete table[idx];
 				return true;
 			}
 		}
-
 		return false;
 	}
 	
@@ -64,8 +88,8 @@ class ::AITaskSavePlayer extends AITaskGroup
 		}
 		local smoker = null;
 		local victim = null;
-		if(player.GetEntityIndex() in whoSaveMe)
-			victim = whoSaveMe[player.GetEntityIndex()];
+		if(player in rescuers)
+			victim = rescuers[player];
 		if(!BotAI.IsAlive(victim)) {
 			updating = false;
 			return;
@@ -101,7 +125,6 @@ class ::AITaskSavePlayer extends AITaskGroup
 			}
 			BotAI.botRunPos(player, victim, "savePlayer", 5, needSave);
 		}
-		
 		updating = false;
 	}
 	

@@ -13,7 +13,8 @@ class ::ChunkMap {
 		if(!(key in map)) {
 			map[key] <- [];
 		}
-		map[key].append(entity);
+		if(map[key].find(entity) == null)
+			map[key].append(entity);
 	}
 
 	function get(object, scale = 0) {
@@ -29,13 +30,16 @@ class ::ChunkMap {
 		if(typeof pos != "Vector") return [];
 		local chunk = [];
 		local start = scale - (2*scale);
-		if(scale < 1)
-			scale = 1;
+		scale += 1;
 
 		for(local x = start; x < scale; ++ x) {
 			for(local y = start; y < scale; ++ y) {
 				for(local z = start; z < scale; ++ z) {
 					local chunkPos = pos + Vector(x * dimension, y * dimension, z * dimension);
+					if(BotAI.BotDebugMode) {
+						local drawVec = Vector(int(chunkPos.x), int(chunkPos.y), int(chunkPos.z))*dimension;
+						DebugDrawBox(drawVec, Vector(0, 0, 0), Vector(dimension, dimension, dimension), 25, 25, 255, 0.1, 0.5);
+					}
 					local key = createKey(chunkPos);
 					if(key in map) {
 						foreach(entity in map[key]) {
@@ -52,20 +56,17 @@ class ::ChunkMap {
 	function createKey(object) {
 		local key = "";
 		if(typeof object == "Vector") {
-			key = "X" + int(object.x) + "Y" + int(object.y, true) + "Z" + int(object.z);
+			key = "X" + int(object.x).tostring() + "Y" + int(object.y).tostring() + "Z" + int(object.z).tostring();
 		} else if(BotAI.IsEntityValid(object)) {
 			local pos = object.GetOrigin();
-			key = "X" + int(pos.x) + "Y" + int(pos.y, true) + "Z" + int(pos.z);
+			key = "X" + int(pos.x).tostring() + "Y" + int(pos.y).tostring() + "Z" + int(pos.z).tostring();
 		}
 		return key;
 	}
 
-	function int(i, y = false) {
+	function int(i, z = false) {
 		local dim = dimension;
-		if(y) {
-			dim = dim / 2;
-		}
-		return (i / dim).tointeger().tostring();
+		return (i / dim).tointeger();
 	}
 
 	function all() {
@@ -123,11 +124,6 @@ function BotAI::loadBackpack() {
 }
 
 function BotAI::BotPerformanceCmd() {
-	/*foreach(per in BotAI.debugPerformance) {
-		local pri = per.print();
-		printl(pri[0]);
-		printl(pri[1]);
-	}*/
 	foreach(name, value in BotAI.debugCallCount) {
 		printl("Method " + name + " use cache " + value + " times.");
 	}
@@ -313,13 +309,41 @@ function BotAI::HasForcedButton(player, button )
 	return buttons == ( buttons | button );
 }
 
-function BotAI::ForceButton(player, button, time = 999, force = false)
-{
+function BotAI::setContext(entity, context, duration) {
+	if(!BotAI.IsEntityValid(entity)) {
+		return;
+	}
+	entity.SetContext(context, context, duration);
+
+	local function deleteContext() {
+		if(BotAI.IsEntityValid(entity))
+			entity.SetContext(context, ">null<", -1);
+	}
+
+	if(duration > 0) {
+		BotAI.delayTimer(deleteContext, duration);
+	}
+}
+
+function BotAI::hasContext(entity, context) {
+	if(!BotAI.IsEntityValid(entity)) {
+		return false;
+	}
+	if(entity.GetContext(context) == null || entity.GetContext(context) == ">null<")
+		return false;
+	return true;
+}
+
+function BotAI::ForceButton(player, button, time = 999, force = false) {
 	if (!BotAI.IsPlayerEntityValid(player) || BotAI.IsPlayerClimb(player) || BotAI.IsBotHealing(player))
+		return;
+	if (!BotAI.IsOnGround(player) && button == 2)
 		return;
 	
 	local buttons = NetProps.GetPropInt(player, "m_afButtonForced" );
-	
+	if(button == 2) {
+		BotAI.setContext(player, "BOTAI_JUMP", 1);
+	}
 	if ( BotAI.HasForcedButton(player, button) )
 		return;
 	
@@ -439,7 +463,7 @@ function BotAI::ChangeItem(p, slot)
 		local weapon = t[("slot" + slot.tostring())];
 		//NetProps.SetPropEntity(p, "m_hActiveWeapon", t[("slot" + slot.tostring())]);
 		p.SwitchToItem(weapon.GetClassname());
-		if(BotAI.BOT_AI_TEST_MOD == 1) {
+		if(BotAI.BotDebugMode) {
 			DebugDrawText(p.EyePosition(), BotAI.getPlayerBaseName(p) + " change " + weapon.GetClassname(), true, 0.2);
 		}
 		NetProps.SetPropFloat(weapon, "m_flNextPrimaryAttack", Time() - 1);
@@ -516,7 +540,7 @@ function BotAI::getDamage(wep) {
 		case "weapon_rifle_m60":
 			return 50;
 		default :
-			return 0;
+			return 20;
 	}
 }
 
@@ -536,15 +560,6 @@ function BotAI::applyPushVelocity(player, target, force = 400) {
 	target.SetVelocity(velocity);
 }
 
-function BotAI::obstacleCheck(player, targetPos, finalPos) {
-	local disTarget = (player.GetOrigin() - targetPos).Length();
-	local disFinal = (player.GetOrigin() - finalPos).Length();
-	local disTF = (targetPos - finalPos).Length();
-	if(disTarget < disTF && disFinal < disTF)
-		return true;
-	return false;
-}
-
 function BotAI::isDoorEntity(entity) {
 	if(!BotAI.IsEntityValid(entity)) return false;
 	return entity.GetClassname() == "func_door" || entity.GetClassname() == "prop_door_rotating_checkpoint" || entity.GetClassname() == "prop_door_rotating";
@@ -554,34 +569,44 @@ function BotAI::doorOpened(door) {
 	return door in BotAI.DoorState && BotAI.DoorState[door];
 }
 
+function BotAI::botMove(player, vec) {
+	vec = BotAI.fakeTwoD(vec);
+	local inAir = !BotAI.IsOnGround(player);
+	if(inAir) {
+		return;
+	}
+	if(player in BotAI.botMoveMap) {
+		local botVec = BotAI.botMoveMap[player];
+		if(botVec.Length() >= 1)
+			BotAI.botMoveMap[player] = botVec*0.25 + vec*0.75;
+		else
+			BotAI.botMoveMap[player] = vec;
+	} else {
+		BotAI.botMoveMap[player] <- vec;
+	}
+}
+
 function BotAI::botRun(player, targetPos, speed = 220) {
-	speed = speed + 250;
+	local onGround = BotAI.IsOnGround(player) && !BotAI.HasForcedButton(player, 2) && !BotAI.IsPressingJump(player);
+	if(!onGround && speed > BOT_JUMP_SPEED_LIMIT)
+		speed = BOT_JUMP_SPEED_LIMIT;
 	local pushVec = BotAI.normalize(targetPos - player.GetOrigin()).Scale(speed);
 	local velocity = Vector(pushVec.x, pushVec.y, player.GetVelocity().z);
-	local onGround = BotAI.IsOnGround(player);
-	if(!onGround) {
-		velocity.Scale(0.01);
-	}
-	
+
 	local dodgeVec = BotAI.getBotDedgeVector(player);
 	if(BotAI.validVector(dodgeVec))
 		velocity = velocity.Scale(0.7) + dodgeVec.Scale(0.3);
 	
+	if(onGround) {
+		local angle = BotAI.checkObstacle(player, velocity);
+		if(angle > 0)
+			velocity = BotAI.rotateVector(velocity, angle);
+	}
+
 	if(BotAI.validVector(velocity))
-		player.SetVelocity(velocity);
+		BotAI.botMove(player, velocity);
 
-	if(onGround && BotAI.checkObstacle(player, targetPos))
-		BotAI.ForceButton(player, 2 , 0.2);
-	/*local pos = player.GetOrigin();
-	local areaString = (pos.x / 500).tostring() + (pos.y / 500).tostring() + (pos.z / 500).tostring();
-	if(areaString in BotAI.obstacles) {
-		local area = BotAI.obstacles[areaString];
-		foreach(obstacle in area) {
-			if()
-		}
-	}*/
-
-	if(BotAI.BOT_AI_TEST_MOD == 1) {
+	if(BotAI.BotDebugMode) {
 		DebugDrawCircle(targetPos, Vector(0, 255, 0), 1.0, 25, true, 0.2);
 		DebugDrawText(targetPos, BotAI.getPlayerBaseName(player) + " navigate here", false, 0.2);
 	}
@@ -601,6 +626,51 @@ function BotAI::SetPlayerAtCheckPoint(player, boolean)
 function BotAI::IsPlayerAtCheckPoint(player)
 {
 	return player.GetEntityIndex() in BotAI.InSafeHouse && BotAI.InSafeHouse[player.GetEntityIndex()];
+}
+
+function BotAI::getLowOriginFromArea(area, dir) {
+	local origins = BotAI.getDirectionOriginFromArea(area, dir);
+	local origin0 = origins[0];
+	local origin1 = origins[1];
+
+	if(origin0.z > origin1.z)
+		return origin1;
+	else
+		return origin0;
+}
+
+function BotAI::getHighOriginFromArea(area, dir) {
+	local origins = BotAI.getDirectionOriginFromArea(area, dir);
+	local origin0 = origins[0];
+	local origin1 = origins[1];
+
+	if(origin0.z < origin1.z)
+		return origin1;
+	else
+		return origin0;
+}
+
+function BotAI::getDirectionOriginFromArea(area, dir) {
+	local origin = [];
+    switch(dir) {
+		case 0:
+			origin.append(area.GetCorner(0));
+			origin.append(area.GetCorner(1));
+			break;
+		case 1:
+			origin.append(area.GetCorner(1));
+			origin.append(area.GetCorner(2));
+			break;
+		case 2:
+			origin.append(area.GetCorner(2));
+			origin.append(area.GetCorner(3));
+			break;
+		case 3:
+			origin.append(area.GetCorner(3));
+			origin.append(area.GetCorner(0));
+			break;
+	}
+	return origin;
 }
 
 /**
@@ -641,6 +711,26 @@ function BotAI::HasSpecialInfectedAlive()
 	return false;
 }
 
+function BotAI::breakTongue(smoker) {
+	if(BotAI.hasContext(smoker, "BOTAI_BREAK"))
+		return;
+
+	local victim = NetProps.GetPropEntity(smoker, "m_tongueVictim");
+	if(BotAI.IsEntityValid(victim)) {
+		victim.SetOrigin(victim.GetOrigin()+Vector(0, 0, 20));
+		victim.Stagger(Vector(0, 0, -100));
+	}
+}
+
+function BotAI::isDeathStillAlive(death) {
+	local _type = NetProps.GetPropInt(death, "m_nCharacterType");
+	foreach(player in BotAI.SurvivorList) {
+		if(NetProps.GetPropInt(player, "m_survivorCharacter") == _type)
+			return true;
+	}
+	return false;
+}
+
 function BotAI::getPlayerBaseName(player)
 {
 	//local name = NetProps.GetPropInt(player, "m_survivorCharacter");
@@ -648,21 +738,34 @@ function BotAI::getPlayerBaseName(player)
 	return g_MapScript.GetCharacterDisplayName(player);
 }
 
-function BotAI::GetPrimaryUpgrades(player)
-{
-	if (!BotAI.IsPlayerEntityValid(player))
-	{
+function BotAI::GetPrimaryUpgrades(player) {
+	if (!BotAI.IsPlayerEntityValid(player)) {
 		return 0;
 	}
 	
 	local t = BotAI.GetHeldItems(player);
 	
-	if (t && "slot0" in t)
-	{
+	if (t && "slot0" in t) {
 		if ( t["slot0"].GetClassname().find("weapon_") == null )
 			return 0;
 			
 		return NetProps.GetPropInt(t["slot0"], "m_upgradeBitVec");
+	}
+	return 0;
+}
+
+function BotAI::setPrimaryUpgrades(player, upgrade) {
+	if (!BotAI.IsPlayerEntityValid(player)) {
+		return;
+	}
+	
+	local t = BotAI.GetHeldItems(player);
+	
+	if (t && "slot0" in t) {
+		if ( t["slot0"].GetClassname().find("weapon_") == null )
+			return;
+			
+		return NetProps.SetPropInt(t["slot0"], "m_upgradeBitVec", upgrade);
 	}
 }
 
@@ -844,18 +947,37 @@ function BotAI::IsOnGround(entity) {
 	return BotAI.HasFlag(entity, 1);
 }
 
-function BotAI::printTable(table) {
+function BotAI::drawArrow(point0, point1, color, timeIn) {
+	local dir = BotAI.normalize(point0 - point1);
+	local finalPoint = point1 + dir.Scale(5);
+	DebugDrawLine(point0 - dir.Scale(5), finalPoint, color.x, color.y, color.z, false, timeIn);
+	local qDir = BotAI.CreateQAngle(dir.x, dir.y, dir.z);
+	local lDir = QAngle(qDir.Pitch(), qDir.Yaw() + 30, 0);
+	local rDir = QAngle(qDir.Pitch(), qDir.Yaw() - 30, 0);
+	DebugDrawLine(finalPoint, finalPoint + lDir.Forward().Scale(15), color.x, color.y, color.z, false, timeIn);
+	DebugDrawLine(finalPoint, finalPoint + rDir.Forward().Scale(15), color.x, color.y, color.z, false, timeIn);
+}
+
+function BotAI::printTable(table, valFunc = null, shouldPrint = null) {
 	if(typeof table != "table") return;
 	foreach(idx, val in table) {
-		printl("Idx: " + idx + " Val: " + val);
-		BotAI.printTable(val);
+		if(shouldPrint != null && (!shouldPrint(idx) || !shouldPrint(val)))
+			continue;
+		if(valFunc != null)
+			printl("Idx: " + idx + " Val: " + valFunc(val));
+		else
+			printl("Idx: " + idx + " Val: " + val);
+		BotAI.printTable(val, valFunc);
 	}
 }
 
-function BotAI::printArray(arri) {
+function BotAI::printArray(arri, valFunc) {
 	if(typeof arri != "array") return;
 	foreach(idx, val in arri) {
-		printl("Idx: " + idx + " Val: " + val);
+		if(valFunc != null)
+			printl("Idx: " + idx + " Val: " + valFunc(val));
+		else
+			printl("Idx: " + idx + " Val: " + val);
 	}
 }
 
@@ -872,8 +994,7 @@ function BotAI::hookViewEntity(ent_self, ent_b) {
 		NetProps.SetPropInt(ent_self, "m_hViewEntity", -1);
 }
 
-function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1)
-{
+function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1) {
 	BotAI.debugCall("lookAtEntity");
 	if(!BotAI.IsEntityValid(ent_b)) {
 		printl("[Bot AI DEBUG] ent_b not valid: " + ent_b);
@@ -888,38 +1009,30 @@ function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1)
 		x = ent_b.GetOrigin().x;
 		y = ent_b.GetOrigin().y;
 		z = ent_b.GetOrigin().z;
-	}
-	else if("LookupAttachment" in ent_b)
-	{
+	} else if("LookupAttachment" in ent_b) {
 		local attachId = ent_b.LookupAttachment("forward");
 		local position = ent_b.GetAttachmentOrigin(attachId);
 		
 		x = position.x;
 		y = position.y;
 		z = position.z;
-	}
-	else if("EyePosition" in ent_b )
-	{
+	} else if("EyePosition" in ent_b ) {
 		x = ent_b.EyePosition().x;
 		y = ent_b.EyePosition().y;
 		z = ent_b.EyePosition().z;
-	}
-	else if("GetBoneOrigin" in ent_b)
-	{
+	} else if("GetBoneOrigin" in ent_b) {
 		x = ent_b.GetBoneOrigin(14).x;
 		y = ent_b.GetBoneOrigin(14).y;
 		z = ent_b.GetBoneOrigin(14).z;
-	}
-	else
-	{
+	} else {
 		x = ent_b.GetCenter().x;
 		y = ent_b.GetCenter().y;
 		z = ent_b.GetCenter().z;
 	}
 
-	if(BotAI.BOT_AI_TEST_MOD == 1) {
+	if(BotAI.BotDebugMode) {
 		DebugDrawBox(Vector(x, y, z), Vector(-10, -10, -10), Vector(10, 10, 10), 100, 255, 0, 0.2, 0.2);
-		DebugDrawText(Vector(x, y, z), BotAI.getPlayerBaseName(ent_self) + " want me", true, 0.2);
+		DebugDrawText(Vector(x, y, z), BotAI.getPlayerBaseName(ent_self) + " want me", false, 0.2);
 	}
 
 	if(ent_b == BotAI.getSmokerTarget(ent_self)) {
@@ -955,10 +1068,7 @@ function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1)
 				angle = eyeAngle.Yaw() + angle;
 			qAngleDirction = QAngle(qAngleDirction.Pitch(), angle, qAngleDirction.Roll());
 		}
-		//NetProps.SetPropVector(ent_self, "m_angRotation", dirction);
-		//ent_self.SetForwardVector(dirction);
-		//NetProps.SetPropFloat(ent_self, "m_angEyeAngles[0]", qAngleDirction.Pitch());
-		//NetProps.SetPropFloat(ent_self, "m_angEyeAngles[1]", qAngleDirction.Yaw());
+
 		ent_self.SnapEyeAngles(qAngleDirction);
 		
 		if(frozen) {
@@ -976,20 +1086,17 @@ function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1)
 		BotAI.lookAtPosition(ent_self, Vector(x, y, z), frozen, time);
 }
 
-function BotAI::lookAtPosition(player, vec, frozen = false, time = 1)
-{
+function BotAI::lookAtPosition(player, vec, frozen = false, time = 1) {
 	if(frozen && BotAI.HasFlag(player, FL_FROZEN))
 		BotAI.RemoveFlag(player, FL_FROZEN );
 
 	if("SnapEyeAngles" in player)
 		player.SnapEyeAngles(BotAI.CreateQAngle(vec.x - player.EyePosition().x, vec.y - player.EyePosition().y, vec.z - player.EyePosition().z));
 	
-	if(frozen)
-	{
+	if(frozen) {
 		BotAI.AddFlag(player, FL_FROZEN );
 		
-		local function RemoveFlag(ent_)
-		{
+		local function RemoveFlag(ent_) {
 			if(ent_ != null)
 				BotAI.RemoveFlag(ent_, FL_FROZEN );
 		}
@@ -1017,60 +1124,85 @@ function BotAI::lookAtPosition(player, vec, frozen = false, time = 1)
 	return QAngle(pitch, yaw, 0);
 }
 
-function BotAI::checkObstacle(player, pos) {
-	local diraction = BotAI.normalize(BotAI.fakeTwoD(pos - player.GetOrigin())).Scale(70);
-	local jump = false;
+function BotAI::isTouchSolid(_ignore, _start, _end) {
 	local traceTable = {
-		start = player.GetOrigin() + Vector(0, 0, 10)
-		end = diraction + player.GetOrigin() + Vector(0, 0, 10)
-		ignore = player
-		mask = MASK_SOLID
+		start = _start
+		end = _end
+		ignore = _ignore
+		mask = g_MapScript.TRACE_MASK_SHOT
 	}
 	TraceLine(traceTable);
 
-	if(traceTable.hit)
-		jump = true;
-
-	traceTable = {
-		start = player.GetOrigin() + Vector(0, 0, 30)
-		end = diraction + player.GetOrigin() + Vector(0, 0, 30)
-		ignore = player
-		mask = MASK_SOLID
-	}
-	TraceLine(traceTable);
-
-	if(traceTable.hit)
-		jump = true;
-
-	traceTable = {
-		start = player.GetOrigin() + Vector(0, 0, 50)
-		end = diraction + player.GetOrigin() + Vector(0, 0, 50)
-		ignore = player
-		mask = MASK_SOLID
-	}
-	TraceLine(traceTable);
-
+	local result = 0;
 	if(traceTable.hit) {
+		if(BotAI.IsLivingEntity(traceTable.enthit))
+			return 0;
+		result+=1;
 		if(BotAI.isDoorEntity(traceTable.enthit)) {
-			if(!BotAI.doorOpened(traceTable.enthit))
-				DoEntFire("!self", "Use", "", 0, player, traceTable.enthit);
-			return false;
+			result+=1;
+			if(!BotAI.doorOpened(traceTable.enthit)) {
+				result+=1;
+				DoEntFire("!self", "Use", "", 0, _ignore, traceTable.enthit);
+			}
 		}
-		jump = true;
 	}
-		
-
-	traceTable = {
-		start = player.GetOrigin() + Vector(0, 0, 56)
-		end = diraction + player.GetOrigin() + Vector(0, 0, 56)
-		ignore = player
-		mask = MASK_SOLID
+	
+	if(BotAI.BotDebugMode) {
+		if(result > 0) {
+			DebugDrawLine(_start, _end, 255, 0, 0, false, 2.2);
+		} else {
+			DebugDrawLine(_start, _end, 255, 255, 255, false, 0.2);
+		}
 	}
-	TraceLine(traceTable);
 
-	if(traceTable.hit)
-		jump = false;
-	return jump;
+	return result;
+}
+
+function BotAI::checkObstacle(player, vec) {
+	local centerPoint = player.GetOrigin() + Vector(0, 0, 20) + BotAI.normalize(vec).Scale(30);
+	local point_0 = player.GetOrigin() + Vector(0, 0, 71);
+	local point_1 = player.GetOrigin() + Vector(0, 0, 8) + BotAI.normalize(BotAI.rotateVector(vec, 90)).Scale(6);
+	local point_2 = player.GetOrigin() + Vector(0, 0, 8) + BotAI.normalize(BotAI.rotateVector(vec, -90)).Scale(6);
+	local point_3 = player.GetOrigin() + Vector(0, 0, 8);
+	local point_4 = player.GetOrigin() + Vector(0, 0, 39) + BotAI.normalize(BotAI.rotateVector(vec, 90)).Scale(14);
+	local point_5 = player.GetOrigin() + Vector(0, 0, 39) + BotAI.normalize(BotAI.rotateVector(vec, -90)).Scale(14);
+	local dodgeVec = 0;
+	local jump = 0;
+
+	if(BotAI.isTouchSolid(player, point_1, centerPoint) > 0) {
+		jump +=1;
+		dodgeVec += -60;
+	}
+
+	if(BotAI.isTouchSolid(player, point_2, centerPoint) > 0) {
+		jump +=1;
+		dodgeVec += 60;
+	}
+
+	if(BotAI.isTouchSolid(player, point_4, centerPoint) > 0) {
+		dodgeVec += -60;
+	}
+
+	if(BotAI.isTouchSolid(player, point_5, centerPoint) > 0) {
+		dodgeVec += 60;
+	}
+
+	BotAI.isTouchSolid(player, point_0, centerPoint);
+
+	local result_3 = BotAI.isTouchSolid(player, point_3, centerPoint);
+	if(result_3 > 0) {
+		jump +=1;
+		if(result_3 >= 2) {
+			jump -=1;
+		}
+	}
+
+	if(jump > 2) {
+		local navigator = BotAI.getNavigator(player);
+		if(navigator.isPathFlat())
+			BotAI.ForceButton(player, 2 , 0.2);
+	}
+	return dodgeVec;
 }
 
 function BotAI::tracePos(player, pos, onlyGround = false) {
@@ -1212,10 +1344,9 @@ function BotAI::HasItem(player, str)
 	return false;
 }
 
-//void GetInvTable(CTerrorPLayer player,table invTable)
+//void GetInvTable(CTerrorPLayer player, table invTable)
 //GetInvTable is a danger function, the first param if it's not CTerrorPLayer or it's null, game crashes
-function BotAI::GetHeldItems(player)
-{
+function BotAI::GetHeldItems(player) {
 	local t = {};
 	if(!BotAI.IsEntitySurvivor(player)) return t;
 	local table = {};
@@ -1252,8 +1383,9 @@ function BotAI::isEntityInfected(entity)
 	
 	if("GetSequenceName" in _ent) {
 		local sequenceName = _ent.GetSequenceName(_ent.GetSequence()).tolower();
-		if(sequenceName.find("death") != null)
+		if(sequenceName.find("death") != null && !(BotAI.IsPlayerEntityValid(_ent) && _ent.IsSurvivor())) {
 			return false;
+		}
 	}
 	
 	if ( _ent.GetClassname() == "infected" || _ent.GetClassname() == "witch" || _ent.GetClassname() == "player" )
@@ -1269,33 +1401,31 @@ function BotAI::isEntityInfected(entity)
 	return _ent.GetClassname() == "infected" || _ent.GetClassname() == "witch" || _ent.GetClassname() == "player";
 }
 
-function BotAI::applyDamage(owner, target, amount, damageType) {
-	target.TakeDamage(amount, damageType, owner);
-	/*
-	if(BotAI.BOT_AI_TEST_MOD <= 1)+-
-		
-	else
-		target.TakeDamageEx(null, owner, owner.GetActiveWeapon(), target.GetOrigin() - owner.GetOrigin()
-			, owner.GetOrigin(), amount, damageType);
-	*/
+function BotAI::CanHumanSeePlace(posIn) {
+	foreach(sur in BotAI.SurvivorHumanList) {
+		if(BotAI.IsAlive(sur) && BotAI.VectorDotProduct(BotAI.normalize(sur.EyeAngles().Forward()), BotAI.normalize(posIn - sur.GetOrigin())) > 0)
+			return true;
+	}
+	return false;
 }
 
-function BotAI::IsInCombat(player)
-{
-	//if(BotAI.callCacheBoolean(tag, false, false, true))
-		//return BotAI.callCacheBoolean(tag, false, false, false);
+function BotAI::applyDamage(owner, target, amount, damageType) {
+	target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), target.GetOrigin() - owner.GetOrigin()
+					, owner.GetOrigin(), amount, damageType);
+}
 
+function BotAI::IsInCombat(player, lowCheck = false) {
 	if(!BotAI.IsPlayerEntityValid(player)) return false;
 
 	local target = BotAI.GetTarget(player);
-	if(BotAI.IsEntityValid(target)) {
+	if(BotAI.IsEntityValid(target) && !lowCheck) {
 		if(BotAI.isEntitySP(target) || BotAI.isEntityInfected(target)) {
 			return true;
 		}
 	}
 	
 	target = BotAI.getBotTarget(player);
-	if(BotAI.IsEntityValid(target)) {
+	if(BotAI.IsEntityValid(target) && !lowCheck) {
 		return true;
 	}
 	
@@ -1366,6 +1496,29 @@ function BotAI::isPressingAlt(ent) {
 	return (ent.GetButtonMask() & 0x8000) > 0;
 }
 
+function BotAI::IsPressingForward(_ent)
+{
+	if(!BotAI.IsAlive(_ent)) return false;
+	return (_ent.GetButtonMask() & (1 << 3)) > 0;
+}
+
+function BotAI::IsPressingBackward(_ent)
+{
+	if(!BotAI.IsAlive(_ent)) return false;
+	return (_ent.GetButtonMask() & (1 << 4)) > 0;
+}
+
+function BotAI::IsPressingLeft(_ent)
+{
+	if(!BotAI.IsAlive(_ent)) return false;
+	return (_ent.GetButtonMask() & (1 << 9)) > 0;
+}
+
+function BotAI::IsPressingRight(ent) {
+	if(!BotAI.IsAlive(ent)) return false;
+	return (ent.GetButtonMask() & (1 << 10)) > 0;
+}
+
 function BotAI::VectorDotProduct(a, b)
 {
 	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
@@ -1401,9 +1554,7 @@ function BotAI::IsOnFire(_ent) {
 		return false;
 }
 
-function BotAI::IsSurvivorTrapped(_ent)
-{
-	BotAI.debugCall("IsSurvivorTrapped");
+function BotAI::IsSurvivorTrapped(_ent) {
 	if (!BotAI.IsPlayerEntityValid(_ent)) {
 		return false;
 	}
@@ -1465,6 +1616,32 @@ function BotAI::getBotGasFinding(player) {
 	if(player.GetEntityIndex() in BotAI.GasFinding)
 		return BotAI.GasFinding[player.GetEntityIndex()];
 	return 0;
+}
+
+::BotAI.CanSeeLocation <- function(player, otherEntity, tolerance = 50) {
+	if (!player.IsValid()) {
+		return false;
+	}
+	
+	local clientPos = player.GetOrigin();
+	if("EyePosition" in player)
+		clientPos = player.EyePosition();
+	else
+		clientPos += Vector(0, 0, 62);
+		
+	local clientToTargetVec = otherEntity - clientPos;
+	local clientAimVector = Vector(0, 0, 0);
+	if("EyeAngles" in player)
+		clientAimVector = player.EyeAngles().Forward();
+	else if("GetForwardVector" in player)
+		clientAimVector = player.GetForwardVector();
+	
+	local angToFind = acos(BotAI.VectorDotProduct(clientAimVector, clientToTargetVec) / (clientAimVector.Length() * clientToTargetVec.Length())) * 360 / 2 / 3.14159265;
+	
+	if (angToFind >= tolerance)
+		return false;
+	else
+		return true;
 }
 
 ::BotAI.CanSeeOtherEntity <- function(player, otherEntity, tolerance = 50, seeBarrier = false)
@@ -1754,8 +1931,7 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 	local m_trace = { start = player.EyePosition(), end = player.EyePosition() + player.EyeAngles().Forward().Scale(distan), ignore = player, mask = trace_mask};
 	TraceLine(m_trace);
 
-	if (!m_trace.hit || m_trace.enthit == null || m_trace.enthit == player)
-	{
+	if (!m_trace.hit || m_trace.enthit == null || m_trace.enthit == player) {
 		if(pri == 1 && m_trace.enthit == player)
 			printl("[Bot AI DEBUG] PLAYER_SELF ");
 		return null;
@@ -1766,9 +1942,21 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 
 	if(pri == 1) {
 		DumpObject(m_trace.enthit);
-		printl("[Bot AI DEBUG] Name " + m_trace.enthit.GetClassname());
-		printl("[Bot AI DEBUG] ModelName " + m_trace.enthit.GetModelName());
-		printl("[Bot AI DEBUG] Flags " + NetProps.GetPropInt(m_trace.enthit, "m_spawnflags"));
+		printl("[Bot AI DEBUG] Name: " + m_trace.enthit.GetClassname());
+		printl("[Bot AI DEBUG] ModelName: " + m_trace.enthit.GetModelName());
+		printl("[Bot AI DEBUG] MoveType: " + BotAI.getMoveType(m_trace.enthit));
+		printl("[Bot AI DEBUG] m_hOwnerEntity: " + NetProps.GetPropEntity(m_trace.enthit, "m_hOwnerEntity"));
+		printl("[Bot AI DEBUG] m_hOwner: " + NetProps.GetPropEntity(m_trace.enthit, "m_hOwner"));
+		
+		if(m_trace.enthit.GetClassname() == "player" && m_trace.enthit.GetZombieType() == 1) {
+			printl("[Bot AI DEBUG] m_duration: " + NetProps.GetPropFloat(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_nextActivationTimer.m_duration"));
+			printl("[Bot AI DEBUG] m_timestamp: " + NetProps.GetPropFloat(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_nextActivationTimer.m_timestamp"));
+			printl("[Bot AI DEBUG] m_tongueState: " + NetProps.GetPropInt(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_tongueState"));
+			printl("[Bot AI DEBUG] m_tongueGrabStartingHealth: " + NetProps.GetPropInt(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_tongueGrabStartingHealth"));
+			printl("[Bot AI DEBUG] Time(): " + Time());
+		}
+
+		printl("[Bot AI DEBUG] Flags: " + NetProps.GetPropInt(m_trace.enthit, "m_spawnflags"));
 		if("GetSequenceName" in m_trace.enthit) {
 			local sequenceName = m_trace.enthit.GetSequenceName(m_trace.enthit.GetSequence()).tolower();
 			printl("[Bot AI DEBUG] ActionState: " + m_trace.enthit.GetSequence() + " " + sequenceName);
@@ -1784,17 +1972,28 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 		printl("[Bot AI DEBUG] Position: " + m_trace.enthit.GetOrigin());
 		printl("[Bot AI DEBUG] LocalVelocity: " + m_trace.enthit.GetLocalVelocity());
 		printl("[Bot AI DEBUG] Velocity: " + m_trace.enthit.GetVelocity());
+		printl("[Bot AI DEBUG] m_vecBaseVelocity: " + NetProps.GetPropVector(m_trace.enthit, "m_vecBaseVelocity"));
 		printl("[Bot AI DEBUG] m_usable: " + NetProps.GetPropInt(m_trace.enthit, "m_usable"));
 		local glowEntity = NetProps.GetPropEntity(m_trace.enthit, "m_glowEntity");
 		if(glowEntity)
 		printl("[Bot AI DEBUG] m_glowEntity: " + glowEntity.GetClassname() + "[" + glowEntity.GetEntityIndex() + "]" + " glow: " + NetProps.GetPropInt(glowEntity, "m_Glow.m_iGlowType") + " color: " + NetProps.GetPropInt(glowEntity, "m_Glow.m_glowColorOverride"));
 		
 		printl("[Bot AI DEBUG] Target: " + BotAI.GetTarget(m_trace.enthit));
-		
+		if(BotAI.IsEntitySurvivor(BotAI.GetTarget(m_trace.enthit))) {
+			printl("[Bot AI DEBUG] me: " + BotAI.getPlayerBaseName(m_trace.enthit));
+			printl("[Bot AI DEBUG] target: " + BotAI.getPlayerBaseName(BotAI.GetTarget(m_trace.enthit)));
+		}
+		if(m_trace.enthit in BotAI.botAim) {
+			printl("[Bot AI DEBUG] BotAI.botAim: " + BotAI.botAim[m_trace.enthit]);
+			printl("[Bot AI DEBUG] BotAI.botAim valid: " + BotAI.IsEntityValid(BotAI.botAim[m_trace.enthit]));
+			if(BotAI.IsEntityValid(BotAI.botAim[m_trace.enthit])) {
+				printl("[Bot AI DEBUG] BotAI.botAim classname: " + BotAI.botAim[m_trace.enthit].GetClassname());
+				printl("[Bot AI DEBUG] BotAI.botAim alive: " + BotAI.IsAlive(BotAI.botAim[m_trace.enthit]));
+			}
+		}
 		if("EyePosition" in m_trace.enthit)
 			printl("[Bot AI DEBUG] Eye: " + m_trace.enthit.EyePosition());
-		if(m_trace.enthit.GetClassname() == "weapon_spawn")
-		{
+		if(m_trace.enthit.GetClassname() == "weapon_spawn") {
 			printl("[Bot AI DEBUG] WeaponID " + NetProps.GetPropInt(m_trace.enthit, "m_weaponID"));
 		}
 		
@@ -1814,30 +2013,6 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 	}
 	
 	return m_trace.enthit;
-}
-
-function BotAI::AttractVec(player, vec, speed)
-{
-	if(BotAI.IsEntityValid(player) && vec != null)
-	{
-		local throwVec = Vector(vec.x - player.GetOrigin().x, vec.y - player.GetOrigin().y, vec.z - player.GetOrigin().z);
-		if(throwVec != null)
-			player.ApplyAbsVelocityImpulse(Vector(throwVec.x * speed, throwVec.y * speed, 0));
-	}
-}
-
-function BotAI::AvoidVec(player, vec, speed)
-{
-	if(BotAI.IsEntityValid(player) && vec != null)
-	{
-		local throwVec = Vector(player.GetOrigin().x - vec.x, player.GetOrigin().y - vec.y, player.GetOrigin().z - vec.z);
-		if(throwVec != null)
-		{
-			if(!BotAI.IsOnGround(player))
-				speed = speed * 0.1;
-			player.ApplyAbsVelocityImpulse(Vector(throwVec.x * speed * 1.75, throwVec.y * speed, 0));
-		}
-	}
 }
 
 ::BotAI.GetEntitySpeedVector <- function(entity) {
@@ -1946,11 +2121,15 @@ function BotAI::xyDotProduct(v1, v2)
 ::BotAI.rotateVector <- function(vector, angle){
 	if(!validVector(vector)) return Vector(0, 0, 0);
 	
+	/*
 	local radians = angle * PI / 180;
 	local x = vector.x * cos(radians) - vector.y * sin(radians);
 	local y = vector.x * sin(radians) - vector.y * cos(radians);
-
-	return Vector(x, y, vector.z);
+	*/
+	local length = vector.Length();
+	local qAngle = BotAI.CreateQAngle(vector.x, vector.y, vector.z);
+	return QAngle(qAngle.Pitch(), qAngle.Yaw() + angle, 0).Forward().Scale(length);
+	//return Vector(x, y, vector.z);
 }
 
 function BotAI::printCollision(entity){
@@ -2006,7 +2185,7 @@ function BotAI::vomitTank(entity) {
 	}
 }
 
-::BotAI.getDodgeVec <- function(player, infected, force = 220, backForce = 220, limit = 220, maxDis = 600, doubleHorizontal = true, motion = false){
+::BotAI.getDodgeVec <- function(player, infected, force = 220, backForce = 220, limit = 220, maxDis = 600, doubleHorizontal = true, motion = false) {
 	BotAI.debugCall("getDodgeVec");
 	if(!BotAI.IsPlayerEntityValid(player)){
 		printl("[Bot AI] getDodgeVec function use for player entity.");
@@ -2035,12 +2214,11 @@ function BotAI::vomitTank(entity) {
 		backForce *= 0.7;
 	}
 	
-	if(BotAI.getIsMelee(player) && (!BotAI.IsEntitySI(infected) || infected.GetZombieType() != 8)){
+	if(BotAI.getIsMelee(player) && (!BotAI.IsEntitySI(infected) || infected.GetZombieType() != 8)) {
 		if(BotAI.IsTargetStaggering(infected) || (BotAI.IsEntitySI(infected) && infected.IsStaggering())) {
 			local attractVec = nextInfected - nextPlayer;
 			return BotAI.fakeTwoD(BotAI.normalize(attractVec).Scale(limit));
-		}
-		else if(BotAI.IsLivingEntity(infected))
+		} else if(BotAI.IsLivingEntity(infected))
 			backForce *= -1;
 	}
 	
@@ -2074,10 +2252,12 @@ function BotAI::vomitTank(entity) {
 	local obstacleTest = {};
 	local obstacleVec = Vector(0, 0, 0);
 	local playerEyeVec = BotAI.normalize(BotAI.fakeTwoD(player.EyeAngles().Forward()));
+
 	for(local i = 0; i < 8; ++i) {
 		local angleVec = BotAI.rotateVector(playerEyeVec, i * 45);
-		if(BotAI.GetDistanceToWall(player, angleVec) <= 75)
-			obstacleTest[obstacleTest.len()] <- angleVec.Scale(-1);
+		if(BotAI.GetDistanceToWall(player, angleVec) <= 75){
+			obstacleTest[obstacleTest.len()] <- angleVec.Scale(-1*force);
+		}
 	}
 	
 	foreach(vector in obstacleTest)
@@ -2100,6 +2280,20 @@ function BotAI::vomitTank(entity) {
 
 		horizontalVector = horizontalVector.Scale(0.5) + horizontalVector_2.Scale(0.5);
 	}
+
+	if(BotAI.isEdge(player, horizontalVector)) {
+		horizontalVector = horizontalVector.Scale(-1);
+		if(BotAI.isEdge(player, horizontalVector)) {
+			horizontalVector = Vector(0, 0, 0);
+		}
+	}
+
+	if(BotAI.isEdge(player, verticalVector)) {
+		verticalVector = verticalVector.Scale(-1);
+		if(BotAI.isEdge(player, verticalVector)) {
+			verticalVector = Vector(0, 0, 0);
+		}
+	}
 	
 	local newVec = BotAI.fakeTwoD(horizontalVector.Scale(force) + verticalVector.Scale(backForce));
 
@@ -2116,42 +2310,7 @@ function BotAI::vomitTank(entity) {
 	if(!doubleHorizontal && obstacleVec.Length() > 0) {
 		newVec = newVec.Scale(1.5);
 	}
-	/*local living = "EyeAngles" in infected;
-	local eyeVec = Vector(0, 0, 0);
 	
-	if(BotAI.GetEntitySpeedVector(infected) > 30)
-		eyeVec = infected.GetVelocity();
-	else{
-		if(living) 
-			eyeVec = infected.EyeAngles().Forward();
-		else
-			eyeVec = player.GetOrigin() - infected.GetOrigin();
-	}
-		
-	local pointB = infected.GetCenter() + eyeVec.Scale(BotAI.distanceof(player.GetOrigin(), infected.GetOrigin()) * 0.95);
-
-	local dodge = player.GetOrigin() - pointB;
-	if(BotAI.GetDistanceToWall(player, dodge) <= 100)
-		dodge = dodge.Scale(-1);
-	local backVec = player.GetOrigin() - infected.GetOrigin();
-	if(BotAI.GetDistanceToWall(player, backVec) <= 100)
-		backVec = BotAI.normalize(backVec).Scale(BotAI.GetDistanceToWall(player, backVec));
-	local newVec = BotAI.fakeTwoD(BotAI.normalize(dodge).Scale(force) + BotAI.normalize(backVec).Scale(backForce));
-	
-	if(newVec.Length() > limit)
-		newVec = BotAI.normalize(newVec).Scale(limit);
-	*/
-	
-	if(newVec.x > 0 )
-		newVec += Vector(250, 0, 0);
-	else
-		newVec += Vector(-250, 0, 0);
-		
-	if(newVec.y > 0 )
-		newVec += Vector(0, 250, 0);
-	else
-		newVec += Vector(0, -250, 0);
-
 	return newVec;
 }
 
@@ -2162,6 +2321,8 @@ function BotAI::botDeath(bot, pos = null) {
 	infoTarget = null;
 	while(infoTarget = Entities.FindByName(infoTarget, "botai_navigator_timer_" + bot.GetEntityIndex()))
         infoTarget.Kill();
+	if(bot in BotAI.playerNavigator)
+		delete BotAI.playerNavigator[bot];
 	if(bot in BotAI.BotLinkGasCan) {
 		DoEntFire("!self", "ClearParent", "", 0, null, BotAI.BotLinkGasCan[bot]);
 		if(BotAI.validVector(pos))
@@ -2191,23 +2352,41 @@ function BotAI::botDeath(bot, pos = null) {
 	}
 }
 
-function BotAI::GetDistanceToWall(entity, vec)
-{
+function BotAI::GetDistanceToWall(entity, vec) {
 	if (!BotAI.IsEntityValid(entity)) return 0.0;
-	
 	local startPt = entity.GetOrigin();
 	if("EyePosition" in entity)
 		startPt = entity.EyePosition();
 	
-	local endPt = startPt + BotAI.normalize(vec).Scale(99999);
+	local endPt = startPt + BotAI.normalize(vec).Scale(200);
 	
 	local m_trace = { start = startPt, end = endPt, ignore = entity, mask = MASK_UNTHROUGHABLE };
 	TraceLine(m_trace);
 	
-	if (!m_trace.hit || BotAI.IsLivingEntity(m_trace.enthit))
-		return 99999;
+	if (!m_trace.hit)
+		return 200;
 	
 	return BotAI.CalculateDistance(startPt, m_trace.pos);
+}
+
+function BotAI::isEdge(entity, vec) {
+	if (!BotAI.IsEntityValid(entity)) return 0.0;
+	local startPt = entity.GetOrigin();
+	if("GetCenter" in entity)
+		startPt = entity.GetCenter();
+
+	vec = BotAI.normalize(vec).Scale(150);
+	startPt += vec;
+
+	local endPt = startPt + Vector(0, 0, -200);
+	
+	local m_trace = { start = startPt, end = endPt, ignore = entity, mask = MASK_UNTHROUGHABLE };
+	TraceLine(m_trace);
+
+	if (!m_trace.hit)
+		return true;
+
+	return false;
 }
 
 function BotAI::IsHumanSpectating(entity) {
@@ -2227,8 +2406,7 @@ function BotAI::isVomited(entity) {
 	return true;
 }
 
-function BotAI::vomitBomb(vomitjar)
-{
+function BotAI::vomitBomb(vomitjar) {
 	local angvec = Vector( 0, 0, 0 );
 	local infectedX =
 	{
@@ -2415,7 +2593,7 @@ function BotAI::SetTarget(_ent, _target) {
 	if(_ent.GetClassname() == "infected" || _ent.GetClassname() == "witch")
 		NetProps.SetPropEntity(_ent, "m_clientLookatTarget", _target);
  
-	if(!IsPlayerABot(_ent) || _ent.GetClassname() != "player")
+	if(_ent.GetClassname() == "player" && !IsPlayerABot(_ent))
 		return;
 
 	BotAI.hookViewEntity(_ent, _target);
@@ -2434,9 +2612,21 @@ function BotAI::IsTarget(_ent, target)
 	return false;
 }
 
-function BotAI::GetTarget(_ent)
-{
+function BotAI::getBotLookAt(_ent) {
+	if(_ent in BotAI.botLookAt)
+		return BotAI.botLookAt[_ent];
+	return null;
+}
+
+function BotAI::GetTarget(_ent) {
 	if(!BotAI.IsEntityValid(_ent)) return;
+
+	if(_ent in BotAI.botLookAt && BotAI.IsAlive(BotAI.botLookAt[_ent]))
+		return BotAI.botLookAt[_ent];
+
+	if(_ent in BotAI.botAim && BotAI.IsAlive(BotAI.botAim[_ent]))
+		return BotAI.botAim[_ent];
+
 	if(BotAI.IsPlayerEntityValid(_ent))
 		return NetProps.GetPropEntity(_ent, "m_lookatPlayer");
 		
@@ -2460,6 +2650,37 @@ function BotAI::GetTarget(_ent)
 
 ::BotAI.IsInfectedBeShoved <- function(infected) {
 	return BotAI.IsEntityValid(infected) && BotAI.IsAlive(infected) && infected.GetClassname() == "infected" && infected.GetSequence() >= 120;
+}
+
+function BotAI::shoveCommon(infected) {
+	if(!BotAI.IsAlive(infected)) return;
+	if(infected.GetSequence() >= 122 && infected.GetSequence() <= 134)
+		infected.ResetSequence(infected.GetSequence());
+	else {
+		local sequences = [
+			122
+			123
+			124
+			125
+			126
+			127
+			128
+			129
+			130
+			131
+			132
+			133
+			134
+		];
+
+		infected.SetSequence(sequences[RandomInt(0, 12)]);
+	}
+}
+
+function BotAI::isPlayerFall(player) {
+	if(!BotAI.IsEntityValid(player) || !BotAI.IsAlive(player))
+		return false;
+	return player.IsDominatedBySpecialInfected() || player.IsStaggering() || player.IsIncapacitated() || player.IsHangingFromLedge();
 }
 
 ::BotAI.IsPlayerClimb <- function(player) {
@@ -2499,8 +2720,6 @@ function BotAI::BotAttack(boto, otherEntity) {
 	if(BotAI.HasItem(boto, BotAI.BotsNeedToFind) && BotAI.UseTargetOri != null && BotAI.distanceof(boto.GetOrigin(), BotAI.UseTargetOri) < 150 && otherEntity.GetClassname() != "player")
 		return;
 
-	//if(BotAI.IsBotGasFinding(boto))
-		//BotAI.BotReset(boto);
 	BotAI.SetTarget(boto, otherEntity);
 	return true;
 }
@@ -2531,6 +2750,20 @@ function BotAI::getMoveType(player) {
 	return NetProps.GetPropInt(player, "movetype");
 }
 
+function BotAI::areaAdjacent(area, i) {
+	local adjacentAreas = {};
+	area.GetAdjacentAreas(i, adjacentAreas);
+	//BotAI.areaCache[key] <- adjacentAreas;
+	return adjacentAreas;
+
+	local key = area.GetID().tostring() + ":" + i.tostring();
+	if(key in BotAI.areaCache) {
+		return BotAI.areaCache[key];
+	} else {
+		
+	}
+}
+
 function BotAI::isEntityEqual(entity, _entity) {
 	if(entity == _entity) return true;
 
@@ -2542,26 +2775,26 @@ function BotAI::isEntityEqual(entity, _entity) {
 	return false;
 }
 
-function BotAI::botStayPos(player, pos, id, priority = 4, stayTime = 3) {
+function BotAI::botStayPos(player, pos, id, priority = 4, stayTime = 3, distance = 100) {
 	local littleBot = player;
+	local dis = distance;
 	local idStay = id + "Stay#";
+	local stay = stayTime;
 	
 	local function changeAndStay() {
 		if(!BotAI.IsAlive(littleBot)) return true;
 		if(typeof pos != "Vector" && !BotAI.IsAlive(pos)) return true;
 		local navigator = BotAI.getNavigator(littleBot);
-		if(!navigator.isMoving(id))
-			return true;
 		local position = Vector(0, 0, 0);
 		if(typeof pos == "Vector")
 			position = pos;
 		else
 			position = pos.GetOrigin();
-		if(BotAI.distanceof(position, littleBot.GetOrigin()) <= 100) {
+		if(BotAI.distanceof(position, littleBot.GetOrigin()) <= dis) {
 			navigator.clearPath(id);
 			local timeGet = Time();
 			local function tryStay() {
-				if(Time() - timeGet > stayTime)
+				if(Time() - timeGet > stay)
 					return true;
 				return false;
 			}
@@ -2569,6 +2802,7 @@ function BotAI::botStayPos(player, pos, id, priority = 4, stayTime = 3) {
 		}
 		return false;
 	}
+	
 	if(BotAI.botRunPos(player, pos, id, priority, changeAndStay)) {
 		local position = Vector(0, 0, 0);
 		if(typeof pos == "Vector")
@@ -2585,9 +2819,10 @@ function BotAI::botStayPos(player, pos, id, priority = 4, stayTime = 3) {
 	return false;
 }
 
-function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.trueDude) {
-	if(!IsPlayerABot(player))
+function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.trueDude, distance = 5000, buildTest = false) {
+	if(!buildTest && !IsPlayerABot(player))
 		return false;
+		
 	if(BotAI.IsPlayerClimb(player) || BotAI.IsBotHealing(player))
 		return false;
 
@@ -2596,6 +2831,12 @@ function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.tru
 		if(idx == id && BotAI.isEntityEqual(path.pos, pos)) {
 			navigator.run(id);
 			return true;
+		}
+	}
+
+	foreach(idx, path in navigator.seachingPath) {
+		if(idx == id && BotAI.isEntityEqual(path.dataGoal, pos)) {
+			return false;
 		}
 	}
 
@@ -2609,7 +2850,7 @@ function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.tru
 		discardFunc = change;
 	}
 
-	if(navigator.buildPath(pos, id, priority, discardFunc)) {
+	if(navigator.buildPath(pos, id, priority, discardFunc, null, false, distance)) {
 		navigator.run(id);
 		return true;
 	}

@@ -11,8 +11,17 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 	playerTick = {};
 
 	function singleUpdateChecker(player) {
-		if(!player.IsDead())
-		{
+		if(!player.IsDead()) {
+			local startPt = player.EyePosition();
+			local endPt = startPt + player.EyeAngles().Forward().Scale(2000);
+			local m_trace = { start = startPt, end = endPt, ignore = player, mask = g_MapScript.TRACE_MASK_SHOT };
+			TraceLine(m_trace);
+
+			if (m_trace.hit && BotAI.IsAlive(m_trace.enthit)) {
+				BotAI.botLookAt[player] <- m_trace.enthit;
+			} else
+				BotAI.botLookAt[player] <- null;
+
 			local wep = player.GetActiveWeapon();
 			local ename = " ";
 
@@ -23,8 +32,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				if(!BotAI.HasFlag(player, FL_FROZEN)) {
 					BotAI.ChangeItem(player, 1);
 					BotAI.DisableButton(player, 1, 0.5);
-				}
-				else {
+				} else {
 					NetProps.SetPropFloat(wep, "m_flNextPrimaryAttack", Time() - 1);
 					BotAI.ForceButton(player, 1 , 0.5);
 				}
@@ -49,12 +57,6 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			else
 				BotAI.setSmokerTarget(player, null);
 
-			local startPt = player.EyePosition();
-			local endPt = startPt + player.EyeAngles().Forward().Scale(999999);
-	
-			local m_trace = { start = startPt, end = endPt, ignore = player, mask = g_MapScript.TRACE_MASK_SHOT };
-			TraceLine(m_trace);
-	
 			if (!m_trace.hit || m_trace.enthit == null || m_trace.enthit == player) {
 				BotAI.UnforceButton(player, 1 );
 				BotAI.UnforceButton(player, 2048 );
@@ -97,7 +99,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			local isTank = targetName == "player" && target.GetZombieType() == 8;
 
 			if(targetName == "player" && target.IsSurvivor() && target != player) {
-				if((target.IsIncapacitated() || target.IsHangingFromLedge()) && !target.IsGettingUp()) {
+				if((target.IsIncapacitated() || target.IsHangingFromLedge()) && !target.IsGettingUp() && !target.IsDominatedBySpecialInfected()) {
 					DoEntFire("!self", "Use", "", 0, player, target);
 					BotAI.ForceButton(player, 32 , 5);
 				}
@@ -143,20 +145,14 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				modelName == "models/weapons/melee/v_katana.mdl" || modelName == "models/weapons/melee/v_fireaxe.mdl" ||
 				modelName == "models/weapons/melee/v_crowbar.mdl" || modelName == "models/v_models/v_pitchfork.mdl");
 			if(isMelee || BotAI.IsSurvivorTrapped(player)) {
-				/*
-				if(targetName == "infected")
-					shotDis = 105;
-				else
-				*/
-					shotDis = 120;
+				shotDis = 120;
 			}
 
 			if(isKnife && targetName == "player" && target.GetZombieType() == 1 && target.GetEntityIndex() in BotAI.smokerTongue){
 				local tongueLength = BotAI.tongueSpeed / 9 * BotAI.smokerTongue[target.GetEntityIndex()];
 				local hitFactor = 420;
 				local tongueRange = BotAI.tongueRange;
-				//local additionFactor = distance / tongueRange * 50;
-				//hitFactor += additionFactor;
+
 				if(distance - tongueLength <= hitFactor){
 					BotAI.setSmokerTarget(player, target);
 					BotAI.setBotTarget(player, null);
@@ -232,9 +228,10 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				Shot = false;
 
 			if(Shot && !HasPlayer) {
-				if(BotAI.IsEntityValid(wep) && NetProps.GetPropInt(wep, "m_iClip1") <= 0 && !isMelee)
-					BotAI.ForceButton(player, 8192 );
-				else
+				if(BotAI.IsEntityValid(wep) && NetProps.GetPropInt(wep, "m_iClip1") <= 0 && !isMelee && player.GetContext("BOTAI_RELOAD") == null) {
+					BotAI.ForceButton(player, 8192, 0.5);
+					player.SetContext("BOTAI_RELOAD", "reload", 3);
+				} else
 					BotAI.UnforceButton(player, 8192 );
 			}
 
@@ -247,8 +244,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				}
 				else
 					BotAI.ForceButton(player, 1 );
-			}
-			else
+			} else
 				BotAI.UnforceButton(player, 1 );
 				
 			updating[player] <- false;

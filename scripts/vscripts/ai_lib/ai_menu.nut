@@ -44,8 +44,7 @@ function HoloMenu::update(player) {
             if((player.GetButtonMask() & (menu.button)) > 0) {
                 HoloMenu.press(player, menu.button);
                 menu.tick(HoloMenu.getPressingTick(player, menu.button), player);
-            }
-            else {
+            } else {
                 if(HoloMenu.getPressingTick(player, menu.button) > 0)
                     menu.press(player);
                 HoloMenu.unPress(player, menu.button);
@@ -60,7 +59,7 @@ function HoloMenu::update(player) {
 
 function HoloMenu::TickMenu() {
     foreach(player in BotAI.SurvivorHumanList) {
-        HoloMenu.update(player);
+            HoloMenu.update(player);
     }
     return 0.01;
 }
@@ -131,23 +130,31 @@ class ::HoloMenu.Menu {
         }
     }
 
-    function show(player) {
-        display[player] <- true;
-        local _icons = [];
-        local forward = player.EyeAngles().Forward();
-        local center = player.EyePosition() + forward.Scale(30);
-        menuCenter[player] <- center;
+    function getFilteredFunction(player) {
         local functionTable = functions;
         if(menuName in HoloMenu.iconHook) {
             functionTable = HoloMenu.iconHook[menuName](player, functions);
         }
+        return functionTable;
+    }
+
+    function show(player) {
+        if(!Director.IsSinglePlayerGame() && GetListenServerHost() != player) {
+            BotAI.SendPlayer(player, "botai_no_holomenu");
+        }
+        display[player] <- true;
+        local _icons = [];
+        local forward = player.EyeAngles().Forward();
+        local center = player.EyePosition() + forward.Scale(60);
+        menuCenter[player] <- center;
+        local functionTable = getFilteredFunction(player);
         local size = functionTable.len();
         local angleValue = 360.0 / size;
         local count = 0;
         local yawAngle = player.EyeAngles().Yaw() + 90;
-        local scale = size;
-        if(scale < 5)
-            scale = 5;
+        local scale = size * 1.2;
+        if(scale < 8)
+            scale = 8;
         //local offset = (player.EyePosition() + forward) - center;
         foreach(name, func in functionTable) {
             local pos = center + QAngle(-90 - angleValue * count, yawAngle).Forward().Scale(scale);
@@ -194,13 +201,13 @@ class ::HoloMenu.Menu {
         local title = I18n.getTranslationKeyByLang(BotAI.language, menuName);
         local center = null;
         foreach(icon in icons) {
-            local scale = 1.5;
+            local scale = 2.5;
             local rgb = Vector(0, 150, 0);
             local string = I18n.getTranslationKeyByLang(BotAI.language, icon.name);
             local leftFactor = string.len() / 7;
             if(icon == impactIcon) {
                 rgb = Vector(100, 255, 0);
-                scale = 2;
+                scale = 3.2;
             }
                 
             DebugDrawBoxDirection(icon.pos, Vector(-scale, -scale, -scale), Vector(scale, scale, scale), icon.forward, rgb, 1.0, 0.1);
@@ -230,5 +237,88 @@ class ::HoloMenu.Icon {
 
     function _typeof() {
 		return "holoIcon";
+	}
+}
+
+local _vguiBaseRes = { width = 640, height = 480 };
+
+/*
+remove title
+*/
+class ::HoloMenu.KeyBindMenu extends ::VSLib.HUD.Menu {
+    _skipOptions = 0;
+	///////////////////////////////////////////////////////////////////
+	// Meta stuff
+	///////////////////////////////////////////////////////////////////
+	constructor(formatStr = "[ {name} ]\n\n{options}", skipOptions = 0, optionFormatStr = "{num}. {option}", highlightStrPre = "", highlightStrPost = "", sticky = false) {
+		SetFormatString(formatStr);
+		_oformat = optionFormatStr;
+		_hpre = highlightStrPre;
+        _skipOptions = skipOptions;
+		_hpost = highlightStrPost;
+		_title = "";
+		_options = {};
+		_numop = 0;
+		_curSel = 0;
+		_sticky = false; // #shotgunefx
+		
+		::VSLib.Timers.RemoveTimer(_optimer);
+		_optimer = -1;
+        _manual = true
+	}
+
+	function GetString() {
+		if (_player == null || _numop <= 0)
+			return "";
+		
+		// Build the options list
+		local optionsList = "";
+        for(local i = 0; i < _skipOptions; ++i) {
+            optionsList += "\n";
+        }
+        
+		foreach (idx, row in _options)
+		{
+			local disp = "";
+			if (idx == _curSel)
+				disp += _hpre;
+			disp += _oformat;
+            if(row.text.find("emp_") == null) {
+                local num = idx+_skipOptions;
+                if(num == 10)
+                    num = 0;
+                disp = ::VSLib.Utils.StringReplace(disp, "{num}", num.tostring());
+                disp = ::VSLib.Utils.StringReplace(disp, "{option}", row.text);
+            } else {
+                disp = ::VSLib.Utils.StringReplace(disp, "{num}.", "");
+                disp = ::VSLib.Utils.StringReplace(disp, "{option}", "");
+            }
+			
+			disp = ParseString(disp);
+			if (idx == _curSel)
+				disp += _hpost;
+			optionsList += disp + "\n";
+		}
+		
+		// Build return string
+		if (_modded || _dynrefcount > 0)
+		{
+			_modded = false;
+			_cachestr = _formatstr;
+			_cachestr = ParseString(_cachestr);
+		}
+        local temp = _cachestr;
+		temp = ::VSLib.Utils.StringReplace(temp, "{name}", _player.GetName());
+		temp = ::VSLib.Utils.StringReplace(temp, "{title}", _title);
+		temp = ::VSLib.Utils.StringReplace(temp, "{options}", optionsList);
+		
+		return temp;
+    }
+
+    function ResizeHeightByLines() {
+		local lines = split(GetString(), "\n").len() + 1;
+		local baseh = _vguiBaseRes.height.tofloat();
+		
+		SetHeight( ((28 * lines)/(480/baseh))/baseh);
 	}
 }

@@ -18,8 +18,7 @@ class ::AITaskHitInfected extends AITaskSingle
 	infectedList = {}
 	danger = {};
 	
-	function singleUpdateChecker(player)
-	{
+	function singleUpdateChecker(player) {
 		danger[player] <- false;
 		
 		if(player in BotAI.targetLocked && BotAI.IsAlive(BotAI.targetLocked[player])) {
@@ -52,7 +51,7 @@ class ::AITaskHitInfected extends AITaskSingle
 		dist = 700;
 		local witch = null;
 		foreach(infected in BotAI.WitchList) {
-			if (BotAI.IsAlive(infected) && (BotAI.witchKilling(infected) || BotAI.witchRunning(infected) && !BotAI.witchRetreat(infected)) && (BotAI.CanSeeOtherEntityWithoutLocation(player, infected, 0, true))) {
+			if (BotAI.IsAlive(infected) && (BotAI.witchKilling(infected) || (BotAI.witchRunning(infected) && !BotAI.witchRetreat(infected))) && BotAI.CanSeeOtherEntityWithoutLocation(player, infected, 0, true)) {
 				if (BotAI.distanceof(player.GetOrigin(), infected.GetOrigin()) < dist) {
 					dist = BotAI.distanceof(player.GetOrigin(), infected.GetOrigin());
 					witch = infected;
@@ -84,38 +83,22 @@ class ::AITaskHitInfected extends AITaskSingle
 			return true;
 		}
 
-		local gasFinding = BotAI.getBotGasFinding(player);
 		local selected = null;
 		if(player in BotAI.dangerInfected && playerFallingDown == null)
 			selected = BotAI.dangerInfected[player];
 		
-		/*
-		local playerReviving = BotAI.IsPlayerReviving(player);
-
-		if(!playerReviving && !BotAI.IsAlive(selected) && playerFallingDown == null) {
-			local closestCom = null;
-			local distance = 1200;
-			foreach(sur in BotAI.SurvivorList) {
-				local othersTarget = BotAI.GetTarget(sur);
-				
-				if(BotAI.IsAlive(othersTarget) && BotAI.isEntityInfected(othersTarget) && !BotAI.IsEntitySI(BotAI.GetTarget(othersTarget)) && BotAI.CanSeeOtherEntityWithoutLocation(player, othersTarget)) {
-					local tDis = BotAI.distanceof(othersTarget.GetOrigin(), player.GetOrigin());
-					if(closestCom == null || tDis < distance) {
-						closestCom = othersTarget;
-						distance = tDis;
-					}
-				}
-			}
-			if(closestCom != null)
-				selected = closestCom;
-		}
-		*/
-		dist = 1000;
+		dist = BotAI.tongueRange*1.2;
+		if(dist < 600)
+			dist = 600;
 		local entS = null;
 		foreach(infected in BotAI.SpecialList) {
 			if (BotAI.IsAlive(infected) && !infected.IsGhost() && !BotAI.IsEntitySI(BotAI.GetTarget(infected)) && infected.GetZombieType() != 8 && (BotAI.CanSeeOtherEntityWithoutLocation(player, infected, 0, true))) {
 				local infecDis = BotAI.nextTickDistance(player, infected, 5.0, true);
-				if (infected.GetZombieType() == 1 || infecDis < dist) {
+				local smoker = false;
+
+				if(infected.GetZombieType() == 1 && NetProps.GetPropFloat(NetProps.GetPropEntity(infected, "m_customAbility"), "m_nextActivationTimer.m_timestamp") <= Time())
+					smoker = true;
+				if (infecDis < dist || BotAI.IsSurvivorTrapped(BotAI.GetTarget(infected)) || smoker) {
 					dist = infecDis;
 					entS = infected;
 				}
@@ -136,8 +119,7 @@ class ::AITaskHitInfected extends AITaskSingle
 				if(siDistance < 90)
 					danger[player] = true;
 				finalEntity = entS;
-			}
-			else {
+			} else {
 				finalEntity = selected;
 				if(coDistance < 90)
 					danger[player] = true;
@@ -171,19 +153,14 @@ class ::AITaskHitInfected extends AITaskSingle
 	function playerUpdate(player) {
 		if(player in infectedList && infectedList[player] != null) {
 			local val = infectedList[player];
-			if(BotAI.IsAlive(val)) {
+			if(BotAI.IsAlive(val) && BotAI.CanSeeOtherEntityWithoutLocation(player, val, 0)) {
 				if(danger[player]) {
-					//if(BotAI.IsBotGasFinding(player))
-						//BotAI.BotReset(player);
-					//BotAI.lookAtEntity(player, val, true, 0.3);
 					BotAI.setBotShoveTarget(player, val);
-					//BotAI.dodgeEntity(player, val);
 				}
 				BotAI.BotAttack(player, val);
 				if(BotAI.IsEntityValid(val) && !IsPlayerABot(player))
 					BotAI.lookAtEntity(player, val);
-			}
-			else
+			} else
 				infectedList[player] <- null;
 		}
 		

@@ -61,21 +61,19 @@ class ::AITaskDoUpgrades extends AITaskGroup
 		
 		foreach(playerB in humanPlayer)
 		{
-			if(BotAI.IsPlayerEntityValid(playerB) && BotAI.IsAlive(playerB) && !BotAI.IsBotGasFinding(player))
+			if(BotAI.IsPlayerEntityValid(playerB) && BotAI.IsAlive(playerB))
 			{
 				if(BotAI.distanceof(player.GetOrigin(), playerB.GetOrigin()) > 150)
 				{
 					local function needUse() {
-						return !BotAI.IsAlive(playerB);
+						return !BotAI.IsAlive(playerB) || (!BotAI.HasItem(player, "upgradepack_incendiary") && !BotAI.HasItem(player, "upgradepack_explosive"));
 					}
-					BotAI.botRunPos(player, playerB, "upgrade", 0, needUse);
+					BotAI.botRunPos(player, playerB, "upgrade", 0, needUse, 1000);
 					return;
 				}
 				else
 				{
 					BotAI.doAmmoUpgrades(player, true);
-					if(BotAI.IsBotGasFinding(player))
-						BotAI.BotReset(player);
 					BotAI.setBotLockTheard(player, -1);
 					return;
 				}

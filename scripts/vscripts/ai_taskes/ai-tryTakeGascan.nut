@@ -52,10 +52,9 @@ class ::AITaskTryTakeGascan extends AITaskGroup
 				}
 				DoEntFire("!self", "Use", "", 0, player, BotAI.UseTarget);
 				if(BotAI.FullPress[player] <= -5)
-					BotAI.FullPress[player] = 50;
-				BotAI.ForceButton(player, 32 , 5);
-			}
-			else {
+					BotAI.FullPress[player] = 80;
+				BotAI.ForceButton(player, 32 , 8);
+			} else {
 				player.SetOrigin(BotAI.UseTargetOri);
 				NetProps.SetPropEntity(player, "m_lookatPlayer", BotAI.UseTarget);
 				BotAI.lookAtPosition(player, BotAI.UseTarget.GetOrigin(), true);
@@ -66,8 +65,8 @@ class ::AITaskTryTakeGascan extends AITaskGroup
 				}
 				DoEntFire("!self", "Use", "", 0, player, BotAI.UseTarget);
 				if(BotAI.FullPress[player] <= -5)
-					BotAI.FullPress[player] = 50;
-				BotAI.ForceButton(player, 32 , 5);
+					BotAI.FullPress[player] = 80;
+				BotAI.ForceButton(player, 32 , 8);
 			}
 			BotAI.setBotLockTheard(player, -1);
 		} else {
