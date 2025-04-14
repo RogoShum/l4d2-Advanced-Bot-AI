@@ -1839,10 +1839,10 @@ function VSLib::Entity::PrecacheModel(mdl)
 	if (!IsEntityValid())
 	{
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
-		return;
+		return -1;
 	}
 	
-	_ent.PrecacheModel(mdl);
+	return _ent.PrecacheModel(mdl);
 }
 
 /**

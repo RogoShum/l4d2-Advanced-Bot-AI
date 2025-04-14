@@ -1027,17 +1027,27 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	if ( Director.GetMapName() == "c2m5_concert" )
 	{
 		::VSLib.EasyLogic.RescueTrigger <- ::VSLib.EasyLogic.Objects.AnyOfName("stadium_exit_right_escape_trigger");
-		::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnStartTouch", VSLib_EnterRescue );
-		::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnEndTouch", VSLib_LeaveRescue );
+		if ( ::VSLib.EasyLogic.RescueTrigger )
+		{
+			::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnStartTouch", VSLib_EnterRescue );
+			::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnEndTouch", VSLib_LeaveRescue );
+		}
 		::VSLib.EasyLogic.RescueTrigger <- ::VSLib.EasyLogic.Objects.AnyOfName("stadium_exit_leftt_escape_trigger");
-		::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnStartTouch", VSLib_EnterRescue );
-		::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnEndTouch", VSLib_LeaveRescue );
+		if ( ::VSLib.EasyLogic.RescueTrigger )
+		{
+			::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnStartTouch", VSLib_EnterRescue );
+			::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnEndTouch", VSLib_LeaveRescue );
+		}
 	}
 	else
 	{
-		::VSLib.EasyLogic.RescueTrigger <- ::VSLib.Entity( FindRescueAreaTrigger() );
-		::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnStartTouch", VSLib_EnterRescue );
-		::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnEndTouch", VSLib_LeaveRescue );
+		local rescueTrigger = FindRescueAreaTrigger();
+		if ( rescueTrigger )
+		{
+			::VSLib.EasyLogic.RescueTrigger <- ::VSLib.Entity( rescueTrigger );
+			::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnStartTouch", VSLib_EnterRescue );
+			::VSLib.EasyLogic.RescueTrigger.ConnectOutput( "OnEndTouch", VSLib_LeaveRescue );
+		}
 	}
 }
 
@@ -1221,6 +1231,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 
 ::VSLib_ConceptData <- function (query)
 {
+	if (!("VSLib" in getroottable()))
+		return false;
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnConcept)
 		func(query);
 	
@@ -1676,9 +1689,12 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	if ( !::VSLib.EasyLogic.ScriptStarted )
 		VSLibScriptStart();
 	
-	local _id = ents.entity.GetIndex();
-	if(_id in ::VSLib.EasyLogic.Cache)
-		::VSLib.EasyLogic.Cache[_id]._inSafeRoom <- false;
+	if ( ents.entity )
+	{
+		local _id = ents.entity.GetIndex();
+		if(_id in ::VSLib.EasyLogic.Cache)
+			::VSLib.EasyLogic.Cache[_id]._inSafeRoom <- false;
+	}
 	
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnLeaveSaferoom)
 		func(ents.entity, params);

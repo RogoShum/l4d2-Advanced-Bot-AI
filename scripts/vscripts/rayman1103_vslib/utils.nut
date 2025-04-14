@@ -1440,8 +1440,9 @@ function VSLib::Utils::PrecacheModel( mdl )
 	if ( !IsModelPrecached( mdl ) )
 	{
 		printf("VSLib: Precaching: %s", mdl);
-		::PrecacheModel( mdl );
+		return ::PrecacheModel( mdl );
 	}
+	return -1;
 }
 
 /**
