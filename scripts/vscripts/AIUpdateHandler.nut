@@ -9,7 +9,7 @@ if (!("VSLib" in getroottable()))
 	}
 }
 
-//if (!("BotAIHook" in getroottable())) 
+//if (!("BotAIHook" in getroottable()))
 {
 	::BotAIHook <- {}
 }
@@ -37,7 +37,7 @@ if (!("VSLib" in getroottable()))
 		taskThinkTimerTick = 0
 		disabledTask = {}
 		debugPerformance = {}
-	
+
 		debugParam1 = null
 		debugParam1_2 = 0
 		doTaskUpdate = true
@@ -64,7 +64,7 @@ if (!("VSLib" in getroottable()))
 		disableButton = {}
 		ladders = {}
 		obstacles = {}
-		
+
 		searchedEntity = {}
 		targetLocked = {}
 		somethingBad = {}
@@ -95,7 +95,7 @@ if (!("VSLib" in getroottable()))
 
 		TriggerList = {}
 		FinaleStart = false
-		
+
 		TargetFindTargetFind = {}
 
 		FullPress = {}
@@ -104,7 +104,7 @@ if (!("VSLib" in getroottable()))
 		playerFallDown = 0
 		playerDominated = 0
 		playerLive = 0
-	
+
 		LeaderSurvivorBot = null
 		SurvivorList = {}
 		SurvivorHumanList = {}
@@ -120,7 +120,7 @@ if (!("VSLib" in getroottable()))
 		pingEntity = {}
 		dangerPlace = {}
 		needOil = false
-		
+
 		BotPosition = {}
 		BotPositionCycle = 0
 		BotStuckCount = {}
@@ -138,13 +138,13 @@ if (!("VSLib" in getroottable()))
 
 		StartPos = null
 		InSafeHouse = {}
-	
+
 		PrecachedSounds = {}
 		PrecachedModels = {}
 		Events = {}
 		Chats = {}
 		Damage = {}
-	
+
 		VomitList = {}
 		continueVomit = {}
 		dontYouWannaExtinguish = {}
@@ -181,8 +181,8 @@ if (!("VSLib" in getroottable()))
 		NeedBotAlive = true
 		BackPack = true
 	}
-	
-	::BotAI.AITaskList <- 
+
+	::BotAI.AITaskList <-
 	{
 		singleTasks = {}
 		groupTasks = {}
@@ -204,18 +204,18 @@ class ::TaskPerformance
     {
         name = nameIn;
     }
-	
+
 	name = "";
 	updateTime = 0.0;
 	updateList = {}
 
 	checkTime = 0.0;
 	checkList = {}
-	
+
 	function preUpdate() {
 		updateTime = Time() - 1;
 	}
-	
+
 	function postUpdate() {
 		local duration = Time() - 1 - updateTime;
 		updateList[updateList.len()] <- duration;
@@ -225,7 +225,7 @@ class ::TaskPerformance
 	function preCheck() {
 		checkTime = Time() - 1;
 	}
-	
+
 	function postCheck() {
 		local duration = Time() - 1 - checkTime;
 		checkList[checkList.len()] <- duration;
@@ -333,7 +333,7 @@ getconsttable()["MASK_SOLID_BRUSHONLY"] <-(getconsttable()["MASK_UNTHROUGHABLE"]
 getconsttable()["MASK_UNTHROUGHABLE_WATER"] <-(getconsttable()["CONTENTS_WATER"]|getconsttable()["CONTENTS_SLIME"])
 getconsttable()["MASK_SOLID"] <-(getconsttable()["CONTENTS_SOLID"]|getconsttable()["CONTENTS_GRATE"]|getconsttable()["CONTENTS_MOVEABLE"]|getconsttable()["CONTENTS_WINDOW"])
 
-getconsttable()["FL_FROZEN"] <- (1 << 5);	
+getconsttable()["FL_FROZEN"] <- (1 << 5);
 getconsttable()["MOVETYPE_LADDER"] <- 9;
 
 getconsttable()["DMG_MELEE"] <- (1 << 21);
@@ -356,13 +356,13 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 		{
 			local sidx = idx.tostring();
 			local sval = val.tostring();
-		
+
 			local newString = sidx + "=" + sval + "\n";
 			UseTargetList += newString;
 		}
 	}
 	StringToFile("advanced bot ai/usetarget/UseTargetList.txt", UseTargetList);
-	
+
 	local UseTargetOriList = "";
 	foreach (idx, val in BotAI.UseTargetOriList)
 	{
@@ -372,13 +372,13 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 			local sval = val.tostring();
 			sval = sval.slice(1);
 			sval = BotAI.StringReplace(sval, "vector : ", "Vector");
-		
+
 			local newString = sidx + "=" + sval + "\n";
 			UseTargetOriList += newString;
 		}
 	}
 	StringToFile("advanced bot ai/usetarget/UseTargetOriList.txt", UseTargetOriList);
-	
+
 	local UseTargetVecList = "";
 	foreach (idx, val in BotAI.UseTargetVecList)
 	{
@@ -388,28 +388,28 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 			local sval = val.tostring();
 			sval = sval.slice(1);
 			sval = BotAI.StringReplace(sval, "vector : ", "Vector");
-		
+
 			local newString = sidx + "=" + sval + "\n";
 			UseTargetVecList += newString;
 		}
 	}
 	StringToFile("advanced bot ai/usetarget/UseTargetVecList.txt", UseTargetVecList);
-	
+
 	printl("[Bot AI] Save UseTarget...");
 }
 
 ::BotAI.SaveSetting <- function() {
-	local settingList = 
-	"BOT_AI_TEST_MOD = " + BotAI.BOT_AI_TEST_MOD.tostring() + 
-	"\nBotDebugMode = " + BotAI.BotDebugMode.tostring() + 
-	"\nBotFullPower = " + BotAI.BotFullPower.tostring() + 
-	"\nNeedGasFinding = " + BotAI.NeedGasFinding.tostring() + 
-	"\nNeedThrowGrenade = " + BotAI.NeedThrowGrenade.tostring() + 
-	"\nImmunity = " + BotAI.Immunity.tostring() + "\nPathFinding = " + 
-	BotAI.PathFinding.tostring() + "\nUnstick = " + BotAI.Unstick.tostring() + 
-	"\nVersus_Mode = " + BotAI.Versus_Mode.tostring() + 
-	"\nDefibrillator = " + BotAI.Defibrillator.tostring() + 
-	"\nServer_Mode = " + BotAI.Server_Mode.tostring() + 
+	local settingList =
+	"BOT_AI_TEST_MOD = " + BotAI.BOT_AI_TEST_MOD.tostring() +
+	"\nBotDebugMode = " + BotAI.BotDebugMode.tostring() +
+	"\nBotFullPower = " + BotAI.BotFullPower.tostring() +
+	"\nNeedGasFinding = " + BotAI.NeedGasFinding.tostring() +
+	"\nNeedThrowGrenade = " + BotAI.NeedThrowGrenade.tostring() +
+	"\nImmunity = " + BotAI.Immunity.tostring() + "\nPathFinding = " +
+	BotAI.PathFinding.tostring() + "\nUnstick = " + BotAI.Unstick.tostring() +
+	"\nVersus_Mode = " + BotAI.Versus_Mode.tostring() +
+	"\nDefibrillator = " + BotAI.Defibrillator.tostring() +
+	"\nServer_Mode = " + BotAI.Server_Mode.tostring() +
 	"\nMelee = " + BotAI.Melee.tostring() +
 	"\nNotice_Text = " + BotAI.Notice_Text.tostring() +
 	"\nNeedBotAlive = " + BotAI.NeedBotAlive.tostring() +
@@ -423,7 +423,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 {
 	local fileContents = FileToString("advanced bot ai/settings.txt");
 	local settings = split(fileContents, "\r\n");
-	
+
 	foreach (setting in settings)
 	{
 		if ( setting.find("//") != null )
@@ -438,7 +438,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 			compiledscript();
 		}
 	}
-	
+
 	local admins_fileContents = FileToString("advanced bot ai/admins.txt");
 	local admins = split(admins_fileContents, "\r\n");
 
@@ -454,7 +454,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 		if ( admin != "" )
 			BotAI.ABA_Admins[admin] <- true;
 	}
-	
+
 	BotAI.LoadUseTargets();
 }
 
@@ -465,7 +465,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 	if(fileContents != null)
 	{
 		local usetargets = split(fileContents, "\r\n");
-	
+
 		foreach (usetarget in usetargets)
 		{
 			if ( usetarget.find("//") != null )
@@ -473,7 +473,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 				usetarget = BotAI.StringReplace(usetarget, "//" + ".*", "");
 				usetarget = rstrip(usetarget);
 			}
-		
+
 			if ( usetarget != "" && usetarget.find("=") != null)
 			{
 				local index = usetarget.find("=");
@@ -483,13 +483,13 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 			}
 		}
 	}
-	
-	
+
+
 	fileContents = FileToString("advanced bot ai/usetarget/UseTargetOriList.txt");
 	if(fileContents != null)
 	{
 		local usetargetsOri = split(fileContents, "\r\n");
-	
+
 	foreach (usetarget in usetargetsOri)
 	{
 		if ( usetarget.find("//") != null )
@@ -497,7 +497,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 			usetarget = BotAI.StringReplace(usetarget, "//" + ".*", "");
 			usetarget = rstrip(usetarget);
 		}
-		
+
 		if ( usetarget != "" && usetarget.find("=") != null)
 		{
 			local index = usetarget.find("=");
@@ -511,7 +511,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 	if(fileContents != null)
 	{
 	local usetargetsVec = split(fileContents, "\r\n");
-	
+
 	foreach (usetarget in usetargetsVec)
 	{
 		if ( usetarget.find("//") != null )
@@ -519,7 +519,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 			usetarget = BotAI.StringReplace(usetarget, "//" + ".*", "");
 			usetarget = rstrip(usetarget);
 		}
-		
+
 		if ( usetarget != "" && usetarget.find("=") != null)
 		{
 			local index = usetarget.find("=");
@@ -538,7 +538,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 
 	if (Director.IsSinglePlayerGame() || GetListenServerHost() == player || !BotAI.Server_Mode)
 		return true;
-	
+
 	local steamid = player.GetNetworkIDString();
 
 	if (!steamid) return false;
@@ -573,7 +573,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 	local map = BotAI.getBotPropertyMap(player);
 	if(map != null)
 		return map.target;
-		
+
 	return null;
 }
 
@@ -676,7 +676,7 @@ class ::BotProperty
 	constructor()
     {
     }
-	
+
 	target = null;
 	shove_target = null;
 	hand_held = null;
@@ -693,11 +693,11 @@ class ::BotLinkedGas
         bot = botIn;
         gascan = gascanIn;
     }
-	
+
 	bot = null;
 	gascan = null;
 	gascanDead = false;
-	
+
 	function GetBot()
 	{
 		return bot;
@@ -726,15 +726,15 @@ class ::CarAvoid
     {
         car = carIn;
     }
-	
+
 	car = null;
 	time = 50;
-	
+
 	function GetTime()
 	{
 		return time;
 	}
-	
+
 	function SetTime(timeIn)
 	{
 		time = timeIn;
@@ -745,16 +745,16 @@ function BotAI::addTask(name, task) {
 	task.name = name;
 	if(task.fillTick)
 		BotAI.task_fill_tick[name] <- task;
-		
+
 	if(task.single) {
 		BotAI.AITaskList.singleTasks[name] <- task;
-		
+
 		if(!(task.getOrder() in BotAI.TaskOrderListSingle))
 			BotAI.TaskOrderListSingle[BotAI.TaskOrderListSingle.len()] <- task.getOrder();
 	}
 	else {
 		BotAI.AITaskList.groupTasks[name] <- task;
-		
+
 		if(!(task.getOrder() in BotAI.TaskOrderListGroup))
 			BotAI.TaskOrderListGroup[BotAI.TaskOrderListGroup.len()] <- task.getOrder();
 	}
@@ -775,7 +775,7 @@ function BotAI::updateAITasks() {
 function BotAI::updateSingleAITasks() {
 	foreach(player in BotAI.SurvivorBotList) {
 		if(!BotAI.IsPlayerEntityValid(player)) continue;
-		
+
 		if(!(player in BotAI.TaskUpdateOrderSingle))
 			BotAI.TaskUpdateOrderSingle[player] <- 0;
 		BotAI.taskHandler(player, BotAI.AITaskList.singleTasks, BotAI.TaskUpdateOrderSingle[player], BotAI.TaskOrderListSingle);
@@ -790,12 +790,12 @@ function BotAI::taskHandler(player, tasks, order, orderTable)
 {
 	local AITaskUpdateList = {};
 	local queueOver = true;
-				
+
 	foreach(idx, task in tasks) {
 		local shouldTick = task.shouldTick(player) && !(idx in BotAI.disabledTask);
 		if(shouldTick)
 			task.setLastTickTime(player, BotAI.tickExisted + task.tick);
-		
+
 		if((task.getOrder() == order || task.isForce())) {
 			if(shouldTick && (task.isUpdating(player) || task.shouldUpdate(player)) && (queueOver || task.isCompatible())) {
 				if(task.getOrder() == order && !task.isForce())
@@ -806,14 +806,14 @@ function BotAI::taskHandler(player, tasks, order, orderTable)
 		else
 			task.taskReset(player);
 	}
-	
+
 	foreach(idx, task in AITaskUpdateList) {
 		task.taskUpdate(player);
 	}
-	
+
 	if(queueOver) {
 		local i = order + 1;
-		
+
 		if(BotAI.IsPlayerEntityValid(player)) {
 			if(i > BotAI.TaskSingleOrderMax)
 				i = 0;
@@ -832,7 +832,7 @@ function BotAI::ModifyMolotovVector(args) {
 	while(view = Entities.FindByClassname(view, "predicted_viewmodel")) {
 		printl("view " + NetProps.GetPropEntity(view, "m_hOwner"));
 	}*/
-	
+
 	foreach(idx, infinityFire in BotAI.dontYouWannaExtinguish) {
 		if(!BotAI.IsAlive(infinityFire)) {
 			delete BotAI.dontYouWannaExtinguish[idx];
@@ -850,17 +850,17 @@ function BotAI::ModifyMolotovVector(args) {
 		local entT = null;
 		local nearest = null;
 		local nearestDis = 800;
-		
+
 		while (entT = Entities.FindByModel(entT, "models/infected/hulk.mdl")) {
 			if(!entT.IsValid() || !BotAI.IsAlive(entT) || BotAI.IsOnFire(entT) || !BotAI.CanHitOtherEntity(molotov, entT)) continue;
-			
+
 			local distance = BotAI.distanceof(molotov.GetOrigin(), entT.GetOrigin());
 			if (distance < nearestDis) {
 				nearestDis = distance;
 				nearest = entT;
 			}
 		}
-		
+
 		if(BotAI.IsEntitySI(nearest)){
 			local originVec = molotov.GetVelocity();
 			local traceVec = BotAI.normalize(nearest.GetOrigin() - molotov.GetOrigin()).Scale(originVec.Length());
@@ -877,7 +877,7 @@ function BotAI::ModifyMolotovVector(args) {
 		if(!BotAI.IsEntitySurvivorBot(thrower)) continue;
 
 		local throwable = g_ModeScript.CreateSingleSimpleEntityFromTable({classname = "weapon_vomitjar"});
-	
+
 		if(throwable)
 			throwable.ValidateScriptScope();
 		if(BotAI.IsEntityValid(throwable)) {
@@ -899,10 +899,10 @@ function BotAI::ModifyMolotovVector(args) {
 		local entT = null;
 		local nearest = null;
 		local nearestDis = 1000;
-		
+
 		while (entT = Entities.FindByModel(entT, "models/infected/hulk.mdl")) {
 			if(!entT.IsValid() || !BotAI.IsAlive(entT) || BotAI.IsOnFire(entT) || !BotAI.CanHitOtherEntity(vomitjar, entT)) continue;
-			
+
 			local distance = BotAI.distanceof(vomitjar.GetOrigin(), entT.GetOrigin());
 			if (distance < nearestDis) {
 				nearestDis = distance;
@@ -916,7 +916,7 @@ function BotAI::ModifyMolotovVector(args) {
 			vomitjar.SetVelocity(traceVec);
 			vomitjar.ApplyAbsVelocityImpulse(traceVec);
 			if(BotAI.distanceof(nearest.GetOrigin(), vomitjar.GetOrigin()) < 200) {
-				bomb = true; 
+				bomb = true;
 			}
 		}
 
@@ -939,12 +939,12 @@ function BotAI::AdjustBotsUpdateRate(args) {
 				FalledPlayer++;
 			else
 				LivedPlayer++;
-			
+
 			if(!BotAI.IsAlive(playerSet)) continue;
 
 			if(playerSet.IsDominatedBySpecialInfected())
 				BotAI.playerDominated++;
-			
+
 			if(BotAI.BotFullPower && IsPlayerABot(playerSet) && (playerSet.GetHealth() + playerSet.GetHealthBuffer()) < 40 && !playerSet.IsAdrenalineActive())
 				playerSet.UseAdrenaline(20);
 
@@ -987,14 +987,14 @@ function BotAI::AdjustBotsUpdateRate(args) {
 						BotAI.ForceButton(playerSet, 2048, 2);
 				}
 
-				//not working 
+				//not working
 				//2.
 				local t = BotAI.getBotTarget(playerSet);
 				//printl("[Bot AI] " + BotAI.getPlayerBaseName(playerSet) + " " + t);
 				if(weapon && BotAI.IsEntitySurvivor(t) && (weapon.GetClassname() != "weapon_first_aid_kit" && weapon.GetClassname() != "weapon_pain_pills" && weapon.GetClassname() != "weapon_adrenaline")) {
 					BotAI.DisableButton(playerSet, 2048, 2);
 				}
-			}	
+			}
 		}
 	}
 
@@ -1002,7 +1002,7 @@ function BotAI::AdjustBotsUpdateRate(args) {
 		if(BotAI.IsPlayerEntityValid(smoker) && smoker.GetEntityIndex() in BotAI.smokerTongue) {
 			BotAI.smokerTongue[smoker.GetEntityIndex()] <- BotAI.smokerTongue[smoker.GetEntityIndex()] + 1;
 		}
-		
+
 		if(BotAI.GetTarget(smoker) in BotAI.SafeTransfer) {
 			foreach(sur in BotAI.SurvivorList) {
 				if(!BotAI.IsAlive(sur) || sur in BotAI.SafeTransfer) continue;
@@ -1010,7 +1010,7 @@ function BotAI::AdjustBotsUpdateRate(args) {
 			}
 		}
 	}
-	
+
 	foreach(idx, pro in BotAI.projectileList) {
 		if(!BotAI.IsEntityValid(pro))
 			delete BotAI.projectileList[idx];
@@ -1056,9 +1056,9 @@ function BotAI::AdjustBotsUpdateRate(args) {
 		if(witch.IsValid() && BotAI.IsAlive(witch))
 			witchList[witchList.len()] <- witch;
 	}
-	
+
 	BotAI.WitchList = witchList;
-	
+
 	BotAI.GiveUpPlayer(true);
 }
 
@@ -1073,7 +1073,7 @@ function BotAI::AdjustBotsUpdateRate(args) {
 						danger = true;
 					}
 				}
-				
+
 				if(danger) {
 					if(!area.IsBlocked(2, false) && !area.IsBlocked(2, true)) {
 						area.MarkAsBlocked(2);
@@ -1095,15 +1095,15 @@ function BotAI::AdjustBotsUpdateRate(args) {
 function BotAI::TriggerHandler(args)
 {
 	local usableTrigger = {};
-	
+
 	local Target = null;
-	
+
 	if(!BotAI.FinaleStart)
 	while(Target = Entities.FindByClassname(Target, "trigger_finale"))
 	{
 		usableTrigger[Target.GetEntityIndex()] <- false;
 	}
-	
+
 	local item = null;
 	while(item = Entities.FindByClassname(item, "func_button"))
 	{
@@ -1112,7 +1112,7 @@ function BotAI::TriggerHandler(args)
 		if (m_usable == 1)
 			usableTrigger[item.GetEntityIndex()] <- false;
 	}
-	
+
 	item = null;
 	while(item = Entities.FindByClassname(item, "func_button_timed"))
 	{
@@ -1120,7 +1120,7 @@ function BotAI::TriggerHandler(args)
 		if (m_usable == 1)
 			usableTrigger[item.GetEntityIndex()] <- false;
 	}
-	
+
 	BotAI.TriggerList = usableTrigger;
 }
 
@@ -1128,7 +1128,7 @@ function BotAI::locateUseTarget(args)
 {
 	if(!BotAI.NeedGasFinding)
 		return;
-	
+
 	notBotPlayerBoolean <- true;
 
 	if(BotAI.UseTarget == null && BotAI.MapName in BotAI.UseTargetList && BotAI.MapName in BotAI.UseTargetOriList && BotAI.MapName in BotAI.UseTargetVecList)
@@ -1138,9 +1138,9 @@ function BotAI::locateUseTarget(args)
 			local UseTarget = Entities.FindByName( null, BotAI.UseTargetList[BotAI.MapName] );
 			local UseTargetOri = BotAI.UseTargetOriList[BotAI.MapName];
 			local UseTargetVec = BotAI.UseTargetVecList[BotAI.MapName];
-			
+
 			playerSet <- null;
-		
+
 			while(playerSet = Entities.FindByClassname(playerSet, "player"))
 			{
 				if(BotAI.IsEntityValid(UseTarget) && BotAI.IsPlayerEntityValid(playerSet) && playerSet.IsSurvivor() && (BotAI.distanceof(playerSet.GetOrigin(), UseTargetOri) < 301 || BotAI.scavenge_start))
@@ -1196,7 +1196,7 @@ function BotAI::locateUseTarget(args)
 									printl("[Bot AI] Located target at " + BotAI.UseTarget.GetOrigin());
 								}
 							}
-							
+
 							if(BotAI.UseTargetVec == null && BotAI.GetHitPosition(notBotPlayer, 9999, false) != null)
 							{
 								BotAI.UseTarget = target;
@@ -1215,7 +1215,7 @@ function BotAI::locateUseTarget(args)
 
 		if(notBotPlayerBoolean) {
 			playerSet <- null;
-		
+
 			while(playerSet = Entities.FindByClassname(playerSet, "player")) {
 				if(BotAI.IsPlayerEntityValid(playerSet) && playerSet.IsSurvivor() && IsPlayerABot(playerSet)) {
 					target <- null;
@@ -1264,7 +1264,7 @@ function BotAI::locateUseTarget(args)
 			return;
 		}
 	}
-		
+
 	player <- null;
 	while(player = Entities.FindByClassname(player, "player")) {
 		if(BotAI.IsPlayerEntityValid(player) && player.IsSurvivor() && IsPlayerABot(player)) {
@@ -1279,7 +1279,7 @@ function BotAI::locateUseTarget(args)
 ::BotAITestCmd <- function ( speaker, args , args1) {
 	if(!ABA_IsAdmin(speaker))
 		return;
-		
+
 	if(args.len() >= 1 && args[0] != null && args[0] != "")
 	{
 		local arg = args[0].tointeger();
@@ -1422,7 +1422,7 @@ function BotAI::locateUseTarget(args)
 		Convars.SetValue( "sb_neighbor_range", 120 );
 		Convars.SetValue( "sb_escort", 1 );
 		BotAI.EasyPrint("botai_path_finding_off");
-		
+
 	} else {
 		BotAI.PathFinding = true;
 		Convars.SetValue( "sb_allow_leading", 1 );
@@ -1476,7 +1476,7 @@ function BotAI::locateUseTarget(args)
 	local function cPrint(s) {
 		ClientPrint(null, 5, "Advanced Bot AI: " + "\x01" + I18n.getTranslationKey(s));
 	}
-	
+
 	::BotAI.Timers.AddTimer(time, false, cPrint, str);
 }
 
@@ -1542,7 +1542,7 @@ function BotAI::registerMenu() {
 				}
 			}
 		}
-			
+
 		if(BotAI.IsEntitySurvivorBot(point)) {
 			if(player in BotAI.pingPoint && BotAI.pingPoint[player] == point)
 				delete BotAI.pingPoint[player];
@@ -1741,7 +1741,7 @@ function BotAI::buildMenu(player, topOptions, bottomOptions) {
 	menu.SetWidth(0.24);
 	menu.SetPositionY(0.36);
 	BotAI.MainMenu[BotAI.MainMenu.len()] <- menu;
-		
+
 	menu = ::HoloMenu.KeyBindMenu("{options}");
 	topOptions(menu);
 	menu.AddFlag(HUD_FLAG_NOBG);
@@ -1800,7 +1800,7 @@ function BotAI::displayOptionMenuNext(player, args, args1) {
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
 	}
-	
+
 	BotAI.buildMenu(player, top, bot);
 }
 
@@ -1908,12 +1908,12 @@ function BotAI::DebugFunction( args ) {
 	local leader = null;
 	foreach(player in BotAI.SurvivorList) {
 		if(!BotAI.IsPlayerEntityValid(player)) continue;
-		
+
 		if(!IsPlayerABot(player)) {
 			if(BotAI.BotDebugMode) {
 				local target = BotAI.CanSeeOtherEntityPrintName(player, 9999, 1, g_MapScript.TRACE_MASK_ALL);
 			}
-			
+
 		} else if (leader == null || GetFlowDistanceForPosition(player.GetOrigin()) > GetFlowDistanceForPosition(leader.GetOrigin())) {
 			leader = player;
 		}
@@ -1928,7 +1928,7 @@ function BotAI::CheckBotPosition(args) {
 			local pos = {};
 			BotAI.BotPosition[bot] <- pos;
 		}
-		
+
 		BotAI.BotPosition[bot][BotAI.BotPositionCycle] <- bot.GetOrigin();
 	}
 
@@ -1939,7 +1939,7 @@ function BotAI::CheckBotPosition(args) {
 function BotAI::PossibleBotStuck(bot) {
 	if(!(bot in BotAI.BotPosition) || BotAI.BotPosition[bot].len() < 10)
 		return false;
-	
+
 	local total = 0;
 	local pos = bot.GetOrigin();
 	foreach(vec in BotAI.BotPosition[bot]) {
@@ -1950,7 +1950,7 @@ function BotAI::PossibleBotStuck(bot) {
 	if(total <= 80) {
 		return true;
 	}
-		
+
 	return false;
 }
 
@@ -1966,19 +1966,19 @@ function BotAI::AdjustBotState(args) {
 		local areaString = (pos.x / 500).tostring() + (pos.y / 500).tostring() + (pos.z / 500).tostring();
 		if(!(areaString in areaObstacle))
 			areaObstacle[areaString] <- {};
-		
+
 		local area = areaObstacle[areaString];
 		area[area.len()] <- obstacle;
 		areaObstacle[areaString] = area;
 	}
 
 	BotAI.obstacles = areaObstacle;
-	
+
 	if(!("DoorList" in BotAI))
 		BotAI.DoorList <- {}
 	if(!("DoorState" in BotAI))
 		BotAI.DoorState <- {}
-	
+
 	local function addDoor(door) {
 		door.ValidateScriptScope();
 		local scope = door.GetScriptScope();
@@ -1990,7 +1990,7 @@ function BotAI::AdjustBotState(args) {
 		}
 		scope["BotAI_Close"] <- close;
 		scope["BotAI_Open"] <- open;
-		
+
 		door.ConnectOutput("OnClose", "BotAI_Close");
 		door.ConnectOutput("OnOpen", "BotAI_Open");
 
@@ -2230,7 +2230,7 @@ function BotAI::AdjustBotState(args) {
 				if(BotAI.BotDebugMode) {
 					BotAI.EasyPrint(BotAI.getPlayerBaseName(bot) + " stuck! try teleport.");
 				}
-				
+
 				local tpPoint = findClosestSur();
 
 				if(tpPoint != null) {
@@ -2254,11 +2254,11 @@ function BotAI::AdjustBotState(args) {
 		scope["BotAI_UseStart"] <- using;
 		scope["BotAI_UseCanceled"] <- finish;
 		scope["BotAI_UseFinished"] <- finish;
-		
+
 		BotAI.UseTarget.ConnectOutput("OnUseStarted", "BotAI_UseStart");
 		BotAI.UseTarget.ConnectOutput("OnUseCanceled", "BotAI_UseCanceled");
 		BotAI.UseTarget.ConnectOutput("OnUseFinished", "BotAI_UseFinished");
-		
+
 		BotAI.useTargetHooks = true;
 	}
 }
@@ -2319,13 +2319,13 @@ function BotAI::resetAITask() {
 
 function resetAllBots() {
 	playerSet <- null;
-		
+
 	while(playerSet = Entities.FindByClassname(playerSet, "player")) {
 		if(BotAI.IsPlayerEntityValid(playerSet) && playerSet.IsSurvivor() && IsPlayerABot(playerSet)) {
 			BotAI.BotReset(playerSet);
 			printl("[Bot AI] Reset " + BotAI.getPlayerBaseName(playerSet));
 		}
-		
+
 		if(BotAI.IsPlayerEntityValid(playerSet) && playerSet.IsSurvivor()) {
 			if(BotAI.StartPos == null)
 				BotAI.StartPos = playerSet.GetOrigin();
@@ -2360,7 +2360,7 @@ function resetAllBots() {
 	BotAI.resetTaskTimers();
 	BotAI.resetAITask();
 	BotAI.registerMenu();
-	local ladders = {}; 
+	local ladders = {};
 	NavMesh.GetAllLadders(ladders);
 	foreach(ladder in ladders) {
 		if(ladder.IsUsableByTeam(2)) {
@@ -2378,7 +2378,7 @@ function resetAllBots() {
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("DebugFunction", 0.1, true, BotAI.DebugFunction));
 	BotAI.ResetBotFireRate();
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("locateUseTarget", 0.1, true, BotAI.locateUseTarget));
-	
+
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("NoticeText", 30, false, BotAI.NoticeText));
 
 	printl("[Bot AI] Timers loaded.");
@@ -2388,7 +2388,7 @@ function resetAllBots() {
 ::BotAI.Events.OnGameEvent_round_start_post_nav <- function(event) {
 	Msg("[Bot AI]	Activated\n");
 	local settingList = FileToString("advanced bot ai/settings.txt");
-	
+
 	if ( settingList != null ) {
 		printl("[Bot AI] Loading settings...");
 		BotAI.LoadSettings();
@@ -2409,23 +2409,23 @@ function resetAllBots() {
 		Convars.SetValue( "sb_neighbor_range", 120 );
 		Convars.SetValue( "sb_escort", 1 );
 	}
-	
+
 	if(!BotAI.PathFinding && BotAI.Unstick)
 		Convars.SetValue( "sb_unstick", 1 );
 	else
 		Convars.SetValue( "sb_unstick", 0 );
 
 	Convars.SetValue( "sb_max_team_melee_weapons", 0 );
-	
+
 	local function allBot(arg){
 		if(BotAI.NeedBotAlive) {
 			Convars.SetValue( "sb_all_bot_game", 1);
 			printl("sb_all_bot_game on.");
 		}
 	}
-	
+
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("allBot", 2, false, allBot, {value = 1}));
-	
+
 	BotAI.survivorLimpHealth <- Convars.GetFloat("survivor_limp_health");
 	BotAI.splatRange <- Convars.GetFloat("z_exploding_splat_radius") + 10;
 	BotAI.tongueSpeed <- Convars.GetFloat("tongue_fly_speed");
@@ -2447,7 +2447,7 @@ function resetAllBots() {
 	//Convars.SetValue( "survivor_calm_no_flashlight", 0 );
 	//Convars.SetValue( "survivor_calm_recent_enemy_delay", 0 );
 	//Convars.SetValue( "survivor_calm_weapon_delay", 0 );
-	
+
 	//Convars.SetValue( "sb_transition", 0 );
 	Convars.SetValue( "sb_enforce_proximity_lookat_timeout", 1 );
 	Convars.SetValue( "sb_enforce_proximity_range", 300 );
@@ -2455,7 +2455,7 @@ function resetAllBots() {
 	Convars.SetValue( "sb_sidestep_for_horde", 0 );
 	Convars.SetValue( "sb_close_checkpoint_door_interval", 0.15 );
 	Convars.SetValue( "sb_max_battlestation_range_from_human", 150 );
-	
+
 	//Convars.SetValue( "sb_threat_very_close_range", 75 );
 	//Convars.SetValue( "sb_close_threat_range", 120 );
 	//Convars.SetValue( "sb_threat_exposure_stop", 0 );
@@ -2475,7 +2475,7 @@ function resetAllBots() {
 	Convars.SetValue( "sb_vomit_blind_time", 0 );
 
 	resetAllBots();
-	
+
 	printl("[Bot AI]	Bot AI loaded.");
 }
 
