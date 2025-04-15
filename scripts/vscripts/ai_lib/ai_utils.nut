@@ -2790,6 +2790,8 @@ function BotAI::botStayPos(player, pos, id, priority = 4, stayTime = 3, distance
 	local stay = stayTime;
 
 	BotAI.botCmdMove(player, pos);
+	DebugDrawCircle(pos, Vector(0, 0, 255), 1.0, 5, true, 5.0);
+	DebugDrawText(pos, "goal", false, 5.0);
 	return;
 
 	local function changeAndStay() {
@@ -2839,6 +2841,8 @@ function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.tru
 		return false;
 
 	BotAI.botCmdMove(player, pos);
+	DebugDrawCircle(pos, Vector(0, 0, 255), 1.0, 5, true, 5.0);
+	DebugDrawText(pos, "goal", false, 5.0);
 	return;
 
 	local navigator = BotAI.getNavigator(player);
@@ -2869,6 +2873,7 @@ function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.tru
 		navigator.run(id);
 		return true;
 	}
+
 	return false;
 }
 
