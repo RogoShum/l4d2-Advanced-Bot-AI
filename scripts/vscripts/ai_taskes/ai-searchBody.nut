@@ -4,13 +4,13 @@ class ::AITaskSearchBody extends AITaskGroup
     {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
-	
+
 	updating = false;
 	playerList = {};
 	GUY = null;
 	ironBanner = null;
 	fallen = {};
-	
+
 	function preCheck() {
 		if(!BotAI.Defibrillator)
 			return false;
@@ -20,7 +20,7 @@ class ::AITaskSearchBody extends AITaskGroup
 				BotAI.setBotLockTheard(GUY, -1);
 			}
 		}
-	
+
 		if(BotAI.IsEntityValid(ironBanner) && ironBanner.GetClassname() == "survivor_death_model") {
 			if(BotAI.isDeathStillAlive(ironBanner)) {
 				ironBanner = null;
@@ -49,13 +49,13 @@ class ::AITaskSearchBody extends AITaskGroup
 			foreach(player in BotAI.SurvivorBotList)
 			{
 				if(!BotAI.IsEntityValid(player)) continue;
-				
+
 				local item = null;
-				while (Entities.FindInSphere(item, player.GetOrigin(), 150) != null) 
+				while (Entities.FindInSphere(item, player.GetOrigin(), 150) != null)
 				{
 					item = Entities.FindInSphere(item, player.GetOrigin(), 150);
 					local name = item.GetClassname();
-					
+
 					if(BotAI.IsEntityValid(item) && item.GetOwnerEntity() == null && !(item in store))
 					{
 						if (name == "first_aid_kit_spawn" || name == "first_aid_kit" || name == "weapon_first_aid_kit_spawn" || name == "weapon_first_aid_kit" )
@@ -67,7 +67,7 @@ class ::AITaskSearchBody extends AITaskGroup
 					}
 				}
 			}
-			
+
 			return false;
 		}
 		else
@@ -76,7 +76,7 @@ class ::AITaskSearchBody extends AITaskGroup
 			return true;
 		}
 	}
-	
+
 	function GroupUpdateChecker(player)
 	{
 		if(BotAI.IsInCombat(player, true) || player.IsIncapacitated())
@@ -108,7 +108,7 @@ class ::AITaskSearchBody extends AITaskGroup
 		} else {
 			local item = null;
 			local findDef = null
-			local defDis = 2000; 
+			local defDis = 2000;
 			while (Entities.FindInSphere(item, player.GetOrigin(), 2000) != null) {
 				item = Entities.FindInSphere(item, player.GetOrigin(), 2000);
 				local name = item.GetClassname();
@@ -120,7 +120,7 @@ class ::AITaskSearchBody extends AITaskGroup
 					}
 				}
 			}
-							
+
 			if(findDef != null)
 			{
 				if (defDis > 150) {
@@ -131,8 +131,8 @@ class ::AITaskSearchBody extends AITaskGroup
 						local function needSearch() {
 							return !BotAI.Defibrillator || !BotAI.IsEntityValid(bo) || !BotAI.IsEntityValid(findDef) || findDef.GetOwnerEntity() != null || BotAI.HasItem(player, "defibrillator");
 						}
-						
-						BotAI.botRunPos(player, findDef, "searchBody", 3, needSearch, 2500);
+
+						BotAI.botRunPos(player, findDef, "searchBody", 3, needSearch, 8000);
 						return false;
 					}
 				} else {
@@ -145,12 +145,12 @@ class ::AITaskSearchBody extends AITaskGroup
 			else
 				return false;
 		}
-		
+
 		return false;
 	}
-	
+
 	function playerUpdate(player) {
-		if(ironBanner != null && player != null) {	
+		if(ironBanner != null && player != null) {
 			local distance = BotAI.distanceof(ironBanner.GetOrigin(), player.GetOrigin());
 			if (distance > 2000) {
 				ironBanner = null;
@@ -180,7 +180,7 @@ class ::AITaskSearchBody extends AITaskGroup
 					}
 					BotAI.conditionTimer(target, 0.2);
 				} else {
-					BotAI.botRunPos(player, ironBanner, "searchBody", 3, needSearch, 5000);
+					BotAI.botRunPos(player, ironBanner, "searchBody", 3, needSearch, 15000);
 				}
 			} else if (distance <= 50) {
 				BotAI.getNavigator(player).stop();
@@ -197,11 +197,11 @@ class ::AITaskSearchBody extends AITaskGroup
 				}
 			}
 		}
-		
+
 		updating = false;
 	}
-	
-	function taskReset(player = null) 
+
+	function taskReset(player = null)
 	{
 		base.taskReset(player);
 		ironBanner = null;

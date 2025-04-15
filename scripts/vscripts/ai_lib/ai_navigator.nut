@@ -28,12 +28,12 @@ class ::Navigator {
         checkTime = Time();
         timeOut = Time();
     }
-	
+
     function _typeof () {
         return "Navigator";
     }
 
-	function buildPath(goal, id, priority = 0, discardFunc = BotAI.trueDude, previousPath = null, aStar = false, distance = 4000) {
+	function buildPath(goal, id, priority = 0, discardFunc = BotAI.trueDude, previousPath = null, aStar = false, distance = 10000) {
         if(timeOut > Time())
             return false;
         local goalArea = null;
@@ -44,9 +44,9 @@ class ::Navigator {
             if("GetLastKnownArea" in goal)
                 goalArea = goal.GetLastKnownArea();
             goalPos = goal.GetOrigin();
-        } else 
+        } else
             return false;
-        
+
         if(goalArea == null) {
             goalArea = NavMesh.GetNavArea(goalPos, 150);
             if(goalArea == null && BotAI.IsTriggerUsable(goal)) {
@@ -64,7 +64,7 @@ class ::Navigator {
 				}
             }
         }
-            
+
         if(typeof previousPath == "table") {
             local newPaths = [];
             for(local i = 0; i < previousPath.len(); ++i) {
@@ -100,7 +100,7 @@ class ::Navigator {
             pathSearch.dataGoalPos = goalPos;
             pathSearch.dataGoalArea = goalArea;
         }
-            
+
         if(newPath && !goalInCoolDown) {
             if(aStar) {
                 try {
@@ -129,7 +129,7 @@ class ::Navigator {
             local faildBuild = false;
             //if(navAPI)
                 //faildBuild = !createPath(goalPos, goalArea, paths);
-            
+
             /*
             if(!faildBuild && navAPI) {
                 paths = {};
@@ -140,13 +140,13 @@ class ::Navigator {
         } else {
             if(BotAI.BotDebugMode)
                 printl("A-Star build success.");
-            
+
             buildAStar = true;
             if(goal in faildTimes)
                 delete faildTimes[goal];
         }
-            
-            
+
+
         /*
         if(build && paths.len() > 0) {
             local firstArea = paths["area" + (paths.len() - 1)];
@@ -228,7 +228,7 @@ class ::Navigator {
                             }
                         }
                     }
-                    
+
                     local data = PathData(pathFinding.paths, pathFinding.dataGoal, pathFinding.dataPriority, pathFinding.dataDiscardFunc, pathFinding.dataDistance);
                     data.aStar = true;
                     if(BotAI.BotDebugMode)
@@ -252,15 +252,15 @@ class ::Navigator {
         foreach(idx, func in NavigatorPause) {
             if(func(player)) {
                 return;
-            } 
+            }
         }
 
         if(pathCache.len() < 1) {
             return;
         }
-        
+
         reRun();
-        
+
         shouldDiscard();
         if(!moving()) {
             return;
@@ -282,6 +282,7 @@ class ::Navigator {
                 stop();
                 return;
             }
+
 			local xyGoalPos = goalPos;
 			local xyTracePos = BotAI.tracePos(player, goalPos, true);
             local addition = Vector(0, 0, 5);
@@ -289,7 +290,7 @@ class ::Navigator {
 			    DebugDrawCircle(xyGoalPos, Vector(0, 0, 255), 1.0, 5, true, 0.2);
 			    DebugDrawLine(player.EyePosition(), xyGoalPos, 0, 0, 255, true, 0.2);
             }
-            
+
             if(BotAI.BotDebugMode && BotAI.validVector(xyTracePos)) {
 				DebugDrawCircle(xyTracePos + addition, Vector(0, 255, 0), 1.0, 10, true, 0.2);
 				DebugDrawLine(player.EyePosition() + addition, xyTracePos + addition, 0, 255, 0, true, 0.2);
@@ -299,27 +300,6 @@ class ::Navigator {
             if(BotAI.distanceof(xyGoalPos, xyTracePos) <= offset) {
                 //if(xyGoalPos.z <= xyTracePos.z)
                     //canTrace = true;
-            }
-
-			if(canTrace) {
-                if(BotAI.distanceof(player.GetOrigin(), goalPos) > 10)
-				    BotAI.botRun(player, goalPos, 400);
-                else if(movingID.find("#") != null) {
-                    player.OverrideFriction(0.5, 10);
-                    player.SetVelocity(Vector(0, 0, player.GetVelocity().z));
-                }
-                    
-				if(movingID.find("#") == null && BotAI.distanceof(BotAI.fakeTwoD(player.GetOrigin()), BotAI.fakeTwoD(goalPos)) <= offset) {
-					stop();
-				}
-				return;
-			}
-
-			if(paths.len() <= 0) {
-                if((goalPos.z - player.GetOrigin().z) >= JUMP_HIGHT) {
-                    BotAI.IsOnGround(player)
-                }
-                return;
             }
 
             try {
@@ -343,8 +323,32 @@ class ::Navigator {
         	    }
             }
 
+            //return;
+
+			//if(canTrace) {
+                if(BotAI.distanceof(player.GetOrigin(), goalPos) > 10) {
+                    BotAI.botCmdMove(player, goalPos);
+                    //BotAI.botRun(player, goalPos, 400);
+                } else if(movingID.find("#") != null) {
+                    player.OverrideFriction(0.5, 10);
+                    player.SetVelocity(Vector(0, 0, player.GetVelocity().z));
+                }
+
+				if(movingID.find("#") == null && BotAI.distanceof(BotAI.fakeTwoD(player.GetOrigin()), BotAI.fakeTwoD(goalPos)) <= offset) {
+					stop();
+				}
+				return;
+			//}
+
+			if(paths.len() <= 0) {
+                if((goalPos.z - player.GetOrigin().z) >= JUMP_HIGHT) {
+                    BotAI.IsOnGround(player)
+                }
+                return;
+            }
+
 			local firstArea = ("area" + (paths.len() - 1)) in paths ? paths["area" + (paths.len() - 1)] : paths["area" + paths.len()];
-			
+
 			if(firstArea.IsDamaging() && movingID.find("%") == null) {
                 return;
             }
@@ -403,7 +407,7 @@ class ::Navigator {
                 }
 
 				local traceFirst = BotAI.distanceof(xyCenter, xyAreaPos) <= offset;
-                
+
 				if(traceFirst)
 					BotAI.botRun(player, xyCenter, 250);
 				else
@@ -454,7 +458,7 @@ class ::Navigator {
                 if(!path.discardFunc()) {
                     pathID = id;
                     pathFound = path;
-                } else 
+                } else
                     clearPath(id);
             }
         }
@@ -472,6 +476,8 @@ class ::Navigator {
         movingID = null;
         if(id in pathCache)
             delete pathCache[id];
+
+        BotAI.BotReset(player);
     }
 
     function getMovingPath(id) {
@@ -480,7 +486,7 @@ class ::Navigator {
     }
 
     function getRunningPathData() {
-        if(moving() && movingID in pathCache) 
+        if(moving() && movingID in pathCache)
             return pathCache[movingID];
         return null;
     }
@@ -532,7 +538,7 @@ class ::Navigator {
                     stop();
                     return false;
                 }
-                
+
                 if(goalArea == null) {
                     goalArea = NavMesh.GetNavArea(goalPos, 150);
                     if(goalArea == null && BotAI.IsTriggerUsable(data.pos)) {
@@ -564,7 +570,7 @@ class ::Navigator {
                 if(centerPaths.len() > 0) {
                     local startArea = centerPaths[centerPaths.len()-1];
                     local endArea = centerPaths[0];
-                    
+
                     if(!createPath(PathSearch(startArea.GetCenter()), startArea.GetCenter(), startArea, 1000, startPaths)) {
                         stop();
                         return false;
@@ -700,7 +706,7 @@ class ::Navigator {
 			    if(mostSuitable == null || (areaData.exactCost + areaData.estimatedCost) < (mostSuitable.exactCost + mostSuitable.estimatedCost))
                     mostSuitable = areaData;
             }
-            
+
 			for(local i = 0; i < 4; ++i) {
                 local adjacentAreas = BotAI.areaAdjacent(mostSuitable.area, i);
                 local ladders = {};
@@ -773,7 +779,7 @@ class ::Navigator {
                 delete needCheack[mostSuitable.area.GetID()];
                 //mostSuitable.area.DebugDrawFilled(255, 0, 0, 30, 10, true);
             }
-            
+
             if(reachLimit) {
                 if(BotAI.BotDebugMode) {
                     printl("[Navigator] searching over " + SEARCH_LIMIT + " area, wait a tick...");
@@ -868,7 +874,7 @@ class ::PathSearch {
             realPos = pos;
         if(BotAI.IsEntityValid(pos) && "GetOrigin" in pos)
             realPos = pos.GetOrigin();
-        
+
         if(BotAI.validVector(posIn))
             return posIn == realPos;
         if(BotAI.IsEntityValid(posIn) && "GetOrigin" in posIn)

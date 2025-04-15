@@ -27,7 +27,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 
 			if(BotAI.IsEntityValid(wep))
 				ename = wep.GetClassname();
-			
+
 			if(ename == "weapon_pipe_bomb" || ename == "weapon_molotov" || ename == "weapon_vomitjar") {
 				if(!BotAI.HasFlag(player, FL_FROZEN)) {
 					BotAI.ChangeItem(player, 1);
@@ -46,11 +46,11 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				BotAI.setBotTarget(player, BotAI.targetLocked[player]);
 				return true;
 			}
-			
+
 			local target = BotAI.getBotTarget(player);
 			if(BotAI.IsEntityValid(target) && target.GetClassname() == "tank_rock")
 				return true;
-				
+
 			target = BotAI.getSmokerTarget(player);
 			if(BotAI.IsEntityValid(target) && BotAI.IsAlive(target) && target.GetEntityIndex() in BotAI.smokerTongue)
 				return true;
@@ -63,32 +63,32 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				BotAI.setBotTarget(player, null);
 				return false;
 			}
-			
+
 			if (m_trace.enthit.GetClassname() == "worldspawn" || !m_trace.enthit.IsValid()) {
 				BotAI.UnforceButton(player, 1 );
 				BotAI.UnforceButton(player, 2048 );
 				BotAI.setBotTarget(player, null);
 				return false;
 			}
-			
+
 			BotAI.setBotTarget(player, m_trace.enthit);
 			return true;
 		}
 		BotAI.setBotTarget(player, null);
 		return false;
 	}
-	
+
 	function playerUpdate(player) {
 		local target = BotAI.getBotTarget(player);
 		if(!BotAI.IsEntityValid(target))
 			target = BotAI.getSmokerTarget(player);
-			
+
 		if(!(player in BotAI.FullPress))
 			BotAI.FullPress[player] <- 0;
 
 		if(BotAI.FullPress[player] > -10)
 			BotAI.FullPress[player]--;
-			
+
 		if(BotAI.IsEntityValid(target)) {
 			local HasWitch = false;
 			local HasPlayer = false;
@@ -108,11 +108,11 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			if(distance <= 150 && BotAI.HasItem(player, "melee") && !BotAI.HasFlag(player, FL_FROZEN)
 			&& !isTank)
 				BotAI.ChangeItem(player, 1);
-			
+
 			local wep = player.GetActiveWeapon();
 
 			local ename = " ";
-				
+
 			if(BotAI.IsEntityValid(wep))
 				ename = wep.GetClassname();
 
@@ -125,15 +125,15 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 
 			if(isShotGun)
 				shotDis = 600;
-			
+
 			local isSniper = ename == "weapon_hunting_rifle" || ename == "weapon_sniper_military" || ename == "weapon_sniper_awp" || ename == "weapon_sniper_scout";
-			
+
 			if(isSniper)
 				shotDis = 5000;
-			
+
 			local isMelee = ename == "weapon_melee" || ename == "weapon_chainsaw";
 			local mel = isMelee && (distance > 150 || isTank);
-				
+
 			if(!player.IsIncapacitated() && !BotAI.IsSurvivorTrapped(player) && !BotAI.HasFlag(player, FL_FROZEN) && (BotAI.GetPrimaryClipAmmo(player) > 0 || isTank) && mel) {
 				BotAI.ChangeItem(player, 0);
 			}
@@ -159,17 +159,17 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 					shotDis = tongueRange + 100;
 				}
 			}
-			
+
 			if(isMelee && BotAI.GetPrimaryClipAmmo(player) <= 0) {
 				BotAI.ReloadPrimaryClip(player);
 			}
-			
+
 			if(player in BotAI.targetLocked && BotAI.targetLocked[player] == target)
 				Shot = true;
 
 			if(targetName == "infected" && BotAI.IsAlive(target) && distance < shotDis)
 				Shot = true;
-			
+
 			if((targetName == "player" && !target.IsGhost() && !target.IsSurvivor() && target.GetZombieType() != 7) && BotAI.IsAlive(target) && distance < shotDis){
 				if(target.GetZombieType() != 2)
 					Shot = true;
@@ -180,12 +180,12 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 						if(BotAI.IsEntitySurvivor(rangePlayer))
 							playerInside = true;
 					}
-					
+
 					if(!playerInside)
 						Shot = true;
 				}
 			}
-			
+
 			if(targetName == "tank_rock" || isTank) {
 				if(BotAI.IsEntityValid(wep) && !isMelee && wep.Clip1() <= 0) {
 					local ammoAmount = wep.GetMaxClip1() * 0.3;
@@ -195,7 +195,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				}
 				Shot = true;
 			}
-			
+
 			if(target != player && targetName == "player" && target.IsSurvivor()) {
 				if(target.IsIncapacitated())
 					HasPlayer = true;
@@ -246,7 +246,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 					BotAI.ForceButton(player, 1 );
 			} else
 				BotAI.UnforceButton(player, 1 );
-				
+
 			updating[player] <- false;
 		}
 		else {
@@ -254,11 +254,11 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			updating[player] <- false;
 		}
 	}
-	
-	function taskReset(player = null) 
+
+	function taskReset(player = null)
 	{
 		base.taskReset(player);
-		
+
 		if(player != null)
 			BotAI.setBotTarget(player, null);
 	}

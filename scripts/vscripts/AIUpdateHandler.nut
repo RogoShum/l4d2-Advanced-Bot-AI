@@ -110,7 +110,7 @@ if (!("VSLib" in getroottable()))
 		SurvivorHumanList = {}
 		SurvivorBotList = {}
 		SpecialList = {}
-		commonInfectedMap = {}
+		//commonInfectedMap = {}
 		SpecialBotList = {}
 		humanBot = {}
 		dangerInfected = {}
@@ -2128,7 +2128,7 @@ function BotAI::AdjustBotState(args) {
 		}
 	}
 
-	local needRecall = true;
+	local needRecall = false;
 	local display = null;
 	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
 		if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") < NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal"))
@@ -2221,8 +2221,8 @@ function BotAI::AdjustBotState(args) {
 			CommandABot( { cmd = 3, bot = botIn } );
 			local timeOut = Time()+5;
 			local function condition() {
-			if(!BotAI.IsEntitySurvivor(botIn) || !BotAI.IsEntitySurvivor(minFlowHuman)) return true;
-				return Time() > timeOut;
+				if(!BotAI.IsEntitySurvivor(botIn) || !BotAI.IsEntitySurvivor(minFlowHuman)) return true;
+					return Time() > timeOut;
 			}
 			BotAI.botRunPos(botIn, minFlowHuman, "leader", 0, condition);
 

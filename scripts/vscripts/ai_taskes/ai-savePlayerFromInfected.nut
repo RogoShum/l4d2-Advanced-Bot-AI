@@ -3,13 +3,13 @@ class ::AITaskSavePlayer extends AITaskGroup
 	constructor(orderIn, tickIn, compatibleIn, forceIn) {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
-	
+
 	updating = false;
 	playerList = {};
 	dominated = {};
 	falled = {};
 	rescuers = {};
-	
+
 	function preCheck() {
 		dominated = {};
 		falled = {};
@@ -27,17 +27,17 @@ class ::AITaskSavePlayer extends AITaskGroup
 					falled[falled.len()] <- victim;
 			}
 		}
-		
+
 		if(dominated.len() > 0 || falled.len() > 0) {
 			return true;
 		}
 
 		return false;
 	}
-	
+
 	function GroupUpdateChecker(player) {
 		if(!BotAI.IsAlive(player) || BotAI.IsPlayerClimb(player) || player.IsDominatedBySpecialInfected() || player.IsStaggering() || player.IsIncapacitated() || player.IsHangingFromLedge()) return false;
-		
+
 		local navigator = BotAI.getNavigator(player);
 		if(navigator.isMoving("savePlayer"))
 			return false;
@@ -80,7 +80,7 @@ class ::AITaskSavePlayer extends AITaskGroup
 		}
 		return false;
 	}
-	
+
 	function playerUpdate(player) {
 		if(!BotAI.IsAlive(player)) {
 			updating = false;
@@ -94,40 +94,40 @@ class ::AITaskSavePlayer extends AITaskGroup
 			updating = false;
 			return;
 		}
-			
+
 		if(NetProps.GetPropInt(victim, "m_tongueOwner") > 0)
 			smoker = NetProps.GetPropEntity(victim, "m_tongueOwner");
-						
+
 		if(NetProps.GetPropInt(victim, "m_carryAttacker") > 0)
 			smoker = NetProps.GetPropEntity(victim, "m_carryAttacker");
-						
+
 		if(NetProps.GetPropInt(victim, "m_pummelAttacker") > 0)
 			smoker = NetProps.GetPropEntity(victim, "m_pummelAttacker");
-						
+
 		if(NetProps.GetPropInt(victim, "m_pounceAttacker") > 0)
 			smoker = NetProps.GetPropEntity(victim, "m_pounceAttacker");
-						
+
 		if(NetProps.GetPropInt(victim, "m_jockeyAttacker") > 0)
 			smoker = NetProps.GetPropEntity(victim, "m_jockeyAttacker");
-			
+
 		if(BotAI.IsEntityValid(smoker) && BotAI.CanSeeOtherEntityWithoutLocation(player, smoker)) {
 			local function needSave() {
 				if(!BotAI.IsAlive(smoker)) return true;
-				
+
 				return false;
 			}
 			BotAI.botRunPos(player, smoker, "savePlayer", 5, needSave);
 		} else {
 			local function needSave() {
 				if(!BotAI.IsAlive(victim) || victim.IsGettingUp()) return true;
-				
+
 				return !victim.IsDominatedBySpecialInfected() && !victim.IsIncapacitated() && !victim.IsHangingFromLedge();
 			}
 			BotAI.botRunPos(player, victim, "savePlayer", 5, needSave);
 		}
 		updating = false;
 	}
-	
+
 	function taskReset(player = null) {
 		base.taskReset(player);
 	}

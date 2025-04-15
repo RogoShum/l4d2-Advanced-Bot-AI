@@ -3,7 +3,7 @@ class ::AITaskSearchEntity extends AITaskSingle
 	constructor(orderIn, tickIn, compatibleIn, forceIn)
     {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
-		
+
 		enumUpgradePack["weapon_upgradepack_incendiary_spawn"] <- 1;
 		enumUpgradePack["weapon_upgradepack_explosive_spawn"] <- 1;
 		enumUpgradePack["weapon_upgradepack_incendiary"] <- 1;
@@ -11,19 +11,19 @@ class ::AITaskSearchEntity extends AITaskSingle
 
 		enumWeaponSpawn["weapon_pistol_magnum_spawn"] <- 1;
 		enumWeaponSpawn["weapon_pistol_magnum"] <- 1;
-		
+
 		enumPills["weapon_pain_pills_spawn"] <- 1;
 		enumPills["weapon_adrenaline_spawn"] <- 1;
 		enumPills["weapon_pain_pills"] <- 1;
 		enumPills["weapon_adrenaline"] <- 1;
-		
+
 		enumBombSpawn["weapon_pipe_bomb_spawn"] <- 1;
 		enumBombSpawn["weapon_molotov_spawn"] <- 1;
 		enumBombSpawn["weapon_vomitjar_spawn"] <- 1;
 		enumBombSpawn["weapon_pipe_bomb"] <- 1;
 		enumBombSpawn["weapon_molotov"] <- 1;
 		enumBombSpawn["weapon_vomitjar"] <- 1;
-		
+
 		enumDefibrillator["weapon_defibrillator_spawn"] <- 1;
 		enumDefibrillator["weapon_defibrillator"] <- 1;
     }
@@ -82,7 +82,7 @@ class ::AITaskSearchEntity extends AITaskSingle
 		items[player] <- null;
 		return false;
 	}
-	
+
 	function playerUpdate(player) {
 		local entity = items[player];
 		if(!BotAI.IsEntityValid(entity) || entity.GetOwnerEntity() != null || NetProps.GetPropEntity(entity, "m_hOwnerEntity") != null) return;
@@ -116,8 +116,8 @@ class ::AITaskSearchEntity extends AITaskSingle
 
 		updating[player] <- false;
 	}
-	
-	function taskReset(player = null) 
+
+	function taskReset(player = null)
 	{
 		base.taskReset(player);
 		items = {};

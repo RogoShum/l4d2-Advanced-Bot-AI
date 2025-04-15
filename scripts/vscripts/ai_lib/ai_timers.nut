@@ -40,29 +40,32 @@ function BotAI::moveFunc() {
 						vec = BotAI.normalize(vec).Scale(BOT_JUMP_SPEED_LIMIT);
 					}
 				}
-		
-				if(vec.Length() > 1000) {
-					vec = BotAI.normalize(vec).Scale(1000);
+
+				if(vec.Length() > 300) {
+					vec = BotAI.normalize(vec).Scale(300);
 				}
 
 				if(!BotAI.isEdge(player, vec)) {
 					NetProps.SetPropVector(player, "m_vecBaseVelocity", vec);
+					BotAI.botRunPos(player, player.GetOrigin() + vec, "botMove", 7, BotAI.falseDude);
 				}
 
 				BotAI.botMoveMap[player] = vec * 0.9;
-			} else {
+			} else if (BotAI.getNavigator(player).hasPath("botMove")) {
 				NetProps.SetPropVector(player, "m_vecBaseVelocity", Vector(0, 0, 0));
 				BotAI.botMoveMap[player] = Vector(0, 0, 0);
+				BotAI.getNavigator(player).clearPath("botMove");
 			}
 		}
 	}
+
 	return 0.01;
 }
 
 function BotAI::taskTimer::hitinfected() {
 	local name = "hitinfected";
 	local task = BotAI.timerTask.hitinfected;
-	
+
 	foreach(player in BotAI.SurvivorBotList) {
 		if(!BotAI.IsPlayerEntityValid(player)) continue;
 
@@ -263,7 +266,7 @@ function BotAI::createProjectileTargetTimer(projectile) {
 				if(needContinue)
 					continue;
 			}
-			
+
 			local function avoidProjectile(danger) {
 				foreach(bot in BotAI.SurvivorBotList) {
 					if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp())
@@ -319,21 +322,23 @@ function BotAI::createPlayerTargetTimer(player) {
 
 		//local com = null;
 		local selected = null;
-		local closestCom = null; 
+		local closestCom = null;
 		local selectedDis = 120;
 		local closestDis = 600;
-		
+
 		local isShove = BotAI.IsPressingShove(player);
 		local isHealing = BotAI.IsBotHealing(player);
 
-		if("get" in BotAI.commonInfectedMap)
-		foreach(com in BotAI.commonInfectedMap.get(player, 1)) {
+		local com = null;
+		//local map = ChunkMap(120);
+		DebugDrawCircle(player.GetCenter(), Vector(25, 25, 255), 10, 200, true, 0.3);
+		while(com = Entities.FindByClassnameWithin(com, "infected", player.GetCenter(), 200)) {
 			if(!BotAI.IsAlive(com) || (BotAI.IsInfectedBeShoved(com) && isShove && !isHealing) || BotAI.IsEntitySI(BotAI.GetTarget(com))) continue;
 			local dis = BotAI.nextTickDistance(player, com);
 			local isTarget = BotAI.IsTarget(player, com);
 
 			if(selected != null && selectedDis < dis) continue;
-			
+
 			if(dis <= 120 && isTarget) {
 				selected = com;
 				selectedDis = dis;
@@ -342,7 +347,7 @@ function BotAI::createPlayerTargetTimer(player) {
 				closestDis = dis;
 			}
 		}
-		
+
 		if(selected != null)
         	BotAI.dangerInfected[player] <- selected;
 		else if(closestCom != null)
@@ -458,7 +463,7 @@ function BotAI::pingSystem() {
 				return 0.5;
 			}
 		}
-		/* 
+		/*
 		else if(BotAI.IsPressingShove(player)) {
 			local point = BotAI.CanSeeOtherEntityPrintName(player, 250, 0);
 			local ename = "";
@@ -575,7 +580,7 @@ function BotAI::pingSystem() {
 			}
 			*/
 		}
-		BotAI.commonInfectedMap = map;
+		//BotAI.commonInfectedMap = map;
 		return 1.0;
 	}
 
@@ -592,19 +597,19 @@ function BotAI::pingSystem() {
 
 		enumWeaponSpawn["weapon_pistol_magnum_spawn"] <- 1;
 		enumWeaponSpawn["weapon_pistol_magnum"] <- 1;
-		
+
 		enumPills["weapon_pain_pills_spawn"] <- 1;
 		enumPills["weapon_adrenaline_spawn"] <- 1;
 		enumPills["weapon_pain_pills"] <- 1;
 		enumPills["weapon_adrenaline"] <- 1;
-		
+
 		enumBombSpawn["weapon_pipe_bomb_spawn"] <- 1;
 		enumBombSpawn["weapon_molotov_spawn"] <- 1;
 		enumBombSpawn["weapon_vomitjar_spawn"] <- 1;
 		enumBombSpawn["weapon_pipe_bomb"] <- 1;
 		enumBombSpawn["weapon_molotov"] <- 1;
 		enumBombSpawn["weapon_vomitjar"] <- 1;
-		
+
 		enumDefibrillator["weapon_defibrillator_spawn"] <- 1;
 		enumDefibrillator["weapon_defibrillator"] <- 1;
 
@@ -717,6 +722,7 @@ if (_aimTimer != null) {
 		AddThinkToEnt(takeThinker, "ThinkTimer");
 	}
 
+	/*
 	takeThinker = SpawnEntityFromTable("info_target", { targetname = "botai_commonInfected"});
 	if (takeThinker != null) {
 		takeThinker.ValidateScriptScope();
@@ -724,6 +730,7 @@ if (_aimTimer != null) {
 		scrScope["ThinkTimer"] <- BotAI.updateCommonInfected;
 		AddThinkToEnt(takeThinker, "ThinkTimer");
 	}
+	*/
 
 	takeThinker = SpawnEntityFromTable("info_target", { targetname = "botai_pick_cooldown"});
 	if (takeThinker != null) {

@@ -17,8 +17,8 @@ class ::ChunkMap {
 			map[key].append(entity);
 	}
 
-	function get(object, scale = 0) {
-		if(scale < 0) return [];
+	function get(object, scale = 1) {
+		if(scale <= 0) return [];
 
 		local pos = null;
 		if(typeof object == "Vector") {
@@ -28,18 +28,31 @@ class ::ChunkMap {
 		}
 
 		if(typeof pos != "Vector") return [];
-		local chunk = [];
-		local start = scale - (2*scale);
-		scale += 1;
 
-		for(local x = start; x < scale; ++ x) {
-			for(local y = start; y < scale; ++ y) {
-				for(local z = start; z < scale; ++ z) {
-					local chunkPos = pos + Vector(x * dimension, y * dimension, z * dimension);
+		local baseChunkX = int(pos.x) * dimension;
+		local baseChunkY = int(pos.y) * dimension;
+		local baseChunkZ = int(pos.z) * dimension;
+
+		local chunk = [];
+
+		for(local x = -scale; x <= scale; ++x) {
+			for(local y = -scale; y <= scale; ++y) {
+				for(local z = -scale; z <= scale; ++z) {
+					local chunkPos = Vector(
+						baseChunkX + x * dimension,
+						baseChunkY + y * dimension,
+						baseChunkZ + z * dimension
+					);
+
 					if(BotAI.BotDebugMode) {
-						local drawVec = Vector(int(chunkPos.x), int(chunkPos.y), int(chunkPos.z))*dimension;
-						DebugDrawBox(drawVec, Vector(0, 0, 0), Vector(dimension, dimension, dimension), 25, 25, 255, 0.1, 0.5);
+						DebugDrawBox(
+							chunkPos + Vector(dimension/2, dimension/2, dimension/2),
+							Vector(-dimension/2, -dimension/2, -dimension/2), // min (-75,-75,-75)
+							Vector(dimension/2, dimension/2, dimension/2),    // max (75,75,75)
+							25, 25, 255, 0.1, 0.5
+						);
 					}
+
 					local key = createKey(chunkPos);
 					if(key in map) {
 						foreach(entity in map[key]) {
@@ -597,11 +610,13 @@ function BotAI::botRun(player, targetPos, speed = 220) {
 	if(BotAI.validVector(dodgeVec))
 		velocity = velocity.Scale(0.7) + dodgeVec.Scale(0.3);
 
+	/*
 	if(onGround) {
 		local angle = BotAI.checkObstacle(player, velocity);
 		if(angle > 0)
 			velocity = BotAI.rotateVector(velocity, angle);
 	}
+	*/
 
 	if(BotAI.validVector(velocity))
 		BotAI.botMove(player, velocity);
@@ -2724,13 +2739,14 @@ function BotAI::BotAttack(boto, otherEntity) {
 	return true;
 }
 
-function BotAI::BotReset(boto, victim = null)
-{
-
+function BotAI::BotReset(boto) {
+	if(!BotAI.IsEntityValid(boto)) return;
+	if(!IsPlayerABot(boto))
+		return;
+	return CommandABot( { cmd = 3, bot = boto } );
 }
 
 function BotAI::BotRetreatFrom(boto, otherEntity) {
-	return;
 	if(!BotAI.IsEntityValid(boto) || !BotAI.IsEntityValid(otherEntity)) return;
 	if(!IsPlayerABot(boto))
 		return;
@@ -2789,10 +2805,19 @@ function BotAI::botStayPos(player, pos, id, priority = 4, stayTime = 3, distance
 	local idStay = id + "Stay#";
 	local stay = stayTime;
 
-	BotAI.botCmdMove(player, pos);
-	DebugDrawCircle(pos, Vector(0, 0, 255), 1.0, 5, true, 5.0);
-	DebugDrawText(pos, "goal", false, 5.0);
+		/*
+
+	local position_ = Vector(0, 0, 0);
+	if(typeof pos == "Vector")
+		position_ = pos;
+	else
+		position_ = pos.GetOrigin();
+
+	BotAI.botCmdMove(player, position_);
+	DebugDrawCircle(position_, Vector(0, 0, 255), 1.0, 5, true, 15.0);
+	DebugDrawText(position_, "goal_RunPos", false, 15.0);
 	return;
+		*/
 
 	local function changeAndStay() {
 		if(!BotAI.IsAlive(littleBot)) return true;
@@ -2833,17 +2858,26 @@ function BotAI::botStayPos(player, pos, id, priority = 4, stayTime = 3, distance
 	return false;
 }
 
-function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.trueDude, distance = 5000, buildTest = false) {
+function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.trueDude, distance = 10000, buildTest = false) {
 	if(!buildTest && !IsPlayerABot(player))
 		return false;
 
 	if(BotAI.IsPlayerClimb(player) || BotAI.IsBotHealing(player))
 		return false;
 
-	BotAI.botCmdMove(player, pos);
-	DebugDrawCircle(pos, Vector(0, 0, 255), 1.0, 5, true, 5.0);
-	DebugDrawText(pos, "goal", false, 5.0);
+		/*
+
+	local position_ = Vector(0, 0, 0);
+	if(typeof pos == "Vector")
+		position_ = pos;
+	else
+		position_ = pos.GetOrigin();
+
+	BotAI.botCmdMove(player, position_);
+	DebugDrawCircle(position_, Vector(0, 0, 255), 1.0, 5, true, 15.0);
+	DebugDrawText(position_, "goal_RunPos", false, 15.0);
 	return;
+		*/
 
 	local navigator = BotAI.getNavigator(player);
 	foreach(idx, path in navigator.pathCache) {
