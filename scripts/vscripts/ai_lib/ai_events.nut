@@ -311,8 +311,7 @@
 
 	if(p != null && p.IsSurvivor() && IsPlayerABot(p)) {
 		weapon <- p.GetActiveWeapon();
-		if(BotAI.BotFullPower || weapon.GetClassname() == "weapon_pistol" || weapon.GetClassname() == "weapon_pistol_magnum")
-		{
+		if(BotAI.BotFullPower || weapon.GetClassname() == "weapon_pistol" || weapon.GetClassname() == "weapon_pistol_magnum") {
 			NetProps.SetPropInt(weapon, "m_iClip1", NetProps.GetPropInt(weapon, "m_iClip1") + 1);
 		}
 		else if(victim != null && ((victim.GetClassname() == "player" && !victim.IsSurvivor()) || victim.GetClassname() == "witch"))
@@ -1049,6 +1048,7 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 				return false;
 		}
 
+		/*
 		if(damageTable.DamageDone >= 100) {
 			local noneAliveEntity = damageTable.Attacker == null ||
 			(damageTable.Attacker.GetClassname() != "player" && damageTable.Attacker.GetClassname() != "infected" && damageTable.Attacker.GetClassname() != "witch")
@@ -1073,6 +1073,7 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 				}
 			}
 		}
+		*/
 	}
 
 	if(BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim) && BotAI.IsEntityValid(attacker) && attacker.GetClassname() == "infected") {

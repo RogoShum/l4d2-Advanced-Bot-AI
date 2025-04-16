@@ -331,7 +331,9 @@ function BotAI::createPlayerTargetTimer(player) {
 
 		local com = null;
 		//local map = ChunkMap(120);
-		DebugDrawCircle(player.GetCenter(), Vector(25, 25, 255), 10, 200, true, 0.3);
+		if(BotAI.BotDebugMode) {
+			DebugDrawCircle(player.GetCenter(), Vector(25, 25, 255), 10, 200, true, 0.3);
+		}
 		while(com = Entities.FindByClassnameWithin(com, "infected", player.GetCenter(), 200)) {
 			if(!BotAI.IsAlive(com) || (BotAI.IsInfectedBeShoved(com) && isShove && !isHealing) || BotAI.IsEntitySI(BotAI.GetTarget(com))) continue;
 			local dis = BotAI.nextTickDistance(player, com);

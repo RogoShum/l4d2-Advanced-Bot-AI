@@ -113,11 +113,11 @@ class ::AITaskAvoidDanger extends AITaskSingle
 
 						local nexDis = BotAI.nextTickDistance(player, danger);
 						local cansee = BotAI.VectorDotProduct(BotAI.normalize(danger.EyeAngles().Forward()), BotAI.normalize(player.GetOrigin() - danger.GetOrigin())) > 0.4
-						if(nexDis < 140 && cansee) {
+						if(nexDis < 150 && cansee) {
 							local navigator = BotAI.getNavigator(player);
 							navigator.clearPath("followPlayer");
 							player.UseAdrenaline(1.0);
-							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 330, 0, 330) + BotAI.normalize(danger.GetOrigin() - player.GetOrigin()).Scale(700);
+							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 130, 0, 130);
 						} else {
 							local isTarget = BotAI.IsTarget(player, danger);
 							if(!isTarget || nexDis > 200) {
@@ -137,12 +137,12 @@ class ::AITaskAvoidDanger extends AITaskSingle
 									}
 									BotAI.botRunPos(player, closest, "followPlayer", 4, changeOrDieOrRun);
 								} else {
-									vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(300);
+									vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
 								}
 							} else {
 								local navigator = BotAI.getNavigator(player);
 								navigator.clearPath("followPlayer");
-								vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(300);
+								vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
 							}
 						}
 					} else {

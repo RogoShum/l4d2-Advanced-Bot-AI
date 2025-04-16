@@ -531,8 +531,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 	}
 }
 
-::ABA_IsAdmin <- function ( player )
-{
+::ABA_IsAdmin <- function ( player ) {
 	if (typeof player == "VSLIB_PLAYER")
 		player = player.GetBaseEntity();
 
@@ -543,8 +542,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 
 	if (!steamid) return false;
 
-	if ( !(steamid in BotAI.ABA_Admins) )
-	{
+	if ( !(steamid in BotAI.ABA_Admins) ) {
 		BotAI.EasyPrint("botai_admin_only");
 		return false;
 	}
@@ -1436,34 +1434,29 @@ function BotAI::locateUseTarget(args)
 	BotAI.SaveSetting();
 }
 
-::BotUnstickCmd <- function ( speaker, args , args1)
-{
+::BotUnstickCmd <- function ( speaker, args , args1) {
 	BotExitMenuCmd(speaker, args, args1);
 	if(BotAI.Unstick) {
 		BotAI.Unstick = false;
 		Convars.SetValue( "sb_unstick", 0 );
 		BotAI.EasyPrint("botai_unstick_off");
-	} else if(BotAI.PathFinding){
-		Convars.SetValue( "sb_unstick", 0 );
-		BotAI.EasyPrint("botai_unstick_fail");
 	} else {
 		BotAI.Unstick = true;
 		Convars.SetValue( "sb_unstick", 1 );
 		BotAI.EasyPrint("botai_unstick_on");
+		if(BotAI.PathFinding) {
+			BotAI.EasyPrint("botai_unstick_pathfinding");
+		}
 	}
 	BotAI.SaveSetting();
 }
 
-::BotMeleeCmd <- function ( speaker, args , args1)
-{
-	if(BotAI.Melee)
-	{
+::BotMeleeCmd <- function ( speaker, args , args1) {
+	if(BotAI.Melee) {
 		BotAI.Melee = false;
 		Convars.SetValue( "sb_max_team_melee_weapons", 0 );
 		BotAI.EasyPrint("botai_melee_off");
-	}
-	else
-	{
+	} else {
 		BotAI.Melee = true;
 		BotAI.resetBotMeleeAction();
 		BotAI.EasyPrint("botai_melee_on");
