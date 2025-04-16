@@ -2743,6 +2743,9 @@ function BotAI::BotReset(boto) {
 	if(!BotAI.IsEntityValid(boto)) return;
 	if(!IsPlayerABot(boto))
 		return;
+	if(BotAI.BotDebugMode) {
+		BotAI.EasyPrint("[Reset] " + BotAI.getPlayerBaseName(boto));
+	}
 	return CommandABot( { cmd = 3, bot = boto } );
 }
 
@@ -2858,7 +2861,7 @@ function BotAI::botStayPos(player, pos, id, priority = 4, stayTime = 3, distance
 	return false;
 }
 
-function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.trueDude, distance = 10000, buildTest = false) {
+function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.trueDude, distance = 7000, buildTest = false) {
 	if(!buildTest && !IsPlayerABot(player))
 		return false;
 

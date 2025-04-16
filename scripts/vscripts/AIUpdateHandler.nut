@@ -1059,7 +1059,7 @@ function BotAI::AdjustBotsUpdateRate(args) {
 
 	BotAI.WitchList = witchList;
 
-	BotAI.GiveUpPlayer(true);
+	//BotAI.GiveUpPlayer(true);
 }
 
 ::BotAI.GiveUpPlayer <- function(flag) {

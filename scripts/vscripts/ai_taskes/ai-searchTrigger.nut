@@ -30,26 +30,62 @@ class ::AITaskSearchTrigger extends AITaskGroup {
 	}
 
 	function GroupUpdateChecker(player) {
-		local dis = 8000;
+		if(!BotAI.IsPlayerEntityValid(player) ||
+		   player.IsIncapacitated() ||
+		   player.IsHangingFromLedge()) {
+			return false;
+		}
+
+		local dis = 5000;
 		local cloest = null;
 
-		foreach(trigger in triggerEnabled)
-		{
-			if(trigger in triggerLinks)
-				continue;
+		/*
+		foreach(trigger, assignedPlayer in triggerLinks) {
+			if(assignedPlayer == player) {
+				return false;
+			}
+		}
+		*/
+
+		foreach(trigger in triggerEnabled) {
+			if(trigger in triggerLinks) continue;
 
 			local disToTrigger = BotAI.distanceof(player.GetOrigin(), trigger.GetOrigin());
+			local isClosest = true;
 
-			if(disToTrigger < dis)
-			{
+			foreach(otherPlayer in BotAI.SurvivorBotList) {
+				if(otherPlayer == player ||
+				   !BotAI.IsPlayerEntityValid(otherPlayer) ||
+				   otherPlayer.IsIncapacitated() ||
+				   otherPlayer.IsHangingFromLedge()) {
+					continue;
+				}
+
+				local alreadyAssigned = false;
+				foreach(_, assignedPlayer in triggerLinks) {
+					if(assignedPlayer == otherPlayer) {
+						alreadyAssigned = true;
+						break;
+					}
+				}
+
+				if(alreadyAssigned) continue;
+
+				local otherDis = BotAI.distanceof(otherPlayer.GetOrigin(), trigger.GetOrigin());
+				if(otherDis < disToTrigger) {
+					isClosest = false;
+					break;
+				}
+			}
+
+			if(isClosest && disToTrigger < dis) {
 				dis = disToTrigger;
 				cloest = trigger;
 			}
 		}
 
-		if(cloest != null)
-		{
-			triggerLinks[cloest] <- player
+		if(cloest != null) {
+			triggerLinks[cloest] <- player;
 			printl("[Bot AI] Found " + cloest.GetClassname() + " named: " + cloest.GetName() + "[" + cloest.GetEntityIndex() + "]");
 			return true;
 		}
@@ -60,16 +96,13 @@ class ::AITaskSearchTrigger extends AITaskGroup {
 	function playerUpdate(player) {
 		if(!BotAI.IsPlayerEntityValid(player)) return;
 
-		foreach(trigger, link in triggerLinks)
-		{
-			if(!BotAI.IsEntityValid(link))
-			{
+		foreach(trigger, link in triggerLinks) {
+			if(!BotAI.IsEntityValid(link)) {
 				delete triggerLinks[trigger];
 				continue;
 			}
 
-			if(!BotAI.IsTriggerUsable(trigger))
-			{
+			if(!BotAI.IsTriggerUsable(trigger) || player.IsIncapacitated() || player.IsHangingFromLedge() || BotAI.SurvivorList.len() > BotAI.SurvivorBotList.len()) {
 				delete triggerLinks[trigger];
 				BotAI.setBotLockTheard(link, -1);
 				continue;
@@ -79,10 +112,12 @@ class ::AITaskSearchTrigger extends AITaskGroup {
 			local needFind = trigger;
 			local hasGlow = false;
 			local glow = NetProps.GetPropEntity(trigger, "m_glowEntity");
+
 			if(BotAI.IsEntityValid(glow)) {
 				hasGlow = true;
 				needFind = glow;
 			}
+
 			if(BotAI.distanceof(player.GetOrigin(), needFind.GetOrigin()) > 150) {
 				local navigator = BotAI.getNavigator(player);
 				if(!navigator.hasPath("searchTrigger")) {

@@ -112,7 +112,13 @@ class ::AITaskAvoidDanger extends AITaskSingle
 						BotAI.BotRetreatFrom(player, danger);
 
 						local nexDis = BotAI.nextTickDistance(player, danger);
-						if(nexDis > 150) {
+						local cansee = BotAI.VectorDotProduct(BotAI.normalize(danger.EyeAngles().Forward()), BotAI.normalize(player.GetOrigin() - danger.GetOrigin())) > 0.4
+						if(nexDis < 140 && cansee) {
+							local navigator = BotAI.getNavigator(player);
+							navigator.clearPath("followPlayer");
+							player.UseAdrenaline(1.0);
+							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 330, 0, 330) + BotAI.normalize(danger.GetOrigin() - player.GetOrigin()).Scale(700);
+						} else {
 							local isTarget = BotAI.IsTarget(player, danger);
 							if(!isTarget || nexDis > 200) {
 								local closest = null;
@@ -130,16 +136,14 @@ class ::AITaskAvoidDanger extends AITaskSingle
 										return false;
 									}
 									BotAI.botRunPos(player, closest, "followPlayer", 4, changeOrDieOrRun);
+								} else {
+									vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(300);
 								}
-
 							} else {
 								local navigator = BotAI.getNavigator(player);
 								navigator.clearPath("followPlayer");
+								vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(300);
 							}
-						} else {
-							local navigator = BotAI.getNavigator(player);
-							navigator.clearPath("followPlayer");
-							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 240, 150, 240);
 						}
 					} else {
 						if(BotAI.nextTickDistance(player, danger) > 300)
@@ -149,7 +153,7 @@ class ::AITaskAvoidDanger extends AITaskSingle
 					}
 				}
 
-				if(name == "infected"){
+				if(name == "infected") {
 					if(BotAI.IsTarget(player, danger))
 						vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 150, 245, 300);
 					else
@@ -172,7 +176,7 @@ class ::AITaskAvoidDanger extends AITaskSingle
 
 					if(BotAI.IsEntityValid(helper) && BotAI.distanceof(helper.GetOrigin(), player.GetOrigin()) < 1000)
 						BotAI.botRunPos(player, helper, "farAwayWitch", 4, untilWitchDie);
-					else if(BotAI.witchKilling(danger) || BotAI.witchRunning(danger)){
+					else if(BotAI.witchKilling(danger) || BotAI.witchRunning(danger)) {
 						local dirction = BotAI.normalize(BotAI.fakeTwoD(player.GetOrigin() - danger.GetOrigin()));
 						local isTarget = BotAI.witchRunning(danger) && BotAI.xyDotProduct(dirction, BotAI.normalize(BotAI.fakeTwoD(danger.GetForwardVector()))) >= 0.85;
 						if(isTarget) {
@@ -183,6 +187,7 @@ class ::AITaskAvoidDanger extends AITaskSingle
 								if(BotAI.witchRetreat(danger)) return true;
 								return false;
 							}
+							player.UseAdrenaline(1.0);
 							BotAI.botRunPos(player, danger, "killWItch", 4, changeOrDieOrRun);
 						}
 					}

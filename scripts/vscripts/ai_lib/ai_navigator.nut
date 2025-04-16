@@ -12,7 +12,7 @@ class ::Navigator {
     checkTime = Time();
     timeOut = Time();
     pathFlat = true;
-    SEARCH_LIMIT = 256;
+    SEARCH_LIMIT = 128;
     TIME_OUT_LIMIT = 5;
     JUMP_HIGHT = 50;
 
@@ -173,7 +173,7 @@ class ::Navigator {
         if(getRunningPathData().discardFunc()) {
             if(BotAI.BotDebugMode)
                 printl("[Navigator] Discard: " + movingID);
-            stop();
+            stop(true);
         }
     }
 
@@ -279,7 +279,7 @@ class ::Navigator {
 		if(paths != null && BotAI.validVector(getRunningPathData().getPos(null))) {
 			local goalPos = getRunningPathData().getPos(null);
             if(goalPos == null || goalPos.Length() == 0) {
-                stop();
+                stop(true);
                 return;
             }
 
@@ -335,7 +335,7 @@ class ::Navigator {
                 }
 
 				if(movingID.find("#") == null && BotAI.distanceof(BotAI.fakeTwoD(player.GetOrigin()), BotAI.fakeTwoD(goalPos)) <= offset) {
-					stop();
+					stop(true);
 				}
 				return;
 			//}
@@ -418,7 +418,7 @@ class ::Navigator {
 
     function clearPath(id) {
         if(id == movingID)
-            stop();
+            stop(true);
         if(id in pathCache)
             delete pathCache[id];
     }
@@ -471,13 +471,15 @@ class ::Navigator {
         return getMovingPath(id) != null;
     }
 
-    function stop() {
+    function stop(resetBot = false) {
         local id = movingID;
         movingID = null;
         if(id in pathCache)
             delete pathCache[id];
 
-        BotAI.BotReset(player);
+        if (resetBot) {
+            BotAI.BotReset(player);
+        }
     }
 
     function getMovingPath(id) {
@@ -535,7 +537,7 @@ class ::Navigator {
                         goalArea = data.pos.GetLastKnownArea();
                     goalPos = data.pos.GetOrigin();
                 } else {
-                    stop();
+                    stop(true);
                     return false;
                 }
 
