@@ -969,20 +969,21 @@ function BotAI::AdjustBotsUpdateRate(args) {
 					//DebugDrawText(playerSet.GetOrigin(), GetFlowDistanceForPosition(playerSet.GetOrigin()).tostring(), false, 0.2);
 				}
 
-				if(BotAI.IsHumanSpectating(playerSet))
+				if(BotAI.IsHumanSpectating(playerSet)) {
 					NetProps.SetPropInt(playerSet, "m_hViewEntity", -1);
-
-				if(BotAI.BotFullPower || HasTank)
-					playerSet.OverrideFriction(1, 0.6);
+				}
 
 				//bug Fix
 				//1.
 				local weapon = playerSet.GetActiveWeapon();
 				if(weapon && weapon.GetClassname() == "weapon_first_aid_kit") {
-					if(BotAI.IsPressingAttack(playerSet))
+					if(BotAI.IsPressingAttack(playerSet)) {
 						BotAI.ForceButton(playerSet, 1, 2);
-					if(BotAI.IsBotHealing(playerSet))
+					}
+
+					if(BotAI.IsBotHealing(playerSet)) {
 						BotAI.ForceButton(playerSet, 2048, 2);
+					}
 				}
 
 				//not working
@@ -1010,10 +1011,11 @@ function BotAI::AdjustBotsUpdateRate(args) {
 	}
 
 	foreach(idx, pro in BotAI.projectileList) {
-		if(!BotAI.IsEntityValid(pro))
+		if(!BotAI.IsEntityValid(pro)) {
 			delete BotAI.projectileList[idx];
-		else if(BotAI.GetEntitySpeedVector(pro) <= 10 && BotAI.GetEntitySpeedLocalVector(pro) <= 10 && !(pro.GetEntityIndex() in BotAI.ListAvoidCar))
+		} else if(BotAI.GetEntitySpeedVector(pro) <= 10 && BotAI.GetEntitySpeedLocalVector(pro) <= 10 && !(pro.GetEntityIndex() in BotAI.ListAvoidCar)) {
 			delete BotAI.projectileList[idx];
+		}
 	}
 
 	foreach(idx, pro in BotAI.groundList) {
@@ -1418,17 +1420,16 @@ function BotAI::locateUseTarget(args)
 		Convars.SetValue( "sb_separation_danger_max_range", 300 );
 		Convars.SetValue( "sb_allow_leading", 0 );
 		Convars.SetValue( "sb_neighbor_range", 120 );
-		Convars.SetValue( "sb_escort", 1 );
+		//Convars.SetValue( "sb_escort", 1 );
 		BotAI.EasyPrint("botai_path_finding_off");
-
 	} else {
 		BotAI.PathFinding = true;
 		Convars.SetValue( "sb_allow_leading", 1 );
 		Convars.SetValue( "sb_separation_range", 2000 );
-		Convars.SetValue( "sb_separation_danger_min_range", 100 );
+		Convars.SetValue( "sb_separation_danger_min_range", 500 );
 		Convars.SetValue( "sb_separation_danger_max_range", 2000 );
 		Convars.SetValue( "sb_neighbor_range", 1000 );
-		Convars.SetValue( "sb_escort", 0 );
+		//Convars.SetValue( "sb_escort", 0 );
 		BotAI.EasyPrint("botai_path_finding_on");
 	}
 	BotAI.SaveSetting();
@@ -2240,12 +2241,15 @@ function BotAI::AdjustBotState(args) {
 	if(BotAI.IsEntityValid(BotAI.UseTarget) && !BotAI.useTargetHooks) {
 		BotAI.UseTarget.ValidateScriptScope();
 		local scope = BotAI.UseTarget.GetScriptScope();
+
 		local function using() {
 			BotAI.useTargetUsing = true;
 		}
+
 		local function finish() {
 			BotAI.useTargetUsing = false;
 		}
+
 		scope["BotAI_UseStart"] <- using;
 		scope["BotAI_UseCanceled"] <- finish;
 		scope["BotAI_UseFinished"] <- finish;
@@ -2392,7 +2396,7 @@ function resetAllBots() {
 	if(BotAI.PathFinding) {
 		Convars.SetValue( "sb_allow_leading", 1 );
 		Convars.SetValue( "sb_separation_range", 2000 );
-		Convars.SetValue( "sb_separation_danger_min_range", 100 );
+		Convars.SetValue( "sb_separation_danger_min_range", 500 );
 		Convars.SetValue( "sb_separation_danger_max_range", 2000 );
 		Convars.SetValue( "sb_neighbor_range", 1000 );
 		Convars.SetValue( "sb_escort", 0 );
@@ -2402,7 +2406,7 @@ function resetAllBots() {
 		Convars.SetValue( "sb_separation_danger_max_range", 300 );
 		Convars.SetValue( "sb_allow_leading", 0 );
 		Convars.SetValue( "sb_neighbor_range", 120 );
-		Convars.SetValue( "sb_escort", 1 );
+		//Convars.SetValue( "sb_escort", 1 );
 	}
 
 	if(!BotAI.PathFinding && BotAI.Unstick)
@@ -2447,7 +2451,7 @@ function resetAllBots() {
 	Convars.SetValue( "sb_enforce_proximity_lookat_timeout", 1 );
 	Convars.SetValue( "sb_enforce_proximity_range", 300 );
 	Convars.SetValue( "sb_battlestation_human_hold_time", 0.1 );
-	Convars.SetValue( "sb_sidestep_for_horde", 0 );
+	Convars.SetValue( "sb_sidestep_for_horde", 1 );
 	Convars.SetValue( "sb_close_checkpoint_door_interval", 0.15 );
 	Convars.SetValue( "sb_max_battlestation_range_from_human", 150 );
 

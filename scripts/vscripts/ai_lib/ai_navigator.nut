@@ -255,38 +255,40 @@ class ::Navigator {
         }
 
         reRun();
-
         shouldDiscard();
+
         if(!moving()) {
             return;
         }
 
         if(BotAI.BotFullPower || BotAI.HasTank) {
-            local friction = 0.9;
-            player.OverrideFriction(0.5, friction);
+            local friction = 1.2;
+
+            foreach(danger in BotAI.SpecialList) {
+                if (danger.GetClassname() == "player" && danger.GetZombieType() == 8 && BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 200) {
+                    friction = 2.0;
+                }
+            }
+
+            NetProps.SetPropFloat(player, "m_flLaggedMovementValue", friction);
+            //player.OverrideFriction(0.5, friction);
+        } else {
+            NetProps.SetPropFloat(player, "m_flLaggedMovementValue", 1.0);
         }
 
-		local paths = getRunningPathData().paths;
-        local offset = 25;
-		if(paths != null && BotAI.validVector(getRunningPathData().getPos(null))) {
+        local offset = 15;
+
+		if(BotAI.validVector(getRunningPathData().getPos(null))) {
 			local goalPos = getRunningPathData().getPos(null);
             if(goalPos == null || goalPos.Length() == 0) {
                 stop(true);
                 return;
             }
 
-			local xyGoalPos = goalPos;
-			local xyTracePos = BotAI.tracePos(player, goalPos, true);
-            local addition = Vector(0, 0, 5);
 			if(BotAI.BotDebugMode) {
-			    DebugDrawCircle(xyGoalPos, Vector(0, 0, 255), 1.0, 5, true, 0.2);
-			    DebugDrawLine(player.EyePosition(), xyGoalPos, 0, 0, 255, true, 0.2);
+			    DebugDrawCircle(goalPos, Vector(0, 0, 255), 1.0, 5, true, 0.2);
+			    DebugDrawLine(player.EyePosition(), goalPos, 0, 0, 255, true, 0.2);
             }
-
-            if(BotAI.BotDebugMode && BotAI.validVector(xyTracePos)) {
-				DebugDrawCircle(xyTracePos + addition, Vector(0, 255, 0), 1.0, 10, true, 0.2);
-				DebugDrawLine(player.EyePosition() + addition, xyTracePos + addition, 0, 255, 0, true, 0.2);
-			}
 
             if(BotAI.distanceof(player.GetOrigin(), goalPos) > 10) {
                 BotAI.botCmdMove(player, goalPos);
@@ -574,10 +576,14 @@ class ::PathData {
     }
 
     function getPos(originalPos) {
-        if(BotAI.validVector(pos))
+        if(BotAI.validVector(pos)) {
             return pos;
-        if(BotAI.IsEntityValid(pos) && "GetOrigin" in pos)
-            return pos.GetOrigin();
+        }
+
+        if(BotAI.IsEntityValid(pos) && "GetCenter" in pos) {
+            return pos.GetCenter();
+        }
+
         return originalPos;
     }
 

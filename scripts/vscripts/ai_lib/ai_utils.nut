@@ -404,8 +404,7 @@ function BotAI::HasDisabledButton(player, button )
 
 function BotAI::DisableButton(player, button, time = 999, force = false)
 {
-	if (!BotAI.IsPlayerEntityValid(player))
-	{
+	if (!BotAI.IsPlayerEntityValid(player)) {
 		return;
 	}
 
@@ -419,8 +418,7 @@ function BotAI::DisableButton(player, button, time = 999, force = false)
 	if(force)
 		BotAI.disableButton[button] <- true;
 
-	local function RemoveButtonDisable(args)
-	{
+	local function RemoveButtonDisable(args) {
 		local buttons = NetProps.GetPropInt(args.ent_, "m_afButtonDisabled" );
 		local button = args.but;
 		NetProps.SetPropInt(args.ent_, "m_afButtonDisabled", ( buttons & ~button ) );
@@ -2188,8 +2186,7 @@ function BotAI::vomitTank(entity) {
 	}
 }
 
-::BotAI.getDodgeVec <- function(player, infected, force = 220, backForce = 220, limit = 220, maxDis = 600, doubleHorizontal = true, motion = false) {
-	BotAI.debugCall("getDodgeVec");
+::BotAI.getDodgeVec <- function(player, infected, force = 220, backForce = 220, limit = 220, maxDis = 600, doubleHorizontal = true, motion_ = false) {
 	if(!BotAI.IsPlayerEntityValid(player)) {
 		printl("[Bot AI] getDodgeVec function use for player entity.");
 		return Vector(0, 0, 0);
@@ -2210,52 +2207,54 @@ function BotAI::vomitTank(entity) {
 	force *= disScale;
 	backForce *= disScale;
 
-	local health = player.GetHealth();
-	if (player.IsPlayer()) {
-		health += player.GetHealthBuffer();
-	}
-
-	if(health < BotAI.survivorLimpHealth) {
-		force *= 0.7;
-		backForce *= 0.7;
-	}
-
 	if(BotAI.getIsMelee(player) && (!BotAI.IsEntitySI(infected) || infected.GetZombieType() != 8)) {
 		if(BotAI.IsTargetStaggering(infected) || (BotAI.IsEntitySI(infected) && infected.IsStaggering())) {
 			local attractVec = nextInfected - nextPlayer;
 			return BotAI.fakeTwoD(BotAI.normalize(attractVec).Scale(limit));
-		} else if(BotAI.IsLivingEntity(infected))
+		} else if(BotAI.IsLivingEntity(infected)) {
 			backForce *= -1;
-	}
-
-	local living = "EyeAngles" in infected;
-	local eyeVec = Vector(0, 0, 0);
-	local dirction = nextInfected - nextPlayer;
-
-	if(BotAI.GetEntitySpeedVector(infected) > 10) {
-		eyeVec = infected.GetVelocity();
-	} else {
-		if(living) {
-			eyeVec = BotAI.normalize(BotAI.fakeTwoD(infected.EyeAngles().Forward()));
-		} else {
-			eyeVec = nextPlayer - nextInfected;
-			dirction = BotAI.normalize(BotAI.fakeTwoD(player.EyeAngles().Forward()));
 		}
 	}
 
-	local horizontalVector = BotAI.normalize(BotAI.fakeTwoD(player.EyeAngles().Left()));
-	local verticalVector = BotAI.normalize(BotAI.fakeTwoD(player.EyeAngles().Forward()));
+	local living = "EyeAngles" in infected;
+	local motion = Vector(0, 0, 0);
+	local dirction = nextInfected - nextPlayer;
+	local justLeft = false;
 
-	if(BotAI.xyCrossProduct(eyeVec, dirction) > 0)
-		horizontalVector = horizontalVector.Scale(-1);
+	if(BotAI.GetEntitySpeedVector(infected) > 10) {
+		motion = infected.GetVelocity();
+	} else {
+		if(living) {
+			motion = BotAI.normalize(BotAI.fakeTwoD(infected.EyeAngles().Forward()));
+		} else {
+			//motion = nextPlayer - nextInfected;
+			//dirction = BotAI.normalize(BotAI.fakeTwoD(player.EyeAngles().Forward()));
+			justLeft = true;
+		}
+	}
+	
+	local foot = BotAI.getCross(nextInfected, nextInfected + motion, nextPlayer);
 
-	if(BotAI.xyDotProduct(eyeVec, dirction) <= 0)
-		verticalVector = verticalVector.Scale(-1);
+	if(BotAI.BotDebugMode) {
+		DebugDrawLine(nextInfected + Vector(0, 0, 20), nextPlayer + Vector(0, 0, 20), 60, 120, 255, true, 0.2);
+		DebugDrawLine(foot + Vector(0, 0, 20), nextPlayer + Vector(0, 0, 20), 60, 255, 60, true, 0.2);
+	}
+
+	local horizontalVector;
+	local verticalVector = BotAI.normalize(BotAI.fakeTwoD(dirction));
+
+	if (!justLeft) {
+		horizontalVector = BotAI.normalize(BotAI.fakeTwoD(nextPlayer - foot));
+		verticalVector = BotAI.normalize(BotAI.fakeTwoD(dirction));
+	} else {
+		horizontalVector = BotAI.normalize(BotAI.fakeTwoD(BotAI.rotateVector(dirction, 90)));
+		verticalVector = BotAI.normalize(BotAI.fakeTwoD(dirction));
+	}
 
 	local playerEyeVec = BotAI.normalize(BotAI.fakeTwoD(player.EyeAngles().Forward()));
 	local obstacleVec = Vector(0, 0, 0);
-	local maxWallDist = 150;
-	local minWallDist = 50;
+	local maxWallDist = 200;
+	local minWallDist = 0;
 
 	local function clamp(value, min, max) {
 		if (value < min) return min;
@@ -2263,51 +2262,49 @@ function BotAI::vomitTank(entity) {
 		return value;
 	}
 
+	local wallCount = 0;
+
 	for(local i = 0; i < 8; ++i) {
 		local angleVec = BotAI.rotateVector(playerEyeVec, i * 45);
 		local dist = BotAI.GetDistanceToWall(player, angleVec);
 
 		if(dist <= maxWallDist) {
+			wallCount++;
 			local t = clamp((dist - minWallDist) / (maxWallDist - minWallDist), 0, 1);
-			local weight = 1.0 - (t * t);
+			local weight = 1.0 - (t * t) * RandomFloat(0.5, 1.0);
 			obstacleVec += angleVec.Scale(-force * weight);
 		}
 	}
 
-	if(obstacleVec.Length() > 0) {
-		obstacleVec = BotAI.normalize(obstacleVec);
-		local closestDist = BotAI.GetDistanceToWall(player, obstacleVec);
-		local blendFactor = clamp(1.0 - (closestDist / maxWallDist), 0.3, 1.0);
-
-		local function lerp(a, b, t) {
-			return a + (b - a) * t;
+	if (wallCount >= 5) {
+		horizontalVector = obstacleVec;
+		verticalVector = obstacleVec;
+	} else {
+		if(obstacleVec.Length() > 0) {
+			obstacleVec = BotAI.normalize(obstacleVec);
+			local closestDist = BotAI.GetDistanceToWall(player, obstacleVec);
+			local blendFactor = clamp(1.0 - (closestDist / maxWallDist), 0.3, 1.0);
+	
+			local function lerp(a, b, t) {
+				return a + (b - a) * t;
+			}
+	
+			horizontalVector = BotAI.normalize(
+				Vector(
+					lerp(horizontalVector.x, obstacleVec.x, blendFactor * 0.7),
+					lerp(horizontalVector.y, obstacleVec.y, blendFactor * 0.7),
+					0
+				)
+			);
+	
+			verticalVector = BotAI.normalize(
+				Vector(
+					lerp(verticalVector.x, obstacleVec.x, blendFactor * 0.3),
+					lerp(verticalVector.y, obstacleVec.y, blendFactor * 0.3),
+					0
+				)
+			);
 		}
-
-		horizontalVector = BotAI.normalize(
-			Vector(
-				lerp(horizontalVector.x, obstacleVec.x, blendFactor * 0.7),
-				lerp(horizontalVector.y, obstacleVec.y, blendFactor * 0.7),
-				0
-			)
-		);
-
-		verticalVector = BotAI.normalize(
-			Vector(
-				lerp(verticalVector.x, obstacleVec.x, blendFactor * 0.3),
-				lerp(verticalVector.y, obstacleVec.y, blendFactor * 0.3),
-				0
-			)
-		);
-	}
-
-	if(doubleHorizontal) {
-		local foot = BotAI.getCross(nextInfected, nextInfected + eyeVec, nextPlayer);
-		local horizontalVector_2 = BotAI.normalize(nextPlayer - foot);
-
-		if(BotAI.xyDotProduct(horizontalVector, horizontalVector_2) <= 0)
-			horizontalVector_2 = horizontalVector_2.Scale(-1);
-
-		horizontalVector = horizontalVector.Scale(0.5) + horizontalVector_2.Scale(0.5);
 	}
 
 	if(BotAI.isEdge(player, horizontalVector)) {
@@ -2334,7 +2331,7 @@ function BotAI::vomitTank(entity) {
 		newVec += BotAI.normalize(BotAI.fakeTwoD(player.GetOrigin() - infected.GetOrigin())).Scale(limit);
 	}
 
-	if(!doubleHorizontal && obstacleVec.Length() > 0) {
+	if(obstacleVec.Length() > 0) {
 		newVec = newVec.Scale(1.5);
 	}
 
@@ -2525,8 +2522,32 @@ function BotAI::nextTickPostion(entity, tps = 10.0) {
 
 	local scale = 1.0 / tps;
 	local vel = entity.GetVelocity().Scale(scale);
+	return entity.GetOrigin();
+}
+
+/** 
+ * break
+ */
+/*
+function BotAI::nextTickDistance(entity, entity1, tps = 10.0, xy = false) {
+	local startPos = BotAI.nextTickPostion(entity, tps);
+	local targetPos = BotAI.nextTickPostion(entity1, tps);
+	if(xy) {
+		startPos = BotAI.fakeTwoD(startPos);
+		targetPos = BotAI.fakeTwoD(targetPos);
+	}
+
+	return BotAI.distanceof(startPos, targetPos);
+}
+
+function BotAI::nextTickPostion(entity, tps = 10.0) {
+	if(!BotAI.IsEntityValid(entity)) return Vector(0, 0, 0);
+
+	local scale = 1.0 / tps;
+	local vel = entity.GetVelocity().Scale(scale);
 	return entity.GetOrigin() + vel;
 }
+*/
 
 function BotAI::distanceof(vec1, vec2) {
 	if(!vec1 || !vec2)
@@ -2757,6 +2778,8 @@ function BotAI::BotReset(boto) {
 	if(BotAI.BotDebugMode) {
 		BotAI.EasyPrint("[Reset] " + BotAI.getPlayerBaseName(boto));
 	}
+
+	NetProps.SetPropFloat(boto, "m_flLaggedMovementValue", 1.0);
 	return CommandABot( { cmd = 3, bot = boto } );
 }
 

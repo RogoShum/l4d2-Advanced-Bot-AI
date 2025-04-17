@@ -1,7 +1,6 @@
-class ::AITaskAvoidDanger extends AITaskSingle
-{
-	constructor(orderIn, tickIn, compatibleIn, forceIn)
-    {
+class ::AITaskAvoidDanger extends AITaskSingle {
+
+	constructor(orderIn, tickIn, compatibleIn, forceIn) {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
 		enumGround["env_entity_igniter"] <- "env_entity_igniter"
 		enumGround["entityflame"] <- "entityflame"
@@ -40,6 +39,7 @@ class ::AITaskAvoidDanger extends AITaskSingle
 			if(BotAI.IsAlive(special) && !special.IsGhost() && BotAI.distanceof(special.GetOrigin(), player.GetOrigin()) <= 600
 			&& (special.GetZombieType() == 3 || special.GetZombieType() == 5 || special.GetZombieType() == 6 || special.GetZombieType() == 8)
 			&& !BotAI.IsEntityValid(special.GetSpecialInfectedDominatingMe())
+			&& BotAI.GetTarget(special) == player
 			&& BotAI.CanSeeOtherEntityWithoutLocation(player, special, 0, false, MASK_UNTHROUGHABLE))
 					dangerous[dangerous.len()] <- special;
 		}
@@ -51,17 +51,17 @@ class ::AITaskAvoidDanger extends AITaskSingle
 
 		BotAI.setBotAvoid(player, dangerous);
 
-		if(dangerous.len() > 0)
+		if(dangerous.len() > 0) {
 			return true;
-		else {
+		} else {
 			BotAI.setBotDedgeVector(player, null);
 			return false;
 		}
 	}
 
-	function playerUpdate(player)
-	{
+	function playerUpdate(player) {
 		local dangerous = BotAI.getBotAvoid(player);
+
 		if(dangerous.len() > 0) {
 			local vec3d = Vector(0, 0, 0);
 			local vecList = {};
@@ -79,6 +79,7 @@ class ::AITaskAvoidDanger extends AITaskSingle
 					local function feelSafe() {
 						return !player.GetLastKnownArea().IsDamaging();
 					}
+
 					if(lastArea && lastArea.IsDamaging()) {
 						local follow = false;
 						foreach(humanPlayer in BotAI.SurvivorHumanList) {
@@ -105,30 +106,44 @@ class ::AITaskAvoidDanger extends AITaskSingle
 
 				if(name == "player") {
 					if(danger.GetZombieType() == 6) {
-						if(BotAI.nextTickDistance(player, danger) > 300)
+						if(BotAI.nextTickDistance(player, danger) > 300) {
 							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 420, 50, 420);
-						else
-							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 420, 220, 420, 800);
+						} else {
+							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 420, 120, 420, 800);
+						}
 					} else if(danger.GetZombieType() == 8) {
-						BotAI.BotRetreatFrom(player, danger);
+						//BotAI.BotRetreatFrom(player, danger);
 
 						local nexDis = BotAI.nextTickDistance(player, danger);
 						local cansee = BotAI.VectorDotProduct(BotAI.normalize(danger.EyeAngles().Forward()), BotAI.normalize(player.GetOrigin() - danger.GetOrigin())) > 0.6
-						if(nexDis < 150 && cansee) {
+						local innerCircle = 200;
+						if(BotAI.BotDebugMode) {
+							DebugDrawCircle(player.GetCenter(), Vector(255, 25, 25), 0, innerCircle, true, 0.5);
+						}
+						
+						if(nexDis < innerCircle) {
 							local navigator = BotAI.getNavigator(player);
 							navigator.clearPath("followPlayer");
 							player.UseAdrenaline(1.0);
 
-							local randomSpot = player.TryGetPathableLocationWithin(370);
+							local randomSpot = player.TryGetPathableLocationWithin(400);
 
 							if(BotAI.distanceof(danger.GetOrigin(), randomSpot) > 170 && BotAI.distanceof(danger.GetOrigin(), (randomSpot + player.GetOrigin()) * 0.5) > 250) {
 								vecList[vecList.len()] <- randomSpot - player.GetOrigin();
 							} else {
-								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 150, 100, 300);
+								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 220, 100, 300, 300);
 							}
 						} else {
 							local isTarget = BotAI.IsTarget(player, danger);
-							if(!isTarget || nexDis > 250) {
+							local rock = null;
+							local hasRock = false;
+							while(rock = Entities.FindByClassname(rock, "tank_rock")) {
+								if(BotAI.xyDotProduct(BotAI.normalize(rock.GetVelocity()), BotAI.normalize(player.GetOrigin() - rock.GetOrigin())) > 0.4) {
+									hasRock = true;
+								}
+							}
+
+							if(!isTarget) {
 								local closest = null;
 								foreach(humanPlayer in BotAI.SurvivorHumanList) {
 									if(humanPlayer.IsIncapacitated() || humanPlayer.IsHangingFromLedge()) continue;
@@ -149,8 +164,10 @@ class ::AITaskAvoidDanger extends AITaskSingle
 									//vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
 									local randomSpot = player.TryGetPathableLocationWithin(300);
 
-									if(BotAI.distanceof(danger.GetOrigin(), randomSpot) > 400) {
+									if(!hasRock && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 500) {
 										vecList[vecList.len()] <- randomSpot - player.GetOrigin();
+									} else {
+										vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
 									}
 								}
 							} else {
@@ -159,24 +176,27 @@ class ::AITaskAvoidDanger extends AITaskSingle
 								//vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 15, 35, 35, 35);
 								local randomSpot = player.TryGetPathableLocationWithin(300);
 
-								if(BotAI.distanceof(danger.GetOrigin(), randomSpot) > 400) {
+								if(!hasRock && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 500) {
 									vecList[vecList.len()] <- randomSpot - player.GetOrigin();
+								} else {
+									vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
 								}
 							}
 						}
 					} else {
 						if(BotAI.nextTickDistance(player, danger) > 300)
-							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 150, 100, 300);
+							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 150, 50, 300);
 						else
 							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 325, 50, 325);
 					}
 				}
 
 				if(name == "infected") {
-					if(BotAI.IsTarget(player, danger))
+					if(BotAI.IsTarget(player, danger)) {
 						vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 50, 30, 300);
-					else
+					} else {
 						vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 35, 55, 300);
+					}
 				}
 
 				if(name == "witch") {
@@ -252,8 +272,9 @@ class ::AITaskAvoidDanger extends AITaskSingle
 			if(BotAI.validVector(finalVec) && !BotAI.isPlayerNearLadder(player)) {
 				BotAI.botRun(player, player.GetOrigin() + finalVec);
 				//BotAI.setBotDedgeVector(player, finalVec);
-				if(BotAI.BotDebugMode)
+				if(BotAI.BotDebugMode) {
 					DebugDrawLine(player.GetOrigin() + Vector(0, 0, 20), player.GetOrigin() + finalVec + Vector(0, 0, 20), 255, 255, 255, true, 0.2);
+				}
 			} else
 				BotAI.setBotDedgeVector(player, null);
 		} else
@@ -262,8 +283,7 @@ class ::AITaskAvoidDanger extends AITaskSingle
 		updating[player] <- false;
 	}
 
-	function taskReset(player = null)
-	{
+	function taskReset(player = null) {
 		base.taskReset(player);
 	}
 }

@@ -47,7 +47,18 @@ function BotAI::moveFunc() {
 
 				if(!BotAI.isEdge(player, vec)) {
 					NetProps.SetPropVector(player, "m_vecBaseVelocity", vec);
-					BotAI.botRunPos(player, player.GetOrigin() + vec, "botMove", 7, BotAI.falseDude);
+					
+					local function feelingSafe() {
+						local dangerous = BotAI.getBotAvoid(player);
+
+						if(dangerous.len() > 0) {
+							return false;
+						} else {
+							return true;
+						}
+					}
+
+					BotAI.botRunPos(player, player.GetOrigin() + vec, "botMove", 7, feelingSafe);
 				}
 
 				BotAI.botMoveMap[player] = vec * 0.9;
@@ -216,10 +227,14 @@ function BotAI::createRockTargetTimer() {
 				foreach(bot in BotAI.SurvivorBotList) {
 					if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp())
 						continue;
+					
 					if(BotAI.xyDotProduct(BotAI.normalize(rock.GetVelocity()), BotAI.normalize(bot.GetOrigin() - rock.GetOrigin())) > 0.5) {
-						local vec = BotAI.getDodgeVec(bot, rock, 500, 150, 500, 800);
+						local vec = BotAI.getDodgeVec(bot, rock, 300, 50, 300, 5000);
+
 						if(BotAI.validVector(vec) && !BotAI.isPlayerNearLadder(bot)) {
 							BotAI.botMove(bot, vec);
+							bot.OverrideFriction(0.5, 0.2);
+							bot.UseAdrenaline(1.0);
 							if(BotAI.CanHitOtherEntity(rock, bot, g_MapScript.TRACE_MASK_SHOT)) {
 								BotAI.BotAttack(bot, rock);
 							}
@@ -227,6 +242,7 @@ function BotAI::createRockTargetTimer() {
 					}
 				}
 			}
+
 		    avoidProjectile(rock);
 	    }
 
@@ -258,11 +274,15 @@ function BotAI::createProjectileTargetTimer(projectile) {
 			if(projectile == "prop_physics") {
 				local needContinue;
 				foreach(thing in BotAI.takeElse) {
-					if(danger.GetModelName().find(thing) != null)
+					if(danger.GetModelName().find(thing) != null) {
 						needContinue = true;
+					}
 				}
-				if(!(danger.GetEntityIndex() in BotAI.ListAvoidCar))
+
+				if(!(danger.GetEntityIndex() in BotAI.ListAvoidCar)) {
 					needContinue = true;
+				}
+
 				if(needContinue)
 					continue;
 			}
@@ -274,11 +294,15 @@ function BotAI::createProjectileTargetTimer(projectile) {
 
 					if(BotAI.xyDotProduct(BotAI.normalize(danger.GetVelocity()), BotAI.normalize(bot.GetOrigin() - danger.GetOrigin())) > 0.5) {
 						isDanger = true;
-						local vec = BotAI.getDodgeVec(bot, danger, 500, 150, 500, 5000);
-						if(danger.GetClassname() == "spitter_projectile")
+						local vec = BotAI.getDodgeVec(bot, danger, 100, 50, 100, 5000);
+
+						if(danger.GetClassname() == "spitter_projectile") {
 							vec = vec.Scale(0.3);
-						if(BotAI.validVector(vec) && !BotAI.isPlayerNearLadder(bot))
+						}
+
+						if(BotAI.validVector(vec) && !BotAI.isPlayerNearLadder(bot)) {
 							BotAI.botMove(bot, vec);
+						}
 					}
 				}
 			}
@@ -296,10 +320,11 @@ function BotAI::createProjectileTargetTimer(projectile) {
 		    }
 	    }
 
-		if(isDanger)
+		if(isDanger) {
 			return 0.1;
-		else
+		} else {
 			return 0.5;
+		}
     }
 
     if (_targetTimer != null) {
@@ -434,10 +459,11 @@ function BotAI::throwTask(task, player, check) {
 		errorThinker.ValidateScriptScope();
 		local scrScope = errorThinker.GetScriptScope();
 		local function thrower() {
-			if(check)
-                task.singleUpdateChecker(player);
-            else
-                task.taskUpdate(player);
+			if(check) {
+				task.singleUpdateChecker(player);
+			} else {
+				task.taskUpdate(player);
+			}
 		}
 		scrScope["ThinkTimer"] <- thrower;
 		AddThinkToEnt(errorThinker, "ThinkTimer");

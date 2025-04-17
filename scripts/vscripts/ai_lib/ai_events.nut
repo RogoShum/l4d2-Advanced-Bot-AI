@@ -217,7 +217,7 @@
 			while(target = Entities.FindByClassnameWithin(target, "infected", p.GetOrigin(), 120)) {
 				if(BotAI.IsEntityValid(target) && BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > -0.2) {
 					damaged = true;
-					target.TakeDamageEx(p, p, p.GetActiveWeapon(), target.GetOrigin() - p.GetOrigin()
+					target.TakeDamageEx(p, p, p.GetActiveWeapon(), BotAI.normalize(target.GetOrigin() - p.GetOrigin())
 					, p.GetOrigin(), target.GetHealth(), DMG_BLAST);
 					BotAI.spawnParticle("blood_impact_infected_01", target.GetOrigin() + Vector(0, 0, 50), target);
 					BotAI.spawnParticle("blood_melee_slash_TP_swing", target.GetOrigin() + Vector(0, 0, 50), target);
