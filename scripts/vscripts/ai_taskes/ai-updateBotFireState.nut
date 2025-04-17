@@ -148,7 +148,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				shotDis = 120;
 			}
 
-			if(isKnife && targetName == "player" && target.GetZombieType() == 1 && target.GetEntityIndex() in BotAI.smokerTongue){
+			if(isKnife && targetName == "player" && target.GetZombieType() == 1 && target.GetEntityIndex() in BotAI.smokerTongue) {
 				local tongueLength = BotAI.tongueSpeed / 9 * BotAI.smokerTongue[target.GetEntityIndex()];
 				local hitFactor = 420;
 				local tongueRange = BotAI.tongueRange;

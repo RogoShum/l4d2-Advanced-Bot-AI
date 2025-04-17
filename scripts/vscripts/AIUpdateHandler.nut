@@ -965,8 +965,8 @@ function BotAI::AdjustBotsUpdateRate(args) {
 						g = 0;
 						b = 255;
 					}
-					area.DebugDrawFilled(r, g, b, 15, 0.2, true);
-					DebugDrawText(playerSet.GetOrigin(), GetFlowDistanceForPosition(playerSet.GetOrigin()).tostring(), false, 0.2);
+					//area.DebugDrawFilled(r, g, b, 15, 0.2, true);
+					//DebugDrawText(playerSet.GetOrigin(), GetFlowDistanceForPosition(playerSet.GetOrigin()).tostring(), false, 0.2);
 				}
 
 				if(BotAI.IsHumanSpectating(playerSet))
@@ -1856,6 +1856,7 @@ function BotAI::ResetBotFireRate() {
 	return false;
 }
 
+/*
 ::NavigatorPause.avoidDanger <- function(player) {
 	if(!BotAI.IsEntityValid(player)) return true;
 	local target = BotAI.GetTarget(player);
@@ -1881,6 +1882,7 @@ function BotAI::ResetBotFireRate() {
 
 	return false;
 }
+*/
 
 ::BotAI.Sort <- function(List) {
     for (local i = 0; i < List.len(); i++) {
@@ -2212,7 +2214,7 @@ function BotAI::AdjustBotState(args) {
 
 		if((minFlow - myFlow > 400 || BotAI.distanceof(bot.GetOrigin(), minFlowHuman.GetOrigin()) >= 700) && stuck) {
 			CommandABot( { cmd = 3, bot = botIn } );
-			local timeOut = Time()+5;
+			local timeOut = Time() + 5;
 			local function condition() {
 				if(!BotAI.IsEntitySurvivor(botIn) || !BotAI.IsEntitySurvivor(minFlowHuman)) return true;
 					return Time() > timeOut;

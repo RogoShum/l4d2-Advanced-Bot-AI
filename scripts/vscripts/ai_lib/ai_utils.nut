@@ -44,15 +44,6 @@ class ::ChunkMap {
 						baseChunkZ + z * dimension
 					);
 
-					if(BotAI.BotDebugMode) {
-						DebugDrawBox(
-							chunkPos + Vector(dimension/2, dimension/2, dimension/2),
-							Vector(-dimension/2, -dimension/2, -dimension/2), // min (-75,-75,-75)
-							Vector(dimension/2, dimension/2, dimension/2),    // max (75,75,75)
-							25, 25, 255, 0.1, 0.5
-						);
-					}
-
 					local key = createKey(chunkPos);
 					if(key in map) {
 						foreach(entity in map[key]) {
@@ -2044,8 +2035,7 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 	return 0;
 }
 
-function BotAI::getCross(p1, p2, p3)
-{
+function BotAI::getCross(p1, p2, p3) {
 	local dx = p1.x - p2.x;
     local dy = p1.y - p2.y;
 
@@ -2055,13 +2045,11 @@ function BotAI::getCross(p1, p2, p3)
 	return Vector((p1.x + u * dx), (p1.y + u * dy), 0);
 }
 
-function BotAI::xyCrossProduct(v1, v2)
-{
+function BotAI::xyCrossProduct(v1, v2) {
     return (v1.x*v2.y) - (v1.y*v2.x);
 }
 
-function BotAI::xyDotProduct(v1, v2)
-{
+function BotAI::xyDotProduct(v1, v2) {
     return (v1.x*v2.x) + (v1.y*v2.y);
 }
 
@@ -2202,7 +2190,7 @@ function BotAI::vomitTank(entity) {
 
 ::BotAI.getDodgeVec <- function(player, infected, force = 220, backForce = 220, limit = 220, maxDis = 600, doubleHorizontal = true, motion = false) {
 	BotAI.debugCall("getDodgeVec");
-	if(!BotAI.IsPlayerEntityValid(player)){
+	if(!BotAI.IsPlayerEntityValid(player)) {
 		printl("[Bot AI] getDodgeVec function use for player entity.");
 		return Vector(0, 0, 0);
 	}
@@ -2214,17 +2202,20 @@ function BotAI::vomitTank(entity) {
 	local nextPlayer = BotAI.nextTickPostion(player, 1.0);
 	local nextInfected = BotAI.nextTickPostion(infected, 1.0);
 
-	if(distance > maxDis)
+	if(distance > maxDis) {
 		distance = maxDis;
+	}
+
 	local disScale = 1 - (distance / maxDis);
 	force *= disScale;
 	backForce *= disScale;
 
 	local health = player.GetHealth();
-	if (player.IsPlayer())
+	if (player.IsPlayer()) {
 		health += player.GetHealthBuffer();
+	}
 
-	if(health < BotAI.survivorLimpHealth){
+	if(health < BotAI.survivorLimpHealth) {
 		force *= 0.7;
 		backForce *= 0.7;
 	}
@@ -2241,12 +2232,12 @@ function BotAI::vomitTank(entity) {
 	local eyeVec = Vector(0, 0, 0);
 	local dirction = nextInfected - nextPlayer;
 
-	if(BotAI.GetEntitySpeedVector(infected) > 10)
+	if(BotAI.GetEntitySpeedVector(infected) > 10) {
 		eyeVec = infected.GetVelocity();
-	else {
-		if(living)
+	} else {
+		if(living) {
 			eyeVec = BotAI.normalize(BotAI.fakeTwoD(infected.EyeAngles().Forward()));
-		else{
+		} else {
 			eyeVec = nextPlayer - nextInfected;
 			dirction = BotAI.normalize(BotAI.fakeTwoD(player.EyeAngles().Forward()));
 		}
@@ -2261,29 +2252,52 @@ function BotAI::vomitTank(entity) {
 	if(BotAI.xyDotProduct(eyeVec, dirction) <= 0)
 		verticalVector = verticalVector.Scale(-1);
 
-	//if(BotAI.GetDistanceToWall(player, verticalVector) <= 100)
-		//verticalVector = BotAI.normalize(verticalVector).Scale(BotAI.GetDistanceToWall(player, verticalVector));
-
-	local obstacleTest = {};
-	local obstacleVec = Vector(0, 0, 0);
 	local playerEyeVec = BotAI.normalize(BotAI.fakeTwoD(player.EyeAngles().Forward()));
+	local obstacleVec = Vector(0, 0, 0);
+	local maxWallDist = 150;
+	local minWallDist = 50;
+
+	local function clamp(value, min, max) {
+		if (value < min) return min;
+		if (value > max) return max;
+		return value;
+	}
 
 	for(local i = 0; i < 8; ++i) {
 		local angleVec = BotAI.rotateVector(playerEyeVec, i * 45);
-		if(BotAI.GetDistanceToWall(player, angleVec) <= 75){
-			obstacleTest[obstacleTest.len()] <- angleVec.Scale(-1*force);
+		local dist = BotAI.GetDistanceToWall(player, angleVec);
+
+		if(dist <= maxWallDist) {
+			local t = clamp((dist - minWallDist) / (maxWallDist - minWallDist), 0, 1);
+			local weight = 1.0 - (t * t);
+			obstacleVec += angleVec.Scale(-force * weight);
 		}
 	}
 
-	foreach(vector in obstacleTest)
-		obstacleVec += vector;
-
 	if(obstacleVec.Length() > 0) {
-		if(BotAI.xyDotProduct(verticalVector, obstacleVec) <= 0)
-			verticalVector = verticalVector.Scale(-1);
+		obstacleVec = BotAI.normalize(obstacleVec);
+		local closestDist = BotAI.GetDistanceToWall(player, obstacleVec);
+		local blendFactor = clamp(1.0 - (closestDist / maxWallDist), 0.3, 1.0);
 
-		if(BotAI.xyDotProduct(horizontalVector, obstacleVec) <= 0)
-			horizontalVector = horizontalVector.Scale(-1);
+		local function lerp(a, b, t) {
+			return a + (b - a) * t;
+		}
+
+		horizontalVector = BotAI.normalize(
+			Vector(
+				lerp(horizontalVector.x, obstacleVec.x, blendFactor * 0.7),
+				lerp(horizontalVector.y, obstacleVec.y, blendFactor * 0.7),
+				0
+			)
+		);
+
+		verticalVector = BotAI.normalize(
+			Vector(
+				lerp(verticalVector.x, obstacleVec.x, blendFactor * 0.3),
+				lerp(verticalVector.y, obstacleVec.y, blendFactor * 0.3),
+				0
+			)
+		);
 	}
 
 	if(doubleHorizontal) {
@@ -2312,11 +2326,9 @@ function BotAI::vomitTank(entity) {
 
 	local newVec = BotAI.fakeTwoD(horizontalVector.Scale(force) + verticalVector.Scale(backForce));
 
-	if(newVec.Length() > limit)
+	if(newVec.Length() > limit) {
 		newVec = BotAI.normalize(newVec).Scale(limit);
-
-	if(obstacleVec.Length() <= 0 && distance < 230 && BotAI.IsEntitySI(infected) && infected.GetZombieType() == 8)
-		newVec += (nextPlayer - nextInfected).Scale(disScale);
+	}
 
 	if(motion) {
 		newVec += BotAI.normalize(BotAI.fakeTwoD(player.GetOrigin() - infected.GetOrigin())).Scale(limit);
@@ -2484,8 +2496,7 @@ function BotAI::GetDistanceToGround(entity)
 	return BotAI.CalculateDistance(startPt, m_trace.pos);
 }
 
-function BotAI::CalculateDistance(vec1, vec2)
-{
+function BotAI::CalculateDistance(vec1, vec2) {
 	if (!vec1 || !vec2)
 		return -1.0;
 

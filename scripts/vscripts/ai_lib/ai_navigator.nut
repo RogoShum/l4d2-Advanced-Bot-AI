@@ -105,16 +105,14 @@ class ::Navigator {
             if(aStar) {
                 try {
                     build = createPath(pathSearch, goalPos, goalArea, distance, paths, previousPath);
-                }
-                catch(e) {
+                } catch(e) {
                     timeOut = Time() + 1;
                     printl("[Navigator] Path build time out.");
                 }
             } else {
                 try {
                     build = createPath(pathSearch, goalPos, goalArea, distance, paths);
-                }
-                catch(e) {
+                } catch(e) {
                     timeOut = Time() + 1;
                     printl("[Navigator] Path build time out.");
                 }
@@ -170,6 +168,7 @@ class ::Navigator {
 
     function shouldDiscard() {
         if(!moving()) return;
+
         if(getRunningPathData().discardFunc()) {
             if(BotAI.BotDebugMode)
                 printl("[Navigator] Discard: " + movingID);
@@ -255,10 +254,6 @@ class ::Navigator {
             }
         }
 
-        if(pathCache.len() < 1) {
-            return;
-        }
-
         reRun();
 
         shouldDiscard();
@@ -266,13 +261,10 @@ class ::Navigator {
             return;
         }
 
-        if(!BotAI.BotFullPower && !BotAI.HasTank) {
-            local friction = 0.8;
+        if(BotAI.BotFullPower || BotAI.HasTank) {
+            local friction = 0.9;
             player.OverrideFriction(0.5, friction);
         }
-
-		if(!recordLastArea())
-            return;
 
 		local paths = getRunningPathData().paths;
         local offset = 25;
@@ -296,123 +288,15 @@ class ::Navigator {
 				DebugDrawLine(player.EyePosition() + addition, xyTracePos + addition, 0, 255, 0, true, 0.2);
 			}
 
-            local canTrace = false;
-            if(BotAI.distanceof(xyGoalPos, xyTracePos) <= offset) {
-                //if(xyGoalPos.z <= xyTracePos.z)
-                    //canTrace = true;
+            if(BotAI.distanceof(player.GetOrigin(), goalPos) > 10) {
+                BotAI.botCmdMove(player, goalPos);
+            } else if(movingID.find("#") != null) {
+                player.OverrideFriction(0.5, 10);
             }
 
-            try {
-                local throwError = paths["area0"];
-            } catch(e) {
-                printl("[the index 'area' does not exist]");
-                printl("[index size]: " + paths.len());
-                BotAI.printTable(paths)
+            if(movingID.find("#") == null && BotAI.distanceof(BotAI.fakeTwoD(player.GetOrigin()), BotAI.fakeTwoD(goalPos)) <= offset) {
+                stop(true);
             }
-
-			if(BotAI.BotDebugMode) {
-			    for(local i = 0; i < paths.len(); ++i) {
-                    if(("area" + i) in paths) {
-                        local path = paths["area" + i];
-            	        path.DebugDrawFilled(0, 255, 0, 15, 0.2, true);
-                        if(!path.IsFlat())
-                            DebugDrawText(path.GetCenter(), "!Flat", false, 0.2);
-                        else
-            	            DebugDrawText(path.GetCenter(), i.tostring(), false, 0.2);
-                    }
-        	    }
-            }
-
-            //return;
-
-			//if(canTrace) {
-                if(BotAI.distanceof(player.GetOrigin(), goalPos) > 10) {
-                    BotAI.botCmdMove(player, goalPos);
-                    //BotAI.botRun(player, goalPos, 400);
-                } else if(movingID.find("#") != null) {
-                    player.OverrideFriction(0.5, 10);
-                    player.SetVelocity(Vector(0, 0, player.GetVelocity().z));
-                }
-
-				if(movingID.find("#") == null && BotAI.distanceof(BotAI.fakeTwoD(player.GetOrigin()), BotAI.fakeTwoD(goalPos)) <= offset) {
-					stop(true);
-				}
-				return;
-			//}
-
-			if(paths.len() <= 0) {
-                if((goalPos.z - player.GetOrigin().z) >= JUMP_HIGHT) {
-                    BotAI.IsOnGround(player)
-                }
-                return;
-            }
-
-			local firstArea = ("area" + (paths.len() - 1)) in paths ? paths["area" + (paths.len() - 1)] : paths["area" + paths.len()];
-
-			if(firstArea.IsDamaging() && movingID.find("%") == null) {
-                return;
-            }
-
-			if(firstArea != player.GetLastKnownArea()) {
-                if((player in BotAI.BotStuckCount && BotAI.BotStuckCount[player] >= 3) || (!BotAI.CanHumanSeePlace(player.GetOrigin()) && !BotAI.CanHumanSeePlace(firstArea.GetCenter()))) {
-                    if(BotAI.BotDebugMode) {
-                        printl("stuck or can't see me. Teleport!");
-                    }
-                    player.SetOrigin(firstArea.GetCenter()+Vector(0, 0, 5));
-                }
-
-                local lastArea = player.GetLastKnownArea();
-                local direc = firstArea.ComputeDirection(lastArea.GetCenter());
-                local lowCorner = BotAI.getLowOriginFromArea(firstArea, direc);
-                local highCorner = BotAI.getHighOriginFromArea(lastArea, lastArea.ComputeDirection(firstArea.GetCenter()));
-                local bottleneckLowCorner = BotAI.getLowOriginFromArea(lastArea, lastArea.ComputeDirection(firstArea.GetCenter()));
-                local bottleneckHighCorner = BotAI.getHighOriginFromArea(firstArea, direc);
-                local height = lowCorner.z - highCorner.z;
-                local isTargetJump = BotAI.IsAlive(getRunningPathData().pos) && (!BotAI.IsOnGround(getRunningPathData().pos) || BotAI.IsPlayerClimb(getRunningPathData().pos));
-                if(height >= JUMP_HIGHT && lastArea.IsFlat()) {
-                    if(BotAI.BotDebugMode)
-                        printl("[Nagigator] lowCorner height: " + height);
-                    BotAI.ForceButton(player, 2 , 0.2);
-                    local jumpHigh = player;
-                    local function move() {
-						jumpHigh.SetOrigin(firstArea.GetCenter()+Vector(0, 0, 5));
-					}
-                    if(!isTargetJump)
-					    BotAI.delayTimer(move, 0.5);
-                } else if(lastArea.IsFlat() && height > 10 && BotAI.distanceof(lowCorner, player.GetOrigin()) < 20 && BotAI.IsOnGround(player)) {
-                    BotAI.ForceButton(player, 2 , 0.2);
-                } else if(lastArea.IsFlat() && height < -JUMP_HIGHT && BotAI.IsOnGround(player)) {
-                    local jumpHigh = player;
-                    local function move() {
-						jumpHigh.SetOrigin(firstArea.GetCenter()+Vector(0, 0, 5));
-					}
-                    if(!isTargetJump)
-					    BotAI.delayTimer(move, 0.5);
-                }
-
-                local origins = BotAI.getDirectionOriginFromArea(firstArea, direc);
-	            local origin0 = origins[0];
-	            local origin1 = origins[1];
-                local origin = Vector((origin0.x + origin1.x) * 0.5, (origin0.y + origin1.y) * 0.5, (origin0.z + origin1.z) * 0.5);
-                local xyCenter = Vector((firstArea.GetCenter().x + origin.x) * 0.5, (firstArea.GetCenter().y + origin.y) * 0.5, (firstArea.GetCenter().z + origin.z) * 0.5);
-				local xyAreaPos = BotAI.tracePos(player, xyCenter);
-
-                if(BotAI.BotDebugMode) {
-				    DebugDrawCircle(xyCenter, Vector(255, 255, 0), 1.0, 5, true, 0.2);
-				    DebugDrawLine(player.EyePosition(), xyCenter, 255, 255, 0, true, 0.2);
-				    if(BotAI.validVector(xyAreaPos)) {
-					    DebugDrawCircle(xyAreaPos + addition, Vector(255, 0, 255), 1.0, 5, true, 0.2);
-					    DebugDrawLine(player.EyePosition() + addition, xyAreaPos + addition, 255, 0, 255, true, 0.2);
-				    }
-                }
-
-				local traceFirst = BotAI.distanceof(xyCenter, xyAreaPos) <= offset;
-
-				if(traceFirst)
-					BotAI.botRun(player, xyCenter, 250);
-				else
-					BotAI.botRun(player, lastArea.GetCenter(), 250);
-			}
 		}
     }
 
@@ -491,131 +375,6 @@ class ::Navigator {
         if(moving() && movingID in pathCache)
             return pathCache[movingID];
         return null;
-    }
-
-    function recordLastArea() {
-        if(lastArea != player.GetLastKnownArea()) {
-            lastArea = player.GetLastKnownArea();
-            local highCorner = BotAI.getHighOriginFromArea(lastArea, lastArea.ComputeDirection(lastArea.GetCenter() + (lastArea.GetCenter() - player.GetOrigin())));
-            if(highCorner.z-player.GetOrigin().z > 8) {
-                pathFlat = false;
-            } else {
-                pathFlat = true;
-            }
-            if(moving() && !(movingID in seachingPath)) {
-                local data = getRunningPathData();
-                local discard = data.discard;
-                local previousPath = data.paths;
-                if(typeof previousPath == "table") {
-                    local newPaths = [];
-                    for(local i = 0; i < previousPath.len(); ++i) {
-                        if(("area" + i.tostring()) in previousPath)
-                            newPaths.append(previousPath["area" + i.tostring()]);
-                    }
-                    previousPath = newPaths;
-                }
-
-                local function printArea(areaIn) {
-                    return areaIn.GetID().tostring();
-                }
-
-                local centerPaths = [];
-                if(previousPath.find(lastArea)) {
-                    local idx = previousPath.find(lastArea);
-                    local function filter(index, val) {
-                        return index < idx;
-                    }
-                    previousPath = previousPath.filter(filter);
-                }
-
-                local goalArea = null;
-                local goalPos = null;
-                if(typeof data.pos == "Vector") {
-                    goalPos = data.pos;
-                } else if(BotAI.IsEntityValid(data.pos)) {
-                    if("GetLastKnownArea" in data.pos)
-                        goalArea = data.pos.GetLastKnownArea();
-                    goalPos = data.pos.GetOrigin();
-                } else {
-                    stop(true);
-                    return false;
-                }
-
-                if(goalArea == null) {
-                    goalArea = NavMesh.GetNavArea(goalPos, 150);
-                    if(goalArea == null && BotAI.IsTriggerUsable(data.pos)) {
-                        local direcVec = Vector(120, 0, 0);
-                        for(local i = 0; i < 8; ++i) {
-                            local angleVec = BotAI.rotateVector(direcVec, i * 45);
-                            local targetPos = goalPos + angleVec;
-                            if(BotAI.BotDebugMode) {
-                                DebugDrawCircle(targetPos, Vector(0, 0, 255), 1.0, 5, true, 1.0);
-                                DebugDrawText(targetPos, "goal", false, 1.0);
-                            }
-
-                            goalArea = NavMesh.GetNavArea(targetPos, 150);
-                            if(goalArea != null) break;
-                        }
-                    }
-                }
-
-                if(previousPath.find(goalArea)) {
-                    local idx = previousPath.find(goalArea);
-                    local function filter(index, val) {
-                        return index > idx;
-                    }
-                    previousPath = previousPath.filter(filter);
-                }
-                centerPaths.extend(previousPath);
-                local startPaths = {};
-                local endPaths = {};
-                if(centerPaths.len() > 0) {
-                    local startArea = centerPaths[centerPaths.len()-1];
-                    local endArea = centerPaths[0];
-
-                    if(!createPath(PathSearch(startArea.GetCenter()), startArea.GetCenter(), startArea, 1000, startPaths)) {
-                        stop();
-                        return false;
-                    }
-
-                    if(!createPath(PathSearch(goalPos), goalPos, goalArea, 1000, endPaths, {}, endArea.GetCenter(), endArea)) {
-                        stop();
-                        return false;
-                    }
-                }
-
-                local newPaths = {};
-
-                for(local i = 0; i < endPaths.len(); ++i) {
-                    local _area = endPaths["area" + i.tostring()];
-               		newPaths["area" + newPaths.len().tostring()] <- endPaths["area" + i.tostring()];
-            	}
-
-                local preArea = null;
-                if(newPaths.len() > 0)
-                    preArea = newPaths["area" + (newPaths.len()-1).tostring()];
-
-                for(local i = 0; i < centerPaths.len(); ++i) {
-                    local _area = centerPaths[i];
-                    if(preArea == null || _area.GetID() != preArea.GetID()) {
-                        newPaths["area" + newPaths.len().tostring()] <- _area;
-                        preArea = _area;
-                    }
-            	}
-
-                for(local i = 0; i < startPaths.len(); ++i) {
-                    local _area = startPaths["area" + i.tostring()];
-               		if(preArea == null || _area.GetID() != preArea.GetID()) {
-                        newPaths["area" + newPaths.len().tostring()] <- _area;
-                        preArea = _area;
-                    }
-            	}
-
-                data.paths = newPaths;
-            }
-        }
-
-        return true;
     }
 
     function addLadder(ladderArea, adjacentAreas, dir) {
