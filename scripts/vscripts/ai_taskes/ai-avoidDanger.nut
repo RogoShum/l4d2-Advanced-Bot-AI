@@ -29,19 +29,22 @@ class ::AITaskAvoidDanger extends AITaskSingle {
 				dangerous[dangerous.len()] <- danger;
 		}
 
+		/*
 		local attackTarget = BotAI.getBotTarget(player);
 		if(BotAI.isEntityInfected(attackTarget)){
 			if(!isHealing && BotAI.IsAlive(attackTarget) && BotAI.distanceof(attackTarget.GetOrigin(), player.GetOrigin()) < 150 && BotAI.CanSeeOtherEntityWithoutLocation(player, attackTarget, 0, false, MASK_UNTHROUGHABLE))
 				dangerous[dangerous.len()] <- attackTarget;
 		}
+		*/
 
 		foreach(special in BotAI.SpecialList) {
 			if(BotAI.IsAlive(special) && !special.IsGhost() && BotAI.distanceof(special.GetOrigin(), player.GetOrigin()) <= 600
 			&& (special.GetZombieType() == 3 || special.GetZombieType() == 5 || special.GetZombieType() == 6 || special.GetZombieType() == 8)
-			&& !BotAI.IsEntityValid(special.GetSpecialInfectedDominatingMe())
+			&& !BotAI.IsEntityValid(BotAI.getSiVictim(special))
 			&& BotAI.GetTarget(special) == player
-			&& BotAI.CanSeeOtherEntityWithoutLocation(player, special, 0, false, MASK_UNTHROUGHABLE))
-					dangerous[dangerous.len()] <- special;
+			&& BotAI.CanSeeOtherEntityWithoutLocation(player, special, 0, false, MASK_UNTHROUGHABLE)) {
+				dangerous[dangerous.len()] <- special;
+			}
 		}
 
 		foreach(entW in BotAI.WitchList) {
@@ -66,14 +69,18 @@ class ::AITaskAvoidDanger extends AITaskSingle {
 			local vec3d = Vector(0, 0, 0);
 			local vecList = {};
 			local length = 0;
-			foreach(danger in dangerous) {
+			local height = 80;
+			foreach(idx, danger in dangerous) {
 				if(!BotAI.IsEntityValid(danger))
 					continue;
 
 				local name = danger.GetClassname();
 
-				if(BotAI.BotDebugMode)
-					printl("[Bot AI] Avoid " + name);
+				if(BotAI.BotDebugMode) {
+					//DebugDrawText(player.EyePosition() + Vector(0, 0, height), "Avoid: " + name, false, 0.5);
+					height += 10;
+				}
+
 				if(name in enumGround) {
 					local lastArea = player.GetLastKnownArea();
 					local function feelSafe() {
@@ -120,7 +127,7 @@ class ::AITaskAvoidDanger extends AITaskSingle {
 						if(BotAI.BotDebugMode) {
 							DebugDrawCircle(player.GetCenter(), Vector(255, 25, 25), 0, innerCircle, true, 0.5);
 						}
-						
+
 						if(nexDis < innerCircle) {
 							local navigator = BotAI.getNavigator(player);
 							navigator.clearPath("followPlayer");

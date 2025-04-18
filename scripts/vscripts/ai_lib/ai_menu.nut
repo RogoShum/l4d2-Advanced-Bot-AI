@@ -185,7 +185,7 @@ class ::HoloMenu.Menu {
         local dot = -1;
         foreach(name, icon in icons) {
             local iconDot = player.EyeAngles().Forward().Dot(BotAI.normalize(icon.pos - player.EyePosition()));
-            
+
             if(iconDot > 0.995 && iconDot > dot) {
                 dot = iconDot;
                 impactIcon = icon;
@@ -209,7 +209,7 @@ class ::HoloMenu.Menu {
                 rgb = Vector(100, 255, 0);
                 scale = 3.2;
             }
-                
+
             DebugDrawBoxDirection(icon.pos, Vector(-scale, -scale, -scale), Vector(scale, scale, scale), icon.forward, rgb, 1.0, 0.1);
             DebugDrawText(icon.pos + left.Scale(leftFactor), string, true, 0.1);
             if(center == null)
@@ -261,7 +261,7 @@ class ::HoloMenu.KeyBindMenu extends ::VSLib.HUD.Menu {
 		_numop = 0;
 		_curSel = 0;
 		_sticky = false; // #shotgunefx
-		
+
 		::VSLib.Timers.RemoveTimer(_optimer);
 		_optimer = -1;
         _manual = true
@@ -270,13 +270,13 @@ class ::HoloMenu.KeyBindMenu extends ::VSLib.HUD.Menu {
 	function GetString() {
 		if (_player == null || _numop <= 0)
 			return "";
-		
+
 		// Build the options list
 		local optionsList = "";
         for(local i = 0; i < _skipOptions; ++i) {
             optionsList += "\n";
         }
-        
+
 		foreach (idx, row in _options)
 		{
 			local disp = "";
@@ -293,13 +293,13 @@ class ::HoloMenu.KeyBindMenu extends ::VSLib.HUD.Menu {
                 disp = ::VSLib.Utils.StringReplace(disp, "{num}.", "");
                 disp = ::VSLib.Utils.StringReplace(disp, "{option}", "");
             }
-			
+
 			disp = ParseString(disp);
 			if (idx == _curSel)
 				disp += _hpost;
 			optionsList += disp + "\n";
 		}
-		
+
 		// Build return string
 		if (_modded || _dynrefcount > 0)
 		{
@@ -311,14 +311,14 @@ class ::HoloMenu.KeyBindMenu extends ::VSLib.HUD.Menu {
 		temp = ::VSLib.Utils.StringReplace(temp, "{name}", _player.GetName());
 		temp = ::VSLib.Utils.StringReplace(temp, "{title}", _title);
 		temp = ::VSLib.Utils.StringReplace(temp, "{options}", optionsList);
-		
+
 		return temp;
     }
 
     function ResizeHeightByLines() {
 		local lines = split(GetString(), "\n").len() + 1;
 		local baseh = _vguiBaseRes.height.tofloat();
-		
+
 		SetHeight( ((28 * lines)/(480/baseh))/baseh);
 	}
 }

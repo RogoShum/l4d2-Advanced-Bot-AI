@@ -800,9 +800,9 @@ function BotAI::taskHandler(player, tasks, order, orderTable)
 					queueOver = false;
 				AITaskUpdateList[idx] <- task;
 			}
-		}
-		else
+		} else {
 			task.taskReset(player);
+		}
 	}
 
 	foreach(idx, task in AITaskUpdateList) {
@@ -816,8 +816,7 @@ function BotAI::taskHandler(player, tasks, order, orderTable)
 			if(i > BotAI.TaskSingleOrderMax)
 				i = 0;
 			BotAI.TaskUpdateOrderSingle[player] = i;
-		}
-		else {
+		} else {
 			if(i > BotAI.TaskGroupOrderMax)
 				i = 0;
 			BotAI.TaskUpdateOrderGroup = i;
@@ -2124,7 +2123,7 @@ function BotAI::AdjustBotState(args) {
 		}
 	}
 
-	local needRecall = false;
+	local needRecall = true;
 	local display = null;
 	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
 		if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") < NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal"))
@@ -2140,100 +2139,36 @@ function BotAI::AdjustBotState(args) {
 			minFlow = GetCurrentFlowDistanceForPlayer(BotAI.LeaderSurvivorBot);
 	}
 
-	if(needRecall)
-	foreach(bot in BotAI.SurvivorBotList) {
-		if(!BotAI.IsPlayerEntityValid(bot) || bot.IsIncapacitated() || bot.IsHangingFromLedge() || bot.IsDominatedBySpecialInfected()) continue;
-		if(BotAI.IsOnGround(bot)) {
-            BotAI.DisableButton(bot, BUTTON_WALK, 2.0);
-        }
-		local navigator = BotAI.getNavigator(bot);
-		local stuck = false;
-		local idle = bot.GetSequenceName(bot.GetSequence()).tolower().find("idle") != null;
+	if(needRecall) {
+		foreach(bot in BotAI.SurvivorBotList) {
+			if(!BotAI.IsPlayerEntityValid(bot) || bot.IsIncapacitated() || bot.IsHangingFromLedge() || bot.IsDominatedBySpecialInfected()) continue;
+			if(BotAI.IsOnGround(bot)) {
+				BotAI.DisableButton(bot, BUTTON_WALK, 2.0);
+			}
 
-		if(BotAI.PossibleBotStuck(bot) && !idle) {
-			if(!(bot in BotAI.BotStuckCount))
+			local navigator = BotAI.getNavigator(bot);
+			local stuck = false;
+			local idle = bot.GetSequenceName(bot.GetSequence()).tolower().find("idle") != null;
+
+			if(BotAI.PossibleBotStuck(bot) && !idle) {
+				if(!(bot in BotAI.BotStuckCount)) {
+					BotAI.BotStuckCount[bot] <- 0;
+				}
+
+				BotAI.BotStuckCount[bot] = BotAI.BotStuckCount[bot]+1;
+			} else {
 				BotAI.BotStuckCount[bot] <- 0;
-			BotAI.BotStuckCount[bot] = BotAI.BotStuckCount[bot]+1;
-		} else {
-			BotAI.BotStuckCount[bot] <- 0;
-		}
-
-		if(!navigator.moving() || !navigator.isMoving("ping")) {
-			if(BotAI.BotStuckCount[bot] >= 4) {
-				stuck = true;
-				navigator.stop();
 			}
-		}
 
-		if((idle && BotAI.BotStuckCount[bot] <= 12) || (Convars.GetFloat("sb_stop") < 0.1 && Convars.GetFloat("sb_move") > 0.1)) {
-			idle = false;
-		}
-
-
-		local lastPlayer = null;
-		local lastFlow = maxFlow;
-		local myFlow = GetCurrentFlowDistanceForPlayer(bot);
-		local botIn = bot;
-
-		local function findClosestSur() {
-			local dis = 99999;
-			local tpPoint = null;
-			foreach(sur in BotAI.SurvivorList) {
-				if(sur == bot || !BotAI.IsAlive(sur) || (sur in BotAI.SafeTransfer)) continue;
-				if(sur in BotAI.BotStuckCount && BotAI.BotStuckCount[sur] > 5) continue;
-				local disToSur = BotAI.distanceof(bot.GetOrigin(), sur.GetOrigin());
-				if(tpPoint == null || disToSur < dis) {
-					tpPoint = sur;
-					dis = disToSur;
+			if(!navigator.moving() || !navigator.isMoving("ping")) {
+				if(BotAI.BotStuckCount[bot] >= 4) {
+					stuck = true;
+					navigator.stop();
 				}
 			}
-			return tpPoint;
-		}
 
-
-
-		if(BotAI.SurvivorHumanList.len() > 0 && (minFlow - myFlow > 400 || BotAI.distanceof(bot.GetOrigin(), minFlowHuman.GetOrigin()) >= 700) && !idle) {
-			if(!BotAI.CanHumanSeePlace(botIn.GetOrigin())) {
-				local sur = minFlowHuman;
-				if(sur == null)
-					sur = findClosestSur();
-				if(sur != null) {
-					for(local i = 0; i < 5; ++i) {
-						local pos = sur.TryGetPathableLocationWithin(200);
-						if(!BotAI.CanHumanSeePlace(pos) && BotAI.distanceof(pos, sur.GetOrigin()) > 100) {
-							if(BotAI.BotDebugMode) {
-								BotAI.EasyPrint(BotAI.getPlayerBaseName(bot) + " behind! try teleport.");
-							}
-							botIn.SetOrigin(pos);
-							CommandABot( { cmd = 3, bot = botIn } );
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		if((minFlow - myFlow > 400 || BotAI.distanceof(bot.GetOrigin(), minFlowHuman.GetOrigin()) >= 700) && stuck) {
-			CommandABot( { cmd = 3, bot = botIn } );
-			local timeOut = Time() + 5;
-			local function condition() {
-				if(!BotAI.IsEntitySurvivor(botIn) || !BotAI.IsEntitySurvivor(minFlowHuman)) return true;
-					return Time() > timeOut;
-			}
-			BotAI.botRunPos(botIn, minFlowHuman, "leader", 0, condition);
-
-			if(BotAI.BotStuckCount[bot] >= 7) {
-				if(BotAI.BotDebugMode) {
-					BotAI.EasyPrint(BotAI.getPlayerBaseName(bot) + " stuck! try teleport.");
-				}
-
-				local tpPoint = findClosestSur();
-
-				if(tpPoint != null) {
-					bot.SetOrigin(tpPoint.TryGetPathableLocationWithin(200));
-				} else {
-					bot.SetOrigin(bot.TryGetPathableLocationWithin(200));
-				}
+			if (stuck) {
+				BotAI.BotReset(bot);
 			}
 		}
 	}

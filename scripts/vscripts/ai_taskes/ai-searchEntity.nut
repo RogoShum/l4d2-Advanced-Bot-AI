@@ -117,8 +117,7 @@ class ::AITaskSearchEntity extends AITaskSingle
 		updating[player] <- false;
 	}
 
-	function taskReset(player = null)
-	{
+	function taskReset(player = null) {
 		base.taskReset(player);
 		items = {};
 		searched = [];

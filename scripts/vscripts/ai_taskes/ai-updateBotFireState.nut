@@ -99,7 +99,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			local isTank = targetName == "player" && target.GetZombieType() == 8;
 
 			if(targetName == "player" && target.IsSurvivor() && target != player) {
-				if((target.IsIncapacitated() || target.IsHangingFromLedge()) && !target.IsGettingUp() && !target.IsDominatedBySpecialInfected()) {
+				if((target.IsIncapacitated() || target.IsHangingFromLedge()) && !target.IsGettingUp() && !target.IsDominatedBySpecialInfected() && distance < 150) {
 					DoEntFire("!self", "Use", "", 0, player, target);
 					BotAI.ForceButton(player, 32 , 5);
 				}
@@ -170,10 +170,10 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			if(targetName == "infected" && BotAI.IsAlive(target) && distance < shotDis)
 				Shot = true;
 
-			if((targetName == "player" && !target.IsGhost() && !target.IsSurvivor() && target.GetZombieType() != 7) && BotAI.IsAlive(target) && distance < shotDis){
-				if(target.GetZombieType() != 2)
+			if((targetName == "player" && !target.IsGhost() && !target.IsSurvivor() && target.GetZombieType() != 7) && BotAI.IsAlive(target) && distance < shotDis) {
+				if(target.GetZombieType() != 2) {
 					Shot = true;
-				else {
+				} else {
 					local rangePlayer = null;
 					local playerInside = false;
 					while(rangePlayer = Entities.FindByClassnameWithin(rangePlayer, "player", target.GetOrigin(), BotAI.splatRange)) {
@@ -255,8 +255,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 		}
 	}
 
-	function taskReset(player = null)
-	{
+	function taskReset(player = null) {
 		base.taskReset(player);
 
 		if(player != null)

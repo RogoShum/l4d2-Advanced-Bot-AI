@@ -4,11 +4,11 @@ class ::AITaskTryTraceGascan extends AITaskGroup
     {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
-	
+
 	updating = false;
 	playerList = {};
 	cabal_oil = {};
-	
+
 	function preCheck()
 	{
 		local display = null;
@@ -19,7 +19,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 
 		if(BotAI.UseTarget == null || BotAI.HasTank || !BotAI.NeedGasFinding)
 			return false;
-			
+
 		foreach(idx, gascan in cabal_oil) {
 			if(!BotAI.IsEntityValid(gascan))
 				delete cabal_oil[idx];
@@ -51,7 +51,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 				delete cabal_oil[player.GetEntityIndex()];
 			return false;
 		}
-		
+
 		if(player.GetEntityIndex() in cabal_oil) {
 			local gas_can = cabal_oil[player.GetEntityIndex()];
 			if(BotAI.IsEntityValid(gas_can) && (gas_can.GetOwnerEntity() == null || gas_can.GetOwnerEntity() == player))
@@ -59,7 +59,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 			else
 				cabal_oil[player.GetEntityIndex()] <- null;
 		}
-		
+
 		local GasTryFind = null;
 		while (GasTryFind = Entities.FindByClassnameWithin(GasTryFind, BotAI.BotsNeedToFind, player.GetOrigin(), 4000)) {
 			local flag = true;
@@ -68,7 +68,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 				if(BotAI.IsEntityValid(gascan) && GasTryFind.GetEntityIndex() == gascan.GetEntityIndex())
 					flag = false;
 			}
-			
+
 			if(flag && GasTryFind.GetOwnerEntity() == null)
 			{
 				local bool = false;
@@ -77,7 +77,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 						bool = true;
 				}
 				if(!bool) {
-					cabal_oil[player.GetEntityIndex()] <- GasTryFind; 
+					cabal_oil[player.GetEntityIndex()] <- GasTryFind;
 					return true;
 				}
 			}
@@ -85,7 +85,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 
 		return false;
 	}
-	
+
 	function playerUpdate(player)
 	{
 		if(player.GetEntityIndex() in cabal_oil) {
@@ -114,9 +114,8 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 		} else
 			updating = false;
 	}
-	
-	function taskReset(player = null) 
-	{
+
+	function taskReset(player = null) {
 		base.taskReset(player);
 	}
 }

@@ -154,8 +154,7 @@ class ::AITaskSearchTrigger extends AITaskGroup {
 			updating = false;
 	}
 
-	function taskReset(player = null)
-	{
+	function taskReset(player = null) {
 		base.taskReset(player);
 	}
 }

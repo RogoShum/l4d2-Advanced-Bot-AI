@@ -833,8 +833,7 @@
 	BotAI.debugParam1 = attacker.GetOrigin();
 }
 
-::BotAI.Events.OnGameEvent_ability_use <- function(event)
-{
+::BotAI.Events.OnGameEvent_ability_use <- function(event) {
 	local attacker = GetPlayerFromUserID(event.userid);
 
 	if(BotAI.GetTarget(attacker) != null)
@@ -1022,8 +1021,9 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 
 	if(BotAI.IsEntitySurvivorBot(attacker) && BotAI.IsEntityValid(BotAI.backpack(attacker))) {
 		local thing = BotAI.backpack(attacker);
-		if(thing.GetModelName().find("gnome") != null || thing.GetClassname() == "weapon_cola_bottles")
+		if(thing.GetModelName().find("gnome") != null || thing.GetClassname() == "weapon_cola_bottles") {
 			damageTable.DamageDone *= 0.75;
+		}
 	}
 
 	if(victim != null && BotAI.IsPlayerEntityValid(attacker) && !attacker.IsSurvivor() && attacker.GetZombieType() == 8) {
@@ -1048,7 +1048,6 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 				return false;
 		}
 
-		/*
 		if(damageTable.DamageDone >= 100) {
 			local noneAliveEntity = damageTable.Attacker == null ||
 			(damageTable.Attacker.GetClassname() != "player" && damageTable.Attacker.GetClassname() != "infected" && damageTable.Attacker.GetClassname() != "witch")
@@ -1066,6 +1065,7 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 					return false;
 				} else {
 					local area = NavMesh.GetNearestNavArea(victim.GetOrigin(), 500, true, true);
+
 					if(area) {
 						victim.SetOrigin(area.FindRandomSpot());
 						return false;
@@ -1073,7 +1073,6 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 				}
 			}
 		}
-		*/
 	}
 
 	if(BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim) && BotAI.IsEntityValid(attacker) && attacker.GetClassname() == "infected") {

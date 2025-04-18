@@ -47,7 +47,7 @@ function BotAI::moveFunc() {
 
 				if(!BotAI.isEdge(player, vec)) {
 					NetProps.SetPropVector(player, "m_vecBaseVelocity", vec);
-					
+
 					local function feelingSafe() {
 						local dangerous = BotAI.getBotAvoid(player);
 
@@ -61,7 +61,7 @@ function BotAI::moveFunc() {
 					BotAI.botRunPos(player, player.GetOrigin() + vec, "botMove", 7, feelingSafe);
 				}
 
-				BotAI.botMoveMap[player] = vec * 0.9;
+				BotAI.botMoveMap[player] = vec * 0.8;
 			} else if (BotAI.getNavigator(player).hasPath("botMove")) {
 				NetProps.SetPropVector(player, "m_vecBaseVelocity", Vector(0, 0, 0));
 				BotAI.botMoveMap[player] = Vector(0, 0, 0);
@@ -70,7 +70,7 @@ function BotAI::moveFunc() {
 		}
 	}
 
-	return 0.01;
+	return 0.1;
 }
 
 function BotAI::taskTimer::hitinfected() {
@@ -227,7 +227,7 @@ function BotAI::createRockTargetTimer() {
 				foreach(bot in BotAI.SurvivorBotList) {
 					if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp())
 						continue;
-					
+
 					if(BotAI.xyDotProduct(BotAI.normalize(rock.GetVelocity()), BotAI.normalize(bot.GetOrigin() - rock.GetOrigin())) > 0.5) {
 						local vec = BotAI.getDodgeVec(bot, rock, 300, 50, 300, 5000);
 
@@ -406,7 +406,7 @@ function BotAI::createNavigatorTimer(player) {
         }
 		local navigator = BotAI.getNavigator(player);
 		navigator.onUpdate();
-		return 0.1;
+		return 0.2;
     }
 
 	if (_targetTimer != null) {

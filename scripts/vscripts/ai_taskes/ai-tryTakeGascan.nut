@@ -4,7 +4,7 @@ class ::AITaskTryTakeGascan extends AITaskGroup
     {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
-	
+
 	updating = false;
 	playerList = {};
 	needOil = false;
@@ -22,7 +22,7 @@ class ::AITaskTryTakeGascan extends AITaskGroup
 			needOil = false;
 		else
 			needOil = true;
-			
+
 		BotAI.needOil = needOil;
 		return true;
 	}
@@ -30,15 +30,15 @@ class ::AITaskTryTakeGascan extends AITaskGroup
 	function GroupUpdateChecker(player) {
 		return BotAI.HasItem(player, BotAI.BotsNeedToFind) && needOil;
 	}
-	
+
 	function playerUpdate(player)
 	{
 		updating = false;
-		
+
 		local Posi = BotAI.UseTarget.GetOrigin();
 		if(BotAI.UseTargetOri != null)
 			Posi = BotAI.UseTargetOri;
-						
+
 		if(BotAI.distanceof(player.GetOrigin(), Posi) < 150 && !BotAI.useTargetUsing) {
 			if(BotAI.UseTargetVec != null) {
 				player.SetOrigin(BotAI.UseTargetOri);
@@ -73,9 +73,8 @@ class ::AITaskTryTakeGascan extends AITaskGroup
 			BotAI.botRunPos(player, Posi, "useTarget", 2, "change");
 		}
 	}
-	
-	function taskReset(player = null) 
-	{
+
+	function taskReset(player = null) {
 		base.taskReset(player);
 	}
 }

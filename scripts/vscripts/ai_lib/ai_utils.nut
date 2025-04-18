@@ -1251,8 +1251,7 @@ function BotAI::GetHitPosition(player, distan, bol)
 	return m_trace.pos;
 }
 
-function BotAI::IsEntityValid(_ent)
-{
+function BotAI::IsEntityValid(_ent) {
 	BotAI.debugCall("IsEntityValid");
 	if (_ent == null)
 		return false;
@@ -1392,10 +1391,11 @@ function BotAI::isEntityInfected(entity)
 		}
 	}
 
-	if ( _ent.GetClassname() == "infected" || _ent.GetClassname() == "witch" || _ent.GetClassname() == "player" )
+	if ( _ent.GetClassname() == "infected" || _ent.GetClassname() == "witch" || _ent.GetClassname() == "player" ) {
 		return NetProps.GetPropInt(_ent, "m_lifeState" ) == 0;
-	else
+	} else {
 		return _ent.GetHealth() > 0;
+	}
 }
 
 ::BotAI.IsLivingEntity <- function(_ent) {
@@ -1952,12 +1952,18 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 		printl("[Bot AI DEBUG] m_hOwnerEntity: " + NetProps.GetPropEntity(m_trace.enthit, "m_hOwnerEntity"));
 		printl("[Bot AI DEBUG] m_hOwner: " + NetProps.GetPropEntity(m_trace.enthit, "m_hOwner"));
 
-		if(m_trace.enthit.GetClassname() == "player" && m_trace.enthit.GetZombieType() == 1) {
-			printl("[Bot AI DEBUG] m_duration: " + NetProps.GetPropFloat(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_nextActivationTimer.m_duration"));
-			printl("[Bot AI DEBUG] m_timestamp: " + NetProps.GetPropFloat(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_nextActivationTimer.m_timestamp"));
-			printl("[Bot AI DEBUG] m_tongueState: " + NetProps.GetPropInt(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_tongueState"));
-			printl("[Bot AI DEBUG] m_tongueGrabStartingHealth: " + NetProps.GetPropInt(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_tongueGrabStartingHealth"));
-			printl("[Bot AI DEBUG] Time(): " + Time());
+		if(m_trace.enthit.GetClassname() == "player") {
+			if (m_trace.enthit.GetZombieType() == 1) {
+				printl("[Bot AI DEBUG] m_duration: " + NetProps.GetPropFloat(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_nextActivationTimer.m_duration"));
+				printl("[Bot AI DEBUG] m_timestamp: " + NetProps.GetPropFloat(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_nextActivationTimer.m_timestamp"));
+				printl("[Bot AI DEBUG] m_tongueState: " + NetProps.GetPropInt(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_tongueState"));
+				printl("[Bot AI DEBUG] m_tongueGrabStartingHealth: " + NetProps.GetPropInt(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_tongueGrabStartingHealth"));
+				printl("[Bot AI DEBUG] Time(): " + Time());
+			}
+
+			printl("[Bot AI DEBUG] IsDominatedBySpecialInfected: " + m_trace.enthit.IsDominatedBySpecialInfected());
+			printl("[Bot AI DEBUG] GetSpecialInfectedDominatingMe: " + m_trace.enthit.GetSpecialInfectedDominatingMe());
+			printl("[Bot AI DEBUG] SI Victim: " + BotAI.getSiVictim(m_trace.enthit));
 		}
 
 		printl("[Bot AI DEBUG] Flags: " + NetProps.GetPropInt(m_trace.enthit, "m_spawnflags"));
@@ -2232,7 +2238,7 @@ function BotAI::vomitTank(entity) {
 			justLeft = true;
 		}
 	}
-	
+
 	local foot = BotAI.getCross(nextInfected, nextInfected + motion, nextPlayer);
 
 	if(BotAI.BotDebugMode) {
@@ -2284,11 +2290,11 @@ function BotAI::vomitTank(entity) {
 			obstacleVec = BotAI.normalize(obstacleVec);
 			local closestDist = BotAI.GetDistanceToWall(player, obstacleVec);
 			local blendFactor = clamp(1.0 - (closestDist / maxWallDist), 0.3, 1.0);
-	
+
 			local function lerp(a, b, t) {
 				return a + (b - a) * t;
 			}
-	
+
 			horizontalVector = BotAI.normalize(
 				Vector(
 					lerp(horizontalVector.x, obstacleVec.x, blendFactor * 0.7),
@@ -2296,7 +2302,7 @@ function BotAI::vomitTank(entity) {
 					0
 				)
 			);
-	
+
 			verticalVector = BotAI.normalize(
 				Vector(
 					lerp(verticalVector.x, obstacleVec.x, blendFactor * 0.3),
@@ -2525,7 +2531,7 @@ function BotAI::nextTickPostion(entity, tps = 10.0) {
 	return entity.GetOrigin();
 }
 
-/** 
+/**
  * break
  */
 /*
@@ -2576,6 +2582,25 @@ function BotAI::IsLastStrike(player) {
 	if(!("maxIncap" in BotAI))
 		BotAI.maxIncap <- maxIncap;
 	return maxIncap == NetProps.GetPropInt(player, "m_currentReviveCount");
+}
+
+function BotAI::getSiVictim(si) {
+	local victim = null;
+
+	if(si.GetZombieType() == 6) {
+		victim = NetProps.GetPropEntity(si, "m_pummelVictim");
+		if (victim == null) {
+			victim = NetProps.GetPropEntity(si, "m_carryVictim");
+		}
+	} else if(si.GetZombieType() == 3) {
+		victim = NetProps.GetPropEntity(si, "m_pounceVictim");
+	} else if(si.GetZombieType() == 5) {
+		victim = NetProps.GetPropEntity(si, "m_jockeyVictim");
+	} else if(si.GetZombieType() == 1) {
+		victim = NetProps.GetPropEntity(si, "m_tongueVictim");
+	}
+
+	return victim;
 }
 
 function BotAI::StringReplace(string, original, replacement) {

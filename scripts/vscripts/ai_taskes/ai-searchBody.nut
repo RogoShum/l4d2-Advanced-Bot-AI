@@ -42,8 +42,7 @@ class ::AITaskSearchBody extends AITaskGroup
 				bodys[bodys.len()] <- deathBody;
 		}
 
-		if(bodys.len() < 1)
-		{
+		if(bodys.len() < 1) {
 			taskReset(1);
 			local store = {};
 			foreach(player in BotAI.SurvivorBotList)
@@ -201,8 +200,7 @@ class ::AITaskSearchBody extends AITaskGroup
 		updating = false;
 	}
 
-	function taskReset(player = null)
-	{
+	function taskReset(player = null) {
 		base.taskReset(player);
 		ironBanner = null;
 		GUY = null;

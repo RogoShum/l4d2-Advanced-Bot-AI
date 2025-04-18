@@ -70,10 +70,11 @@ class ::AITaskHitInfected extends AITaskSingle
 		foreach(savePlayer in BotAI.SurvivorList) {
 			if(BotAI.IsAlive(savePlayer) && savePlayer != player) {
 				local dis = BotAI.nextTickDistance(player, savePlayer) < dist;
-				if (savePlayer.IsDominatedBySpecialInfected() && dis)
+				if (savePlayer.IsDominatedBySpecialInfected() && dis) {
 					playerNeedSave = savePlayer;
-				else if ((savePlayer.IsIncapacitated() || savePlayer.IsHangingFromLedge()) && !savePlayer.IsGettingUp() && dis)
+				} else if ((savePlayer.IsIncapacitated() || savePlayer.IsHangingFromLedge()) && !savePlayer.IsGettingUp() && dis) {
 					playerFallingDown = savePlayer;
+				}
 			}
 		}
 
@@ -84,16 +85,30 @@ class ::AITaskHitInfected extends AITaskSingle
 		}
 
 		local selected = null;
-		if(player in BotAI.dangerInfected && playerFallingDown == null)
+		if(player in BotAI.dangerInfected && playerFallingDown == null) {
 			selected = BotAI.dangerInfected[player];
+		}
 
 		dist = BotAI.tongueRange*1.2;
 		if(dist < 800) {
 			dist = 800;
 		}
+
 		local entS = null;
+		local highestPriority = -1;
 		foreach(infected in BotAI.SpecialList) {
-			if (BotAI.IsAlive(infected) && !infected.IsGhost() && !BotAI.IsEntitySI(BotAI.GetTarget(infected)) && (infected.GetZombieType() != 8 || entS == null) && (BotAI.CanSeeOtherEntityWithoutLocation(player, infected, 0, true))) {
+			if (BotAI.IsAlive(infected) && !infected.IsGhost() && !BotAI.IsEntitySI(BotAI.GetTarget(infected)) && (infected.GetZombieType() != 8 || entS == null) && BotAI.CanSeeOtherEntityWithoutLocation(player, infected, 0, true)) {
+				local currentPriority = 0;
+				local target = BotAI.GetTarget(infected);
+
+				if (target == player) {
+					currentPriority = 3;
+				} else if (BotAI.IsEntityValid(BotAI.getSiVictim(infected))) {
+					currentPriority = 2;
+				} else {
+					currentPriority = 1;
+				}
+
 				local infecDis = BotAI.nextTickDistance(player, infected, 5.0, true);
 				local smoker = false;
 
@@ -101,9 +116,10 @@ class ::AITaskHitInfected extends AITaskSingle
 					smoker = true;
 				}
 
-				if (infecDis < dist || BotAI.IsSurvivorTrapped(BotAI.GetTarget(infected)) || smoker) {
+				if (currentPriority > highestPriority ||(currentPriority == highestPriority && (infecDis < dist || BotAI.IsSurvivorTrapped(target) || smoker))) {
 					dist = infecDis;
 					entS = infected;
+					highestPriority = currentPriority;
 				}
 			}
 		}
@@ -119,13 +135,17 @@ class ::AITaskHitInfected extends AITaskSingle
 			local coDistance = BotAI.nextTickDistance(player, selected, 5.0);
 
 			if(siDistance < 270) {
-				if(siDistance < 90)
+				if(siDistance < 90) {
 					danger[player] = true;
+				}
+
 				finalEntity = entS;
 			} else {
 				finalEntity = selected;
-				if(coDistance < 90)
+
+				if(coDistance < 90) {
 					danger[player] = true;
+				}
 			}
 
 			infectedList[player] <- finalEntity;
@@ -135,8 +155,10 @@ class ::AITaskHitInfected extends AITaskSingle
 		if (entS != null) {
 			infectedList[player] <- entS;
 			local siDistance = BotAI.nextTickDistance(player, entS, 5.0);
-			if(siDistance < 90)
+			if(siDistance < 90) {
 				danger[player] = true;
+			}
+
 			return true;
 		}
 
@@ -146,6 +168,7 @@ class ::AITaskHitInfected extends AITaskSingle
 			if(coDistance < 90) {
 				danger[player] = true;
 			}
+
 			return true;
 		}
 
@@ -170,8 +193,7 @@ class ::AITaskHitInfected extends AITaskSingle
 		updating[player] <- false;
 	}
 
-	function taskReset(player = null)
-	{
+	function taskReset(player = null) {
 		base.taskReset(player);
 
 		if(player != null)

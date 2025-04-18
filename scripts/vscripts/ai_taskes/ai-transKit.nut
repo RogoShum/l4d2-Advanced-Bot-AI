@@ -13,7 +13,7 @@ class ::AITaskTransKit extends AITaskSingle
 	{
 		if(player.IsDead() || BotAI.IsLastStrike(player))
 			return false;
-			
+
 		local survivor = null;
 		while(survivor = Entities.FindByClassnameWithin(survivor, "player", player.GetOrigin(), 150))
 		{
@@ -22,7 +22,7 @@ class ::AITaskTransKit extends AITaskSingle
 				local invPlayer = BotAI.GetHeldItems(player);
 				local inv = BotAI.GetHeldItems(survivor);
 				local weapon = player.GetActiveWeapon();
-				
+
 				if("slot3" in invPlayer && !("slot3" in inv))
 				{
 					local it = invPlayer["slot3"];
@@ -36,17 +36,16 @@ class ::AITaskTransKit extends AITaskSingle
 				}
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	function playerUpdate(player)
 	{
 		updating[player] <- false;
 	}
-	
-	function taskReset(player = null) 
-	{
+
+	function taskReset(player = null) {
 		base.taskReset(player);
 	}
 }

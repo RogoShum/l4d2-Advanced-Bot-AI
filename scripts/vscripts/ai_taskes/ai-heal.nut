@@ -4,24 +4,24 @@ class ::AITaskHeal extends AITaskSingle
     {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
-	
+
 	single = true;
 	updating = {};
 	playerTick = {};
-	
+
 	function singleUpdateChecker(player)
 	{
 		if(BotAI.playerDominated > 0) return false;
 		local needHealing = BotAI.getPlayerTotalHealth(player) <= 35 || player.IsOnThirdStrike();
 		local hasTreatmentItems = BotAI.HasItem(player, "weapon_first_aid_kit");
 		local safeCheck = !BotAI.IsInCombat(player) && !BotAI.validVector(BotAI.getBotDedgeVector(player)) && !BotAI.IsPlayerClimb(player);
-		
+
 		if(needHealing && safeCheck && hasTreatmentItems)
 			return true;
-		
+
 		return false;
 	}
-	
+
 	function playerUpdate(player)
 	{
 		BotAI.AddFlag(player, FL_FROZEN );
@@ -30,9 +30,9 @@ class ::AITaskHeal extends AITaskSingle
 			if(BotAI.IsEntityValid(ent_))
 				BotAI.RemoveFlag(ent_, FL_FROZEN );
 		}
-		
+
 		::BotAI.Timers.AddTimerByName("[BotAI]Heal" + player.GetEntityIndex(), duration, false, RemoveFlag, player);
-				
+
 		local weapon = player.GetActiveWeapon();
 		if(weapon && weapon.GetClassname() == "weapon_first_aid_kit" && NetProps.GetPropFloat(weapon, "m_flNextPrimaryAttack") <= Time())
 			BotAI.ForceButton(player, 1 , duration, true);
@@ -40,12 +40,11 @@ class ::AITaskHeal extends AITaskSingle
 			BotAI.ChangeItem(player, 3);
 			BotAI.ForceButton(player, 1 , duration, true);
 		}
-			
+
 		updating[player] <- false;
 	}
-	
-	function taskReset(player = null) 
-	{
+
+	function taskReset(player = null) {
 		base.taskReset(player);
 
 		if(BotAI.HasFlag(player, FL_FROZEN) && BotAI.IsBotHealing(player)) {

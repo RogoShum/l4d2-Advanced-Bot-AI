@@ -4,11 +4,11 @@ class ::AITaskTransItem extends AITaskSingle
     {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
-	
+
 	single = true;
 	updating = {};
 	playerTick = {};
-	
+
 	function singleUpdateChecker(player)
 	{
 		local survivor = null;
@@ -43,7 +43,7 @@ class ::AITaskTransItem extends AITaskSingle
 						return true;
 					}
 				}
-				
+
 				if(!("slot4" in inv) && "slot4" in invPlayer && BotAI.getPlayerTotalHealth(player) > 55)
 				{
 					local it = invPlayer["slot4"];
@@ -53,7 +53,7 @@ class ::AITaskTransItem extends AITaskSingle
 					survivor.GiveItem(item);
 					return true;
 				}
-				
+
 				if("slot2" in invPlayer && !("slot2" in inv))
 				{
 					local it = invPlayer["slot2"];
@@ -65,17 +65,16 @@ class ::AITaskTransItem extends AITaskSingle
 				}
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	function playerUpdate(player)
 	{
 		updating[player] <- false;
 	}
-	
-	function taskReset(player = null) 
-	{
+
+	function taskReset(player = null) {
 		base.taskReset(player);
 	}
 }
