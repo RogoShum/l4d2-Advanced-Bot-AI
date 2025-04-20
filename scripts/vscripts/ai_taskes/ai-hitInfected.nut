@@ -1,7 +1,6 @@
-class ::AITaskHitInfected extends AITaskSingle
-{
-	constructor(orderIn, tickIn, compatibleIn, forceIn)
-    {
+class ::AITaskHitInfected extends AITaskSingle {
+
+	constructor(orderIn, tickIn, compatibleIn, forceIn) {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
 		name = "hitinfected";
 		single = true;
@@ -172,7 +171,7 @@ class ::AITaskHitInfected extends AITaskSingle
 			return true;
 		}
 
-		NetProps.SetPropInt(player, "m_hViewEntity", -1);
+		BotAI.hookViewEntity(player, null);
 		return false;
 	}
 

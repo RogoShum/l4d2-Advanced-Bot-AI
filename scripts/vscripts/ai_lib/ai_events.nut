@@ -129,7 +129,7 @@
 				r = 0;
 				g = 255;
 			} else {
-				BotAI.applyDamage(bot, target, BotAI.getDamage(bot.GetActiveWeapon())*0.2, DMG_HEADSHOT);
+				BotAI.applyDamage(bot, target, BotAI.getDamage(bot.GetActiveWeapon()) * 0.2 * BotAI.BotCombatSkill, DMG_HEADSHOT);
 			}
 			if(BotAI.BotDebugMode) {
 				DebugDrawBox(target.GetCenter(), Vector(-1, -1, -1), Vector(1, 1, 1), 0, 0, 255, 0.2, 1);
@@ -143,6 +143,8 @@
 ::BotAI.Events.OnGameEvent_weapon_fire <- function(event) {
 	local p = GetPlayerFromUserID(event.userid);
 	local victim = BotAI.getBotLookAt(p);
+
+	NetProps.SetPropInt(p, "m_hObserverTarget", -1);
 
 	if("weapon" in event && event.weapon.find("claw") != null && !p.IsSurvivor()) {
 		foreach(bot in BotAI.SurvivorBotList) {
@@ -211,23 +213,27 @@
 		if(ename == "weapon_melee" || ename == "weapon_chainsaw") {
 			local target = null;
 			local damaged = false;
+			local range = Convars.GetFloat("melee_range") + 50;
 			local TD = 300;
-			if(ename == "weapon_chainsaw")
+			local additionAngle = BotAI.BotCombatSkill * 0.2;
+			if(ename == "weapon_chainsaw") {
 				TD = 50;
-			while(target = Entities.FindByClassnameWithin(target, "infected", p.GetOrigin(), 120)) {
-				if(BotAI.IsEntityValid(target) && BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > -0.2) {
+			}
+
+			while(target = Entities.FindByClassnameWithin(target, "infected", p.GetOrigin(), range)) {
+				if(BotAI.IsEntityValid(target) && BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (-0.2 - additionAngle)) {
 					damaged = true;
 					target.TakeDamageEx(p, p, p.GetActiveWeapon(), BotAI.normalize(target.GetOrigin() - p.GetOrigin())
-					, p.GetOrigin(), target.GetHealth(), DMG_BLAST);
+					, BotAI.getEntityHeadPos(target), target.GetHealth(), DMG_MELEE);
 					BotAI.spawnParticle("blood_impact_infected_01", target.GetOrigin() + Vector(0, 0, 50), target);
 					BotAI.spawnParticle("blood_melee_slash_TP_swing", target.GetOrigin() + Vector(0, 0, 50), target);
 				}
 			}
-			local range = Convars.GetFloat("melee_range");
+
 			target = null;
-			while(target = Entities.FindByClassnameWithin(target, "player", p.GetOrigin(), 120)) {
-				if(BotAI.IsEntitySI(target) && BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range
-				&& BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > 0.5) {
+			while(target = Entities.FindByClassnameWithin(target, "player", p.GetOrigin(), range)) {
+				if (BotAI.IsEntitySI(target) && BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range - 50
+				&& BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (0.7 - additionAngle)) {
 					damaged = true;
 					BotAI.applyDamage(p, target, TD, DMG_MELEE);
 					BotAI.spawnParticle("blood_impact_infected_01", target.GetOrigin() + Vector(0, 0, 50), target);
@@ -236,9 +242,9 @@
 			}
 
 			target = null;
-			while(target = Entities.FindByClassnameWithin(target, "witch", p.GetOrigin(), 120)) {
-				if(BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range
-				&& BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > 0.5) {
+			while(target = Entities.FindByClassnameWithin(target, "witch", p.GetOrigin(), range)) {
+				if (BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range - 50
+				&& BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (0.7 - additionAngle)) {
 					damaged = true;
 					BotAI.applyDamage(p, target, TD, DMG_MELEE);
 					BotAI.spawnParticle("blood_impact_infected_01", target.GetOrigin() + Vector(0, 0, 50), target);
@@ -246,14 +252,16 @@
 				}
 			}
 
-			if(damaged)
+			if(damaged) {
 				BotAI.playSound(p, BotAI.getMeleeSound(wep.GetModelName()));
+			}
 		}
 
 		if(BotAI.IsEntityValid(wep) && (BotAI.getIsMelee(p) || isSniper)) {
 			local mult = 0.7;
-			if(isSniper)
+			if(isSniper) {
 				mult = 0.3;
+			}
 			local endTime = NetProps.GetPropFloat(wep, "m_flNextPrimaryAttack");
 			local nowTime = Time();
 			local duration = (endTime - nowTime) * mult;
@@ -261,10 +269,15 @@
 		}
 	}
 
-	if(!BotAI.BotFullPower)
+	if(BotAI.BotCombatSkill < 2)
 		return;
 
-	if(victim != null && (victim.GetClassname() == "witch" || victim.GetClassname() == "infected" || (victim.GetClassname() == "player" && BotAI.IsPlayerEntityValid(victim) && !victim.IsSurvivor())) && p.IsSurvivor() && IsPlayerABot(p)) {
+	if(victim != null
+		&& (victim.GetClassname() == "witch" || victim.GetClassname() == "infected" || (victim.GetClassname() == "player"
+		&& BotAI.IsPlayerEntityValid(victim)
+		&& !victim.IsSurvivor()))
+		&& IsPlayerABot(p)
+		&& p.IsSurvivor()) {
 		local weapon = p.GetActiveWeapon();
 		local count = 1;
 		local mult = 0.5;
@@ -275,7 +288,8 @@
 
 		if(count < 1)
 			count = 1;
-		if(BotAI.BotFullPower) {
+
+		if(BotAI.BotCombatSkill > 2) {
 			if(weapon && weapon.GetClassname().find("shotgun") != null)
 				mult = 0.15;
 			else
@@ -289,7 +303,7 @@
 
 		local mp_gamemode = Convars.GetStr("mp_gamemode");
 		local function hit(health) {
-			BotAI.applyDamage(p, target, health, DMG_HEADSHOT);
+			BotAI.applyDamage(p, victim, health, DMG_HEADSHOT);
 		}
 		if(victim.GetClassname() == "witch") {
 			if(BotAI.witchKilling(victim) || BotAI.witchRunning(victim) || BotAI.witchRetreat(victim)) {
@@ -311,7 +325,7 @@
 
 	if(p != null && p.IsSurvivor() && IsPlayerABot(p)) {
 		weapon <- p.GetActiveWeapon();
-		if(BotAI.BotFullPower || weapon.GetClassname() == "weapon_pistol" || weapon.GetClassname() == "weapon_pistol_magnum") {
+		if(BotAI.BotCombatSkill > 2 || weapon.GetClassname() == "weapon_pistol" || weapon.GetClassname() == "weapon_pistol_magnum") {
 			NetProps.SetPropInt(weapon, "m_iClip1", NetProps.GetPropInt(weapon, "m_iClip1") + 1);
 		}
 		else if(victim != null && ((victim.GetClassname() == "player" && !victim.IsSurvivor()) || victim.GetClassname() == "witch"))
@@ -423,8 +437,9 @@
 		printl(mp_gamemode);
 
 	if(victim != null && BotAI.IsPlayerEntityValid(attacker) && IsPlayerABot(attacker) && attacker.IsSurvivor()) {
-		if(mp_gamemode == "realism")
+		if(mp_gamemode == "realism") {
 			BotAI.applyDamage(attacker, victim, 75, DMG_BULLET);
+		}
 	}
 }
 
@@ -536,7 +551,7 @@
 	local victim = GetPlayerFromUserID(event.victim);
 	local attacker = GetPlayerFromUserID(event.userid);
 
-	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.BotFullPower && RandomInt(0, 3) > 0) {
+	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.BotCombatSkill > 1 && RandomInt(0, BotAI.BotCombatSkill + 1) > 0) {
 		NetProps.SetPropInt(victim, "m_jockeyAttacker", -1);
 		NetProps.SetPropInt(attacker, "m_jockeyVictim", 1);
 		return;
@@ -570,7 +585,7 @@
 	local victim = GetPlayerFromUserID(event.victim);
 	local attacker = GetPlayerFromUserID(event.userid);
 
-	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.BotFullPower && RandomInt(0, 3) > 0) {
+	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.BotCombatSkill > 1 && RandomInt(0, BotAI.BotCombatSkill + 1) > 0) {
 		NetProps.SetPropInt(victim, "m_pounceAttacker", -1);
 		NetProps.SetPropInt(attacker, "m_pounceVictim", 1);
 		return;
@@ -731,8 +746,9 @@
 
 ::BotAI.Events.OnGameEvent_player_team <- function(event) {
 	local player = GetPlayerFromUserID(event.userid);
+
 	if(BotAI.IsEntityValid(player) && event.team == 2) {
-		NetProps.SetPropInt(player, "m_hViewEntity", -1);
+		BotAI.hookViewEntity(player, null);
 	}
 }
 
@@ -763,8 +779,9 @@
 		if(event.player in BotAI.SpecialList)
 			delete BotAI.SpecialList[event.player];
 	}
-	NetProps.SetPropInt(player, "m_hViewEntity", -1);
-	NetProps.SetPropInt(bot, "m_hViewEntity", -1);
+
+	BotAI.hookViewEntity(player, null);
+	BotAI.hookViewEntity(bot, null);
 }
 
 ::BotAI.Events.OnGameEvent_bot_player_replace <- function(event) {
@@ -792,8 +809,9 @@
 			BotAI.SpecialList[event.player] <- player;
 		}
 	}
-	NetProps.SetPropInt(player, "m_hViewEntity", -1);
-	NetProps.SetPropInt(bot, "m_hViewEntity", -1);
+
+	BotAI.hookViewEntity(player, null);
+	BotAI.hookViewEntity(bot, null);
 }
 
 ::BotAI.Events.OnGameEvent_finale_start <- function(event)
@@ -907,9 +925,8 @@ function ChatTriggers::botstop( player, args, text )
 	BotStopCmd( player, args, text );
 }
 
-function ChatTriggers::botaitest( player, args, text )
-{
-	BotAITestCmd( player, args, text );
+function ChatTriggers::botskill( player, args, text ) {
+	BotAISkillCmd( player, args, text );
 }
 
 function ChatTriggers::botfindgas( player, args, text )
@@ -942,19 +959,9 @@ function ChatTriggers::botmelee( player, args, text )
 	BotMeleeCmd( player, args, text );
 }
 
-function ChatTriggers::botversus( player, args, text )
-{
-	BotVersusModCmd( player, args, text );
-}
-
 function ChatTriggers::botmenu( player, args, text )
 {
 	BotMenuCmd( player, args, text );
-}
-
-function ChatTriggers::botfullpower( player, args, text )
-{
-	BotFractureRayCmd( player, args, text );
 }
 
 function ChatTriggers::botdebug( player, args, text ) {
@@ -981,9 +988,8 @@ function ChatTriggers::imbot( player, args, text ) {
 		BotAI.humanBot[player] <- player;
 }
 
-function ChatTriggers::botnotice( player, args, text )
-{
-	BotAI.Notice_Text = false;
+function ChatTriggers::botnotice( player, args, text ) {
+	BotAI.NoticeText = false;
 	BotAI.EasyPrint("通告已关闭.");
 	BotAI.SaveSetting();
 }

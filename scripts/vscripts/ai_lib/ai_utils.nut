@@ -301,8 +301,7 @@ function BotAI::HoldButton(player, button, time = 999, force = false)
 	::BotAI.Timers.AddTimerByName("RemoveButtonHold" + player.GetEntityIndex() + button, time, false, RemoveButtonHold, {ent_ = player, but = button, forc = force});
 }
 
-function BotAI::HasForcedButton(player, button )
-{
+function BotAI::HasForcedButton(player, button ) {
 	if (!BotAI.IsPlayerEntityValid(player))
 	{
 		return;
@@ -368,8 +367,7 @@ function BotAI::ForceButton(player, button, time = 999, force = false) {
 	::BotAI.Timers.AddTimerByName("RemoveButtonForece" + player.GetEntityIndex() + button, time, false, RemoveButtonForece, {ent_ = player, but = button, forc = force});
 }
 
-function BotAI::UnforceButton(player, button )
-{
+function BotAI::UnforceButton(player, button ) {
 	if (!BotAI.IsPlayerEntityValid(player))
 	{
 		return;
@@ -390,8 +388,7 @@ function BotAI::UnforceButton(player, button )
 	NetProps.SetPropInt(player, "m_afButtonForced", ( buttons & ~button ) );
 }
 
-function BotAI::HasDisabledButton(player, button )
-{
+function BotAI::HasDisabledButton(player, button ) {
 	if (!BotAI.IsPlayerEntityValid(player))
 	{
 		return;
@@ -402,8 +399,7 @@ function BotAI::HasDisabledButton(player, button )
 	return buttons == ( buttons | button );
 }
 
-function BotAI::DisableButton(player, button, time = 999, force = false)
-{
+function BotAI::DisableButton(player, button, time = 999, force = false) {
 	if (!BotAI.IsPlayerEntityValid(player)) {
 		return;
 	}
@@ -721,7 +717,7 @@ function BotAI::breakTongue(smoker) {
 
 	local victim = NetProps.GetPropEntity(smoker, "m_tongueVictim");
 	if(BotAI.IsEntityValid(victim)) {
-		victim.SetOrigin(victim.GetOrigin()+Vector(0, 0, 20));
+		victim.SetOrigin(victim.GetOrigin() + Vector(0, 0, 20));
 		victim.Stagger(Vector(0, 0, -100));
 	}
 }
@@ -794,14 +790,12 @@ function BotAI::SpawnUpgrade( upgrade, count = 4, pos = Vector(0,0,0), ang = QAn
 	return ent;
 }
 
-::BotAI.doAmmoUpgrades <- function(p, func = false)
-{
+::BotAI.doAmmoUpgrades <- function(p, func = false) {
 	local amount = 4;
 	if(BotAI.SurvivorList.len() > 4)
 		amount = BotAI.SurvivorList.len();
 
-	if(HasItem(p, "upgradepack_explosive"))
-	{
+	if(HasItem(p, "upgradepack_explosive")) {
 		local inv = BotAI.GetHeldItems(p);
 		if("slot3" in inv)
 		{
@@ -812,8 +806,7 @@ function BotAI::SpawnUpgrade( upgrade, count = 4, pos = Vector(0,0,0), ang = QAn
 		BotAI.SpawnUpgrade(1, amount, p.GetOrigin());
 	}
 
-	if(HasItem(p, "upgradepack_incendiary"))
-	{
+	if(HasItem(p, "upgradepack_incendiary")) {
 		local inv = BotAI.GetHeldItems(p);
 		if("slot3" in inv)
 		{
@@ -825,8 +818,7 @@ function BotAI::SpawnUpgrade( upgrade, count = 4, pos = Vector(0,0,0), ang = QAn
 	}
 }
 
-function BotAI::dropItem(p, str)
-{
+function BotAI::dropItem(p, str) {
 	local wep = "";
 	local dummyWep = "";
 	local slot = "";
@@ -986,20 +978,20 @@ function BotAI::printArray(arri, valFunc) {
 }
 
 function BotAI::hookViewEntity(ent_self, ent_b) {
-	/*
-	if(ent_b.GetClassname() == "player" && !ent_b.IsSurvivor() && !IsPlayerABot(ent_b)) {
-		NetProps.SetPropInt(ent_self, "m_hViewEntity", -1);
-		return;
+	if(BotAI.IsEntityValid(ent_b)) {
+		printl("player " + BotAI.getPlayerBaseName(ent_self) + " hook: " + ent_b);
+
+		//NetProps.SetPropEntity(ent_self, "m_viewtarget", ent_b);
+	} else {
+		//NetProps.SetPropInt(ent_self, "m_viewtarget", -1);
 	}
-	*/
-	if((!BotAI.IsHumanSpectating(ent_self) && !BotAI.IsEntitySurvivor(ent_b)))
-		NetProps.SetPropEntity(ent_self, "m_hViewEntity", ent_b);
-	else
-		NetProps.SetPropInt(ent_self, "m_hViewEntity", -1);
 }
 
-function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1) {
-	BotAI.debugCall("lookAtEntity");
+function BotAI::getViewEntity(ent_self) {
+	return NetProps.GetPropEntity(ent_self, "m_viewtarget");
+}
+
+function BotAI::getEntityHeadPos(ent_b) {
 	if(!BotAI.IsEntityValid(ent_b)) {
 		printl("[Bot AI DEBUG] ent_b not valid: " + ent_b);
 		return;
@@ -1034,13 +1026,24 @@ function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1) {
 		z = ent_b.GetCenter().z;
 	}
 
+	return Vector(x, y, z);
+}
+
+function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1) {
+	if(!BotAI.IsEntityValid(ent_b)) {
+		printl("[Bot AI DEBUG] ent_b not valid: " + ent_b);
+		return;
+	}
+
+	local headPos = BotAI.getEntityHeadPos(ent_b);
+
 	if(BotAI.BotDebugMode) {
-		DebugDrawBox(Vector(x, y, z), Vector(-10, -10, -10), Vector(10, 10, 10), 100, 255, 0, 0.2, 0.2);
-		DebugDrawText(Vector(x, y, z), BotAI.getPlayerBaseName(ent_self) + " want me", false, 0.2);
+		DebugDrawBox(headPos, Vector(-10, -10, -10), Vector(10, 10, 10), 100, 255, 0, 0.2, 0.2);
+		DebugDrawText(headPos, BotAI.getPlayerBaseName(ent_self) + " want me", false, 0.2);
 	}
 
 	if(ent_b == BotAI.getSmokerTarget(ent_self)) {
-		local dirction = Vector(x - ent_self.EyePosition().x, y - ent_self.EyePosition().y, z - ent_self.EyePosition().z);
+		local dirction = Vector(headPos.x - ent_self.EyePosition().x, headPos.y - ent_self.EyePosition().y, headPos.z - ent_self.EyePosition().z);
 		local qAngleDirction = BotAI.CreateQAngle(dirction.x, dirction.y, dirction.z);
 		ent_self.SnapEyeAngles(qAngleDirction);
 		local eyeVec = QAngle(ent_self.EyeAngles().x + 55, ent_self.EyeAngles().y, 0);
@@ -1061,9 +1064,10 @@ function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1) {
 		if(frozen && BotAI.HasFlag(ent_self, FL_FROZEN))
 			BotAI.RemoveFlag(ent_self, FL_FROZEN );
 
-		local dirction = Vector(x - ent_self.EyePosition().x, y - ent_self.EyePosition().y, z - ent_self.EyePosition().z);
+		local dirction = Vector(headPos.x - ent_self.EyePosition().x, headPos.y - ent_self.EyePosition().y, headPos.z - ent_self.EyePosition().z);
 		local qAngleDirction = BotAI.CreateQAngle(dirction.x, dirction.y, dirction.z);
-		if(BotAI.Versus_Mode) {
+
+		if(BotAI.BotCombatSkill == 0) {
 			local eyeAngle = ent_self.EyeAngles();
 			local angle = (qAngleDirction.Yaw() - eyeAngle.Yaw()) / 4;
 			if(angle <= 20 && angle >= -20)
@@ -1087,7 +1091,7 @@ function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1) {
 		}
 	}
 	else
-		BotAI.lookAtPosition(ent_self, Vector(x, y, z), frozen, time);
+		BotAI.lookAtPosition(ent_self, headPos, frozen, time);
 }
 
 function BotAI::lookAtPosition(player, vec, frozen = false, time = 1) {
@@ -1125,6 +1129,7 @@ function BotAI::lookAtPosition(player, vec, frozen = false, time = 1) {
 			else
 				pitch = 90;
 	}
+
 	return QAngle(pitch, yaw, 0);
 }
 
@@ -1228,8 +1233,7 @@ function BotAI::tracePos(player, pos, onlyGround = false) {
 	return null;
 }
 
-function BotAI::GetHitPosition(player, distan, bol)
-{
+function BotAI::GetHitPosition(player, distan, bol) {
 	BotAI.debugCall("GetHitPosition");
 	local m_trace = { start = player.EyePosition(), end = player.EyePosition() + player.EyeAngles().Forward().Scale(distan), ignore = player, mask = g_MapScript.TRACE_MASK_ALL};
 	TraceLine(m_trace);
@@ -1311,8 +1315,7 @@ function BotAI::IsEntitySurvivor(entity) {
 	return false;
 }
 
-function BotAI::Laugh(player)
-{
+function BotAI::Laugh(player) {
 	if(BotAI.IsEntitySurvivor(player)) {
 		DoEntFire("!self", "SpeakResponseConcept", "PlayerLaugh", 0, null, player);
 	}
@@ -1414,8 +1417,8 @@ function BotAI::CanHumanSeePlace(posIn) {
 }
 
 function BotAI::applyDamage(owner, target, amount, damageType) {
-	target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), target.GetOrigin() - owner.GetOrigin()
-					, owner.GetOrigin(), amount, damageType);
+	target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), BotAI.normalize(target.GetOrigin() - owner.GetOrigin())
+					, BotAI.getEntityHeadPos(target), amount, damageType);
 }
 
 function BotAI::IsInCombat(player, lowCheck = false) {
@@ -2662,16 +2665,20 @@ function BotAI::getIsMelee(player)
 function BotAI::SetTarget(_ent, _target) {
 	if(!BotAI.IsEntityValid(_target)) return;
 	_ent.__KeyValueFromString("target", _target.tostring());
-	if(_ent.GetClassname() == "infected" || _ent.GetClassname() == "witch")
+
+	if(_ent.GetClassname() == "infected" || _ent.GetClassname() == "witch") {
 		NetProps.SetPropEntity(_ent, "m_clientLookatTarget", _target);
+	}
 
 	if(_ent.GetClassname() == "player" && !IsPlayerABot(_ent))
 		return;
 
 	BotAI.hookViewEntity(_ent, _target);
-
+	if(BotAI.BotDebugMode) {
+		printl("[Attack] " + BotAI.getPlayerBaseName(_ent));
+	}
 	CommandABot( { cmd = 0, target = _target, bot = _ent } );
-	//if(_ent.GetActiveWeapon() && (!BotAI.Versus_Mode || BotAI.versusWeaponCheck(_ent.GetActiveWeapon().GetClassname())))
+
 	BotAI.botAim[_ent] <- _target;
 	BotAI.lookAtEntity(_ent, _target);
 }
@@ -2781,7 +2788,6 @@ function BotAI::isPlayerNearLadder(player) {
 }
 
 function BotAI::BotAttack(boto, otherEntity) {
-	BotAI.debugCall("BotAttack");
 	if(!BotAI.IsEntityValid(boto)) return;
 	if(!BotAI.IsEntityValid(otherEntity) || (!BotAI.IsAlive(otherEntity) && otherEntity.GetClassname() != "tank_rock") || !IsPlayerABot(boto))
 		return;
@@ -2792,6 +2798,7 @@ function BotAI::BotAttack(boto, otherEntity) {
 	if(BotAI.HasItem(boto, BotAI.BotsNeedToFind) && BotAI.UseTargetOri != null && BotAI.distanceof(boto.GetOrigin(), BotAI.UseTargetOri) < 150 && otherEntity.GetClassname() != "player")
 		return;
 
+	BotAI.setBotMoveCooldown(boto, Time());
 	BotAI.SetTarget(boto, otherEntity);
 	return true;
 }
@@ -2800,8 +2807,9 @@ function BotAI::BotReset(boto) {
 	if(!BotAI.IsEntityValid(boto)) return;
 	if(!IsPlayerABot(boto))
 		return;
+
 	if(BotAI.BotDebugMode) {
-		BotAI.EasyPrint("[Reset] " + BotAI.getPlayerBaseName(boto));
+		printl("[Reset] " + BotAI.getPlayerBaseName(boto));
 	}
 
 	NetProps.SetPropFloat(boto, "m_flLaggedMovementValue", 1.0);
@@ -2815,6 +2823,10 @@ function BotAI::BotRetreatFrom(boto, otherEntity) {
 
 	if(BotAI.IsPlayerClimb(boto))
 		return;
+
+	if(BotAI.BotDebugMode) {
+		printl("[Retreat] " + BotAI.getPlayerBaseName(boto));
+	}
 	return CommandABot( { cmd = 2, target = otherEntity, bot = boto } );
 }
 
@@ -2822,6 +2834,17 @@ function BotAI::botCmdMove(boto, vector) {
 	if(!BotAI.IsEntityValid(boto)) return;
 	if(!IsPlayerABot(boto))
 		return;
+
+	if (Time() - BotAI.getBotMoveCooldown(boto) < 1.25) {
+		if(BotAI.BotDebugMode) {
+			printl("[Move Fail] " + BotAI.getPlayerBaseName(boto));
+		}
+		return;
+	}
+
+	if(BotAI.BotDebugMode) {
+		printl("[Move] " + BotAI.getPlayerBaseName(boto));
+	}
 
 	return CommandABot({ cmd = 1, pos = vector, bot = boto});
 }

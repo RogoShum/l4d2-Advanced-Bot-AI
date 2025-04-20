@@ -164,23 +164,7 @@ class ::AITaskSearchBody extends AITaskGroup
 					return !BotAI.Defibrillator || !BotAI.IsEntityValid(bo) || BotAI.isDeathStillAlive(bo);
 				}
 
-				if(distance < 500) {
-					CommandABot( { cmd = 1, pos = ironBanner.GetOrigin(), bot = player } );
-					local function reset() {
-						CommandABot( { cmd = 3, bot = player } );
-					}
-					BotAI.delayTimer(reset, 5);
-					local function target() {
-						if(BotAI.IsInCombat(player, true)) {
-							CommandABot( { cmd = 3, bot = player } );
-							return true;
-						}
-						return false;
-					}
-					BotAI.conditionTimer(target, 0.2);
-				} else {
-					BotAI.botRunPos(player, ironBanner, "searchBody", 3, needSearch, 15000);
-				}
+				BotAI.botRunPos(player, ironBanner, "searchBody", 3, needSearch, 15000);
 			} else if (distance <= 50) {
 				BotAI.getNavigator(player).stop();
 				BotAI.botMoveMap[player] <- Vector(0, 0, 0);

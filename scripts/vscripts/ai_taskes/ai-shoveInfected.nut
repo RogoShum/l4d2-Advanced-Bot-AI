@@ -82,10 +82,13 @@ class ::AITaskShoveInfected extends AITaskSingle {
 				}
 
 				if(target.GetClassname() == "player" && !target.IsSurvivor() && (target.GetZombieType() == 1 || target.GetZombieType() == 3 || target.GetZombieType() == 5)) {
-					if(BotAI.Versus_Mode)
+					if(BotAI.BotCombatSkill < 1)
 						chance += 2;
-					if(BotAI.BotDebugMode)
-						chance += 2;
+
+					if (BotAI.BotCombatSkill > 2) {
+						chance = 0;
+					}
+
 					reassess();
 
 					if(RandomInt(0, chance) == 0) {
@@ -98,16 +101,18 @@ class ::AITaskShoveInfected extends AITaskSingle {
 						BotAI.setMoveType(target, 2);
 						return false;
 					}
+
 					BotAI.conditionTimer(resetMoveType, 0.1);
 				}
 
-				if(target.GetClassname() == "infected") {
-					if(BotAI.Versus_Mode) {
+				if (target.GetClassname() == "infected") {
+					if (BotAI.BotCombatSkill < 1) {
 						chance += 1;
 					}
 
 					reassess();
-					if(RandomInt(0, chance) == 0)
+
+					if (RandomInt(0, chance) == 0)
 						BotAI.shoveCommon(target);
 				}
 

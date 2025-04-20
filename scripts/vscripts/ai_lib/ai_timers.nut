@@ -3,8 +3,10 @@ function BotAI::bestAim() {
 		local target = null;
 		if(player in BotAI.botAim)
 			target = BotAI.botAim[player];
-		if(BotAI.IsAlive(target))
+
+		if(BotAI.IsAlive(target)) {
 			BotAI.lookAtEntity(player, target);
+		}
 	}
 
 	return 0.01;
@@ -593,25 +595,6 @@ function BotAI::pingSystem() {
 		return 1;
 	}
 
-	function BotAI::updateCommonInfected() {
-		local infec = null;
-		local map = ChunkMap(120);
-		while(infec = Entities.FindByClassname(infec, "infected")) {
-			if(BotAI.IsAlive(infec))
-				map.put(infec);
-			/*
-			if(BotAI.GetTarget(infec) in BotAI.SafeTransfer) {
-				foreach(sur in BotAI.SurvivorList) {
-					if(!BotAI.IsAlive(sur) || sur in BotAI.SafeTransfer) continue;
-					BotAI.SetTarget(infec, sur);
-				}
-			}
-			*/
-		}
-		//BotAI.commonInfectedMap = map;
-		return 1.0;
-	}
-
 	function BotAI::updateSearchedEntity() {
 		local enumUpgradePack = {};
 		local enumWeaponSpawn = {};
@@ -685,46 +668,44 @@ function BotAI::pingSystem() {
 
 function BotAI::loadTimers() {
 	::BotAI._taskTimer <- SpawnEntityFromTable("info_target", { targetname = "botai_task_timer" });
-if (::BotAI._taskTimer != null) {
-		::BotAI._taskTimer.ValidateScriptScope();
-		local scrScope = ::BotAI._taskTimer.GetScriptScope();
-		scrScope["ThinkTimer"] <- ::BotAI.updateAITasks;
-		AddThinkToEnt(::BotAI._taskTimer, "ThinkTimer");
-}
+	if (::BotAI._taskTimer != null) {
+			::BotAI._taskTimer.ValidateScriptScope();
+			local scrScope = ::BotAI._taskTimer.GetScriptScope();
+			scrScope["ThinkTimer"] <- ::BotAI.updateAITasks;
+			AddThinkToEnt(::BotAI._taskTimer, "ThinkTimer");
+	}
 
-local _singleTaskTimer = SpawnEntityFromTable("info_target", { targetname = "botai_single_task_timer" });
-if (_singleTaskTimer != null) {
-		_singleTaskTimer.ValidateScriptScope();
-		local scrScope = _singleTaskTimer.GetScriptScope();
-		scrScope["ThinkTimer"] <- ::BotAI.updateSingleAITasks;
-		AddThinkToEnt(_singleTaskTimer, "ThinkTimer");
-}
+	local _singleTaskTimer = SpawnEntityFromTable("info_target", { targetname = "botai_single_task_timer" });
+	if (_singleTaskTimer != null) {
+			_singleTaskTimer.ValidateScriptScope();
+			local scrScope = _singleTaskTimer.GetScriptScope();
+			scrScope["ThinkTimer"] <- ::BotAI.updateSingleAITasks;
+			AddThinkToEnt(_singleTaskTimer, "ThinkTimer");
+	}
 
-local _groupTaskTimer = SpawnEntityFromTable("info_target", { targetname = "botai_group_task_timer" });
-if (_groupTaskTimer != null) {
-		_groupTaskTimer.ValidateScriptScope();
-		local scrScope = _groupTaskTimer.GetScriptScope();
-		scrScope["ThinkTimer"] <- ::BotAI.updateGroupAITasks;
-		AddThinkToEnt(_groupTaskTimer, "ThinkTimer");
-}
+	local _groupTaskTimer = SpawnEntityFromTable("info_target", { targetname = "botai_group_task_timer" });
+	if (_groupTaskTimer != null) {
+			_groupTaskTimer.ValidateScriptScope();
+			local scrScope = _groupTaskTimer.GetScriptScope();
+			scrScope["ThinkTimer"] <- ::BotAI.updateGroupAITasks;
+			AddThinkToEnt(_groupTaskTimer, "ThinkTimer");
+	}
 
-local _aimTimer = SpawnEntityFromTable("info_target", { targetname = "botai_aim_timer" });
-if (_aimTimer != null) {
-	_aimTimer.ValidateScriptScope();
-	local scrScope = _aimTimer.GetScriptScope();
-	scrScope["ThinkTimer"] <- BotAI.bestAim;
-	AddThinkToEnt(_aimTimer, "ThinkTimer");
-}
+	local _aimTimer = SpawnEntityFromTable("info_target", { targetname = "botai_aim_timer" });
+	if (_aimTimer != null) {
+		_aimTimer.ValidateScriptScope();
+		local scrScope = _aimTimer.GetScriptScope();
+		scrScope["ThinkTimer"] <- BotAI.bestAim;
+		AddThinkToEnt(_aimTimer, "ThinkTimer");
+	}
 
-_aimTimer = SpawnEntityFromTable("info_target", { targetname = "botai_move_func" });
-if (_aimTimer != null) {
-	_aimTimer.ValidateScriptScope();
-	local scrScope = _aimTimer.GetScriptScope();
-	scrScope["ThinkTimer"] <- BotAI.moveFunc;
-	AddThinkToEnt(_aimTimer, "ThinkTimer");
-}
-
-
+	_aimTimer = SpawnEntityFromTable("info_target", { targetname = "botai_move_func" });
+	if (_aimTimer != null) {
+		_aimTimer.ValidateScriptScope();
+		local scrScope = _aimTimer.GetScriptScope();
+		scrScope["ThinkTimer"] <- BotAI.moveFunc;
+		AddThinkToEnt(_aimTimer, "ThinkTimer");
+	}
 
 	local pingThinker = SpawnEntityFromTable("info_target", { targetname = "botai_ping_system"});
 	if (pingThinker != null) {
@@ -750,17 +731,8 @@ if (_aimTimer != null) {
 		AddThinkToEnt(takeThinker, "ThinkTimer");
 	}
 
-	/*
-	takeThinker = SpawnEntityFromTable("info_target", { targetname = "botai_commonInfected"});
-	if (takeThinker != null) {
-		takeThinker.ValidateScriptScope();
-		local scrScope = takeThinker.GetScriptScope();
-		scrScope["ThinkTimer"] <- BotAI.updateCommonInfected;
-		AddThinkToEnt(takeThinker, "ThinkTimer");
-	}
-	*/
 
-	takeThinker = SpawnEntityFromTable("info_target", { targetname = "botai_pick_cooldown"});
+	local takeThinker = SpawnEntityFromTable("info_target", { targetname = "botai_pick_cooldown"});
 	if (takeThinker != null) {
 		takeThinker.ValidateScriptScope();
 		local scrScope = takeThinker.GetScriptScope();

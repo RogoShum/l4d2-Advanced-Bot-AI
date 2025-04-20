@@ -1,21 +1,21 @@
-/*  
+/*
  * Copyright (c) 2013 LuKeM aka Neil - 119 and Rayman1103
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  * and associated documentation files (the "Software"), to deal in the Software without
  * restriction, including without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or
  * substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
  * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  */
 
 
@@ -77,21 +77,21 @@ function BotAI::Timers::AddTimer(delay, repeat, func, paramTable = null, flags =
 	local TIMER_FLAG_COUNTDOWN = (1 << 2);
 	local TIMER_FLAG_DURATION = (1 << 3);
 	local TIMER_FLAG_DURATION_VARIANT = (1 << 4);
-	
+
 	delay = delay.tofloat();
 	repeat = repeat.tointeger();
-	
+
 	local rep = (repeat > 0) ? true : false;
-	
+
 	if (delay < 0)
 	{
 		printl("BotAI Warning: Timer delay cannot be less than 0 second(s). Delay has been reset to 0.");
 		delay = 0;
 	}
-	
+
 	if (paramTable == null)
 		paramTable = {};
-	
+
 	if (typeof value != "table")
 	{
 		printl("BotAI Timer Error: Illegal parameter: 'value' parameter needs to be a table.");
@@ -107,16 +107,16 @@ function BotAI::Timers::AddTimer(delay, repeat, func, paramTable = null, flags =
 		printl("BotAI Timer Error: Could not create the duration timer because the 'duration' field is missing from 'value'.");
 		return -1;
 	}
-	
+
 	// Convert the flag into countdown
 	if (flags & TIMER_FLAG_DURATION)
 	{
 		flags = flags & ~TIMER_FLAG_DURATION;
 		flags = flags | TIMER_FLAG_COUNTDOWN;
-		
+
 		value["count"] <- floor(value["duration"].tofloat() / delay);
 	}
-	
+
 	++count;
 	TimersList[count] <-
 	{
@@ -129,7 +129,7 @@ function BotAI::Timers::AddTimer(delay, repeat, func, paramTable = null, flags =
 		_flags = flags
 		_opval = value
 	}
-	
+
 	return count;
 }
 
@@ -156,7 +156,7 @@ function BotAI::Timers::ManageTimer(idx, command, value = null, allowNegTimer = 
 	{
 		if ( value == null )
 			value = 0;
-		
+
 		::BotAI.Timers.ClockList[idx] <-
 		{
 			_value = value
@@ -175,7 +175,7 @@ function BotAI::Timers::ReadTimer(idx)
 {
 	if ( idx in ::BotAI.Timers.ClockList )
 		return ::BotAI.Timers.ClockList[idx]._value;
-	
+
 	return null;
 }
 
@@ -194,10 +194,10 @@ function BotAI::Timers::DisplayTime(idx)
 {
 	if (!("BotAI" in getroottable()))
 		return;
-	
+
 	local TIMER_FLAG_COUNTDOWN = (1 << 2);
 	local TIMER_FLAG_DURATION_VARIANT = (1 << 4);
-	
+
 	// current time
 	local curtime = Time();
 	// Execute timers as needed
@@ -208,11 +208,11 @@ function BotAI::Timers::DisplayTime(idx)
 		if ((curtime - timer._startTime) >= timer._delay) {
 			if (timer._flags & TIMER_FLAG_COUNTDOWN) {
 				timer._params["TimerCount"] <- timer._opval["count"];
-				
+
 				if ((--timer._opval["count"]) <= 0)
 					timer._repeat = false;
 			}
-			
+
 			if (timer._flags & TIMER_FLAG_DURATION_VARIANT && (curtime - timer._baseTime) > timer._opval["duration"]) {
 				delete ::BotAI.Timers.TimersList[idx];
 				continue;
@@ -221,10 +221,10 @@ function BotAI::Timers::DisplayTime(idx)
 			if (timer._func(timer._params) == false)
 				timer._repeat = false;
 			try {
-				
+
 			}
 			catch (id) {
-				if(BotAI.BOT_AI_TEST_MOD != 1) {
+				//if(BotAI.BOT_AI_TEST_MOD != 1) {
 					//BotAI.EasyPrint("botai_report", 0.1);
 					//BotAI.EasyPrint(id.tostring(), 0.2);
 
@@ -238,19 +238,19 @@ function BotAI::Timers::DisplayTime(idx)
 
 								BotAI.Timers.AddTimerByName(args._name, args._delay, args._repeat, args._func);
 							}
-							BotAI.Timers.AddTimerByName("reAddTimer " + UniqueString(), 1.0, false, reAddTimer, 
+							BotAI.Timers.AddTimerByName("reAddTimer " + UniqueString(), 1.0, false, reAddTimer,
 							{_name = name, _delay = timer._delay, _repeat = timer._repeat, _func = timer._func});
 						}
 					}
 					*/
-				}
+				//}
 				local deadFunc = timer._func;
 				local params = timer._params;
 				deadFunc(params); // this will most likely throw
 				//BotAI.Timers.throwError(deadFunc, params);
 				continue;
 			}
-			
+
 			if (timer._repeat)
 				timer._startTime = curtime;
 			else
@@ -263,7 +263,7 @@ function BotAI::Timers::DisplayTime(idx)
 		if ( Time() > timer._lastUpdateTime )
 		{
 			local newTime = Time() - timer._lastUpdateTime;
-			
+
 			if ( timer._command == 1 )
 				timer._value += newTime;
 			else if ( timer._command == 2 )
@@ -276,7 +276,7 @@ function BotAI::Timers::DisplayTime(idx)
 						timer._value -= newTime;
 				}
 			}
-			
+
 			timer._lastUpdateTime <- Time();
 		}
 	}

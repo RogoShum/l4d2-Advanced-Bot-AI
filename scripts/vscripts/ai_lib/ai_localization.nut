@@ -1,5 +1,5 @@
-/** 
-	This file is used to store a K-V tables about localized languages. 
+/**
+	This file is used to store a K-V tables about localized languages.
 */
 ::BotAI.I18n <- {};
 
@@ -37,7 +37,7 @@ function I18n::getTranslationKeyByLang(language, transKey) {
 		return getLanguage(language)[transKey];
 	if(existTranslationKey(transKey))
 		return ::I18n["english"][transKey];
-	return transKey; 
+	return transKey;
 }
 
 function I18n::getTranslationKey(transKey) {
@@ -46,11 +46,11 @@ function I18n::getTranslationKey(transKey) {
 		return getLanguage(language)[transKey];
 	if(existTranslationKey(transKey))
 		return ::I18n["english"][transKey];
-	return transKey; 
+	return transKey;
 }
 
 function I18n::existTranslationKey(transKey) {
-	return transKey in ::I18n["english"]; 
+	return transKey in ::I18n["english"];
 }
 
 function I18n::getLanguage(language) {
@@ -59,16 +59,12 @@ function I18n::getLanguage(language) {
 
 function I18n::init() {
 	local english =  {
-		botai_fullpower_off = "Bot Full Power Mode off.",
-		botai_fullpower_on = "Bot Full Power Mode on.",
 		botai_gascan_finding_off = "Bot Find Gascan off.",
 		botai_gascan_finding_on = "Bot Find Gascan on.",
 		botai_throw_grenade_off = "Bot Throw Grenade off.",
 		botai_throw_grenade_on = "Bot Throw Grenade on.",
 		botai_immunity_off = "Bot Immunity to player damage off.",
 		botai_immunity_on = "Bot Immunity to player damage on.",
-		botai_balance_mode_off = "Bot Balance Mode off.",
-		botai_balance_mode_on = "Bot Balance Mode on.",
 		botai_bot_alive_on = "Bots will keep going even when all players are dead.",
 		botai_bot_alive_off = "Bots will not keep going when all players are dead.",
 		botai_defibrillator_off = "Bots will not use defibrillator.",
@@ -93,6 +89,7 @@ function I18n::init() {
 		botai_no_hud = "Menu requires Admin System addon for support.",
 		botai_no_holomenu = "Holo Menu is only available to host.",
 		botai_admin_only = "This command is for admin only.",
+		botai_bot_combat_skill = "Bot Combat Skill set to: ",
 
 		menu_title = "Advanced Bot Settings",
 		menu_add_bot = "Add a bot",
@@ -104,8 +101,6 @@ function I18n::init() {
 		menu_immunity = "Immunity to player damage",
 		menu_carry = "Carry supplies",
 		menu_alive = "Continue after player death",
-		menu_balance = "Balance Mode",
-		menu_fullpower = "Full Power Mode",
 		menu_defibrillator = "Use Defibrillator",
 		menu_next = "Next page",
 		menu_pre = "Previous page",
@@ -122,20 +117,16 @@ function I18n::init() {
 		ping_follow = "Follow",
 		ping_follow_me = "Follow Me"
 	};
-	
+
 	addTranslationTable("english", english);
-	
+
 	local schinese =  {
-		botai_fullpower_off = "Bot Full Power模式关闭。",
-		botai_fullpower_on = "Bot Full Power模式开启。",
 		botai_gascan_finding_off = "Bot寻油功能关闭。",
 		botai_gascan_finding_on = "Bot寻油功能开启。",
 		botai_throw_grenade_off = "Bot丢投掷功能关闭。",
 		botai_throw_grenade_on = "Bot丢投掷功能开启。",
 		botai_immunity_off = "Bot免疫玩家伤害关闭。",
 		botai_immunity_on = "Bot免疫玩家伤害开启。",
-		botai_balance_mode_off = "Bot平衡模式关闭。",
-		botai_balance_mode_on = "Bot平衡模式开启。",
 		botai_defibrillator_off = "关闭Bot使用电击器。",
 		botai_defibrillator_on = "开启Bot使用电击器。",
 		botai_bot_alive_on = "Bot将在玩家死后继续跑图。",
@@ -160,7 +151,8 @@ function I18n::init() {
 		botai_no_hud = "菜单需要安装Admin System模组来启用。",
 		botai_no_holomenu = "全息菜单仅限房主使用。",
 		botai_admin_only = "该指令仅管理员可用。",
-		
+		botai_bot_combat_skill = "Bot战斗能力设置为: ",
+
 		menu_title = "进阶Bot设置模组",
 		menu_add_bot = "添加Bot",
 		menu_find_gas = "Bot寻油",
@@ -171,9 +163,7 @@ function I18n::init() {
 		menu_immunity = "Bot免疫黑枪",
 		menu_carry = "Bot携带物资",
 		menu_alive = "Bot死后跑图",
-		menu_balance = "平衡模式",
 		menu_defibrillator = "使用电击器",
-		menu_fullpower = "Full Power",
 		menu_enable = "√ ",
 		menu_disable = "✕ ",
 		menu_next = "下一页",
@@ -189,20 +179,16 @@ function I18n::init() {
 		ping_follow = "跟随",
 		ping_follow_me = "跟随我"
 	};
-	
+
 	addTranslationTable("schinese", schinese);
-	
+
 	local tchinese =  {
-		botai_fullpower_off = "Bot全功率模式已關閉。",
-		botai_fullpower_on = "Bot全功率模式已開啟。",
 		botai_gascan_finding_off = "Bot尋找油罐功能已關閉。",
 		botai_gascan_finding_on = "Bot尋找油罐功能已開啟。",
 		botai_throw_grenade_off = "Bot投擲手榴彈功能已關閉。",
 		botai_throw_grenade_on = "Bot投擲手榴彈功能已開啟。",
 		botai_immunity_off = "Bot免疫玩家傷害已關閉。",
 		botai_immunity_on = "Bot免疫玩家傷害已開啟。",
-		botai_balance_mode_off = "Bot平衡模式已關閉。",
-		botai_balance_mode_on = "Bot平衡模式已開啟。",
 		botai_bot_alive_on = "Bot會在玩家全滅後繼續行動。",
 		botai_bot_alive_off = "Bot不會在玩家全滅後繼續行動。",
 		botai_bot_carry_on = "Bot攜帶物資功能已開啟。",
@@ -227,7 +213,8 @@ function I18n::init() {
 		botai_no_hud = "此選單需要安裝Admin System模組才能使用。",
 		botai_no_holomenu = "全息選單僅限主機使用。",
 		botai_admin_only = "此指令僅限管理員使用。",
-		
+		botai_bot_combat_skill = "Bot战斗能力设置为: ",
+
 		menu_title = "進階Bot設定模組",
 		menu_add_bot = "新增Bot",
 		menu_find_gas = "Bot尋找油罐",
@@ -238,9 +225,7 @@ function I18n::init() {
 		menu_immunity = "Bot免疫友傷",
 		menu_carry = "Bot攜帶物資",
 		menu_alive = "Bot玩家全滅後繼續",
-		menu_balance = "平衡模式",
 		menu_defibrillator = "使用電擊器",
-		menu_fullpower = "全功率模式",
 		menu_enable = "√ ",
 		menu_disable = "✕ ",
 		menu_next = "下一頁",
@@ -256,7 +241,7 @@ function I18n::init() {
 		ping_follow = "跟隨",
 		ping_follow_me = "跟隨我"
 	};
-	
+
 	addTranslationTable("tchinese", tchinese);
 }
 

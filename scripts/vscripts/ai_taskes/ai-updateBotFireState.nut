@@ -74,6 +74,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			BotAI.setBotTarget(player, m_trace.enthit);
 			return true;
 		}
+
 		BotAI.setBotTarget(player, null);
 		return false;
 	}
@@ -97,6 +98,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			local distance = BotAI.nextTickDistance(target, player);
 			local targetName = target.GetClassname();
 			local isTank = targetName == "player" && target.GetZombieType() == 8;
+			local meleeRange = Convars.GetFloat("melee_range") + 50;
 
 			if(targetName == "player" && target.IsSurvivor() && target != player) {
 				if((target.IsIncapacitated() || target.IsHangingFromLedge()) && !target.IsGettingUp() && !target.IsDominatedBySpecialInfected() && distance < 150) {
@@ -105,9 +107,9 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				}
 			}
 
-			if(distance <= 150 && BotAI.HasItem(player, "melee") && !BotAI.HasFlag(player, FL_FROZEN)
-			&& !isTank)
+			if(distance <= meleeRange && BotAI.HasItem(player, "melee") && !BotAI.HasFlag(player, FL_FROZEN) && !isTank) {
 				BotAI.ChangeItem(player, 1);
+			}
 
 			local wep = player.GetActiveWeapon();
 
@@ -118,34 +120,40 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 
 			local notWeapon = ename == "weapon_defibrillator" || ename == "weapon_first_aid_kit";
 
-			if(notWeapon)
+			if(notWeapon) {
 				shotDis = 0;
+			}
 
 			local isShotGun = ename == "weapon_pumpshotgun" || ename == "weapon_shotgun_chrome" || ename == "weapon_autoshotgun" || ename == "weapon_shotgun_spas";
 
-			if(isShotGun)
+			if(isShotGun) {
 				shotDis = 600;
+			}
 
 			local isSniper = ename == "weapon_hunting_rifle" || ename == "weapon_sniper_military" || ename == "weapon_sniper_awp" || ename == "weapon_sniper_scout";
 
-			if(isSniper)
+			if(isSniper) {
 				shotDis = 5000;
+			}
 
 			local isMelee = ename == "weapon_melee" || ename == "weapon_chainsaw";
-			local mel = isMelee && (distance > 150 || isTank);
+			local mel = isMelee && (distance > meleeRange || isTank);
 
 			if(!player.IsIncapacitated() && !BotAI.IsSurvivorTrapped(player) && !BotAI.HasFlag(player, FL_FROZEN) && (BotAI.GetPrimaryClipAmmo(player) > 0 || isTank) && mel) {
 				BotAI.ChangeItem(player, 0);
 			}
 
 			local modelName = " ";
-			if(BotAI.IsEntityValid(wep))
+			if(BotAI.IsEntityValid(wep)) {
 				modelName = wep.GetModelName();
+			}
+
 			local isKnife = isMelee && (modelName == "models/v_models/v_knife_t.mdl" || modelName == "models/weapons/melee/v_machete.mdl" ||
 				modelName == "models/weapons/melee/v_katana.mdl" || modelName == "models/weapons/melee/v_fireaxe.mdl" ||
 				modelName == "models/weapons/melee/v_crowbar.mdl" || modelName == "models/v_models/v_pitchfork.mdl");
+
 			if(isMelee || BotAI.IsSurvivorTrapped(player)) {
-				shotDis = 120;
+				shotDis = meleeRange;
 			}
 
 			if(isKnife && targetName == "player" && target.GetZombieType() == 1 && target.GetEntityIndex() in BotAI.smokerTongue) {

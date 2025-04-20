@@ -1,21 +1,21 @@
-/*  
+/*
  * Copyright (c) 2013 LuKeM aka Neil - 119 and Rayman1103
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  * and associated documentation files (the "Software"), to deal in the Software without
  * restriction, including without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or
  * substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
  * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  */
 
 
@@ -34,49 +34,49 @@ if (!("EasyLogic" in ::VSLib))
 		_itChatCount = 0
 		_triggerStart = "!"
 		_triggerHide = "/"
-		
+
 		// Intercept chat hooks
 		_interceptCount = 0
 		_interceptList = {}
 		OnInterceptChat = {}
-		
+
 		// Update() hooks
 		Update = {}
-		
+
 		// SlowPoll hooks
 		SlowPoll = {}
-		
+
 		// Easier chat triggers
 		Triggers = {}
-		
+
 		// Easier damage hooks
 		OnDamage = {}
 		OnTakeDamage = {}
-		
+
 		// User defined data storage
 		UserDefinedVars = {}
-		
+
 		// Player/Zombie/Object helpers
 		Players = {}
 		Zombies = {}
 		Objects = {}
-		
+
 		// Bash hooks
 		OnBash = {}
-		
+
 		// BotQuery hooks
 		OnBotQuery = {}
-		
+
 		// User command hooks
 		OnUserCommand = {}
-		
+
 		// Stores VSLib's OnGameEvent_ functions
 		Events = {}
-		
+
 		// Hook for when the script starts
 		OnScriptStart = {}
 		ScriptStarted = false
-		
+
 		// Hooks from scriptedmode.nut
 		OnGameplayStart = {}
 		OnActivate = {}
@@ -84,7 +84,7 @@ if (!("EasyLogic" in ::VSLib))
 		OnSystemCall = {}
 		OnAddCriteria = {}
 		OnPrecache = {}
-		
+
 		// Round variables
 		RoundVars =
 		{
@@ -94,40 +94,40 @@ if (!("EasyLogic" in ::VSLib))
 				return value;
 			}
 		}
-		
+
 		OrigRoundVars = {}
-		
+
 		// Session variables that remain through map transitions
 		SessionVars = {}
 		SessionVarsBackup = {}
-		
+
 		// Create entity data cache system
 		Cache = {}
-		
+
 		// Create user data cache system
 		UserCache = {}
-		
+
 		// Used to determine if the next map is a continuation of the same campaign
 		NextMapContinues = false
-		
+
 		// Holds precached sounds
 		PrecachedSounds = {}
-		
+
 		// These are used for custom event notifications
 		RoundStartPostNavFired = false
 		SurvivorsSpawned = {}
 		PlayerSpawnedOnce = {}
-		
+
 		// Used to store the rescue trigger entity
 		RescueTrigger = null
-		
+
 		// Used to determine if rescue is incoming or leaving
 		RescueVehicleIncoming = false
 		RescueVehicleLeaving = false
-		
+
 		// Used for Player.Ragdoll()
 		SurvivorRagdolls = {}
-		
+
 		// Used for Utils.SpawnSurvivor()
 		ExtraBills = []
 		ExtraBillsData = {}
@@ -143,14 +143,14 @@ if (!("EasyLogic" in ::VSLib))
 		SpawnL4D1BotZoey = null
 		SpawnL4D1BotFrancis = null
 		SpawnL4D1BotLouis = null
-		
+
 		// Used for Utils.SpawnLeaker()
 		LeakerChance = 0
 		SpawnLeaker = 0
-		
+
 		// ResponseRules hooks that get fired when loading a map for the first time
 		OnProcessResponse = {}
-		
+
 		// Saves misc data
 		MiscData =
 		{
@@ -222,7 +222,7 @@ if (!("Notifications" in ::VSLib.EasyLogic))
 		OnPanicEventFinished = {}
 		OnStartScoreAnimation = {}
 		OnHostNameChanged = {}
-		
+
 		// General player events (both infected and survivors)
 		OnPlayerJoined = {}
 		OnPlayerConnected = {}
@@ -274,7 +274,7 @@ if (!("Notifications" in ::VSLib.EasyLogic))
 		OnVoteCastNo = {}
 		OnRelocated = {}
 		OnRespawning = {}
-		
+
 		// General infected events
 		OnAbilityUsed = {}
 		OnAbilityOutOfRange = {}
@@ -284,7 +284,7 @@ if (!("Notifications" in ::VSLib.EasyLogic))
 		OnWitchStartled = {}
 		OnWitchKilled = {}
 		OnZombieIgnited = {}
-		
+
 		// Survivor events
 		OnDefibBegin = {}
 		OnDefibInterrupted = {}
@@ -333,7 +333,7 @@ if (!("Notifications" in ::VSLib.EasyLogic))
 		OnUpgradeAlreadyUsed = {}
 		OnUpgradeFailed = {}
 		OnLeaveSafeArea = {}
-		
+
 		// Charger events
 		OnChargerCharged = {}
 		OnChargerCarryVictim = {}
@@ -341,7 +341,7 @@ if (!("Notifications" in ::VSLib.EasyLogic))
 		OnChargerImpact = {}
 		OnChargerPummelBegin = {}
 		OnChargerPummelEnd = {}
-		
+
 		// Smoker events
 		OnSmokerChokeBegin = {}
 		OnSmokerChokeEnd = {}
@@ -350,17 +350,17 @@ if (!("Notifications" in ::VSLib.EasyLogic))
 		OnSmokerTongueReleased = {}
 		OnSmokerTongueGrab = {}
 		OnSmokerTongueBent = {}
-		
+
 		// Spitter events
 		OnSpitLanded = {}
 		OnEnterSpit = {}
-		
+
 		// Jockey
 		OnJockeyRideStart = {}
 		OnJockeyRideEnd = {}
 		OnJockeyHeadshot = {}
 		OnJockeyPunched = {}
-		
+
 		// Hunter
 		OnHunterHeadshot = {}
 		OnHunterPounceFailed = {}
@@ -369,20 +369,20 @@ if (!("Notifications" in ::VSLib.EasyLogic))
 		OnHunterPounceStopped = {}
 		OnHunterPunched = {}
 		OnHunterReleasedVictim = {}
-		
+
 		// Boomer
 		OnPlayerVomited = {}
 		OnPlayerVomitEnd = {}
 		OnFatalVomit = {}
 		OnBoomerExploded = {}
 		OnBoomerNear = {}
-		
+
 		// Tank
 		OnTankFrustrated = {}
 		OnTankKilled = {}
 		OnTankSpawned = {}
 		OnSpawnedAsTank = {}
-		
+
 		// Achievements
 		OnPunchedClown = {}
 		OnInfectedDecapitated = {}
@@ -403,7 +403,7 @@ if (!("Notifications" in ::VSLib.EasyLogic))
 		OnChristmasGiftGrab = {}
 		OnGoldenCrowbarPickup = {}
 		OnLeftConcertStage = {}
-		
+
 		// Misc
 		OnDifficulty = {}
 		OnDifficultyChanged = {}
@@ -419,11 +419,11 @@ if (!("Notifications" in ::VSLib.EasyLogic))
 		OnSurvivorsLeftStartArea = {}
 		OnEnterRescueVehicle = {}
 		OnLeaveRescueVehicle = {}
-		
+
 		// SourceTV events
 		OnSourceTVStatus = {}
 		OnSourceTVRankEntity = {}
-		
+
 		// Hint events from info_game_event_proxy
 		OnExplainSurvivorGlowsDisabled = {}
 		OnExplainItemGlowsDisabled = {}
@@ -522,7 +522,7 @@ if (!("Notifications" in ::VSLib.EasyLogic))
 		OnExplainJunkyardFuel = {}
 		OnExplainContainerDrop = {}
 		OnExplainContainerReady = {}
-		
+
 		// OnScriptEvent_ functions
 		OnHoldoutStart = {}
 		OnResourcesChanged = {}
@@ -530,7 +530,7 @@ if (!("Notifications" in ::VSLib.EasyLogic))
 		OnHelicopterEnd = {}
 		OnCooldownBegin = {}
 		OnCooldownEnd = {}
-		
+
 		// ResponseRules Query Events
 		OnConcept = {}
 	}
@@ -675,32 +675,32 @@ if ( !("MutationState" in g_ModeScript) )
 	::VSLib.EasyLogic.ScriptStarted <- true;
 	VSLib_ResetRoundVars();
 	VSLib_ResetCache();
-	
+
 	RestoreTable( "_vslib_user_cache", ::VSLib.EasyLogic.UserCache );
-	
+
 	if (::VSLib.EasyLogic.UserCache == null)
 		::VSLib.EasyLogic.UserCache <- {};
-	
+
 	// Restore session table
 	RestoreTable( "_vslib_global_cache_session", ::VSLib.GlobalCacheSession );
-	
+
 	::VSLib.GlobalCache <- ::VSLib.FileIO.LoadTable( "_vslib_global_cache" );
 	if (::VSLib.GlobalCache == null)
 	{
 		::VSLib.GlobalCache <- {};
-		
+
 		// Attempt read from session
 		::VSLib.GlobalCache <- ::VSLib.Utils.DeserializeIdxTable(::VSLib.GlobalCacheSession);
-		
+
 		if (::VSLib.GlobalCache == null)
 			::VSLib.GlobalCache <- {};
 	}
-	
+
 	RestoreTable( "_vslib_save_data", ::VSLib.EasyLogic.MiscData );
 	RestoreTable( "_vslib_session_vars", ::VSLib.EasyLogic.SessionVars );
 	foreach( key, val in ::VSLib.EasyLogic.SessionVars )
 		::VSLib.EasyLogic.SessionVarsBackup[key] <- val;
-	
+
 	foreach (func in ::VSLib.EasyLogic.OnScriptStart)
 		func();
 }
@@ -752,7 +752,7 @@ g_MapScript.ScriptMode_OnActivate <- function (modename, mapname)
 	{
 		// Need to reload the mode script
 		// TODO: Should know exactly which script we want to load here
-		
+
 		g_ModeScript = getroottable().DirectorScript.MapScript.ChallengeScript;
 
 		if ( IncludeScript( modename, g_ModeScript ) )
@@ -760,7 +760,7 @@ g_MapScript.ScriptMode_OnActivate <- function (modename, mapname)
 			printl( "ScriptMode loaded " + modename + " and now Initializing" );
 		}
 	}
-		
+
 	if ( !SessionState.StartActive )
 	{
 		MergeSessionOptionTables();
@@ -772,10 +772,10 @@ g_MapScript.ScriptMode_OnActivate <- function (modename, mapname)
 	}
 
 	ScriptMode_SystemCall("OnActivate");
-	
+
 	foreach (slowPoll in ::VSLib.EasyLogic.SlowPoll)
 		g_MapScript.ScriptedMode_AddSlowPoll( slowPoll );
-	
+
 	foreach (func in ::VSLib.EasyLogic.OnActivate)
 		func(modename, mapname);
 }
@@ -789,7 +789,7 @@ g_MapScript.ScriptMode_OnShutdown <- function (reason, nextmap)
 	VSLib_ResetRoundVars();
 	VSLib_ResetCache();
 	VSLib_RemoveDeadTimers();
-	
+
 	if ( reason > 0 && reason < 4 )
 	{
 		if ( reason == 1 )
@@ -828,13 +828,13 @@ g_MapScript.ScriptMode_OnShutdown <- function (reason, nextmap)
 	foreach (func in ::VSLib.EasyLogic.OnShutdown)
 		func(reason, nextmap);
 	g_ModeScript = null;
-	
+
 	// Delete ::VSLib in order to reset data upon restarts
 	delete ::VSLib;
 }
 
 //=========================================================
-// Called by RR system to add any global criteria to queries based on mode or map state 
+// Called by RR system to add any global criteria to queries based on mode or map state
 //=========================================================
 g_MapScript.ScriptMode_AddCriteria <- function ( )
 {   // @todo: is there a varargs for syscall? - if so swap this to a syscall
@@ -856,17 +856,17 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
  * enabling the data to be used quickly and efficiently. That also removes
  * a lot of repetitive logic by organizing common tasks in ::VSLib.EasyLogic.
  *
- * \todo @TODO This stuff can get repetitive... fast. A function to group similar instructions would be nice. 
+ * \todo @TODO This stuff can get repetitive... fast. A function to group similar instructions would be nice.
  */
 
 ::VSLib.EasyLogic.Events.OnGameEvent_player_hurt <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	local _id = ents.entity.GetIndex();
 	if(_id in ::VSLib.EasyLogic.Cache)
 		::VSLib.EasyLogic.Cache[_id]._lastAttacker <- ents.attacker;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHurt)
 		func(ents.entity, ents.attacker, params);
 }
@@ -874,7 +874,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_hurt_concise <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHurtConcise)
 		func(ents.entity, ents.attacker, params);
 }
@@ -884,7 +884,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local damage = ::VSLib.EasyLogic.GetEventFloat(params, "damage");
 	local causer = ::VSLib.EasyLogic.GetEventPlayer(params, "causer");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnFallDamage)
 		func(ents.entity, damage, causer, params);
 }
@@ -894,15 +894,15 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local subjectentid = ::VSLib.EasyLogic.GetEventInt(params, "subjectentid");
 	local award = ::VSLib.EasyLogic.GetEventInt(params, "award");
-	
+
 	local idx = ents.entity.GetIndex();
-	
+
 	if(!(idx in ::VSLib.EasyLogic.Cache))
 		::VSLib.EasyLogic.Cache[idx] <- {};
 	if (!("Awards" in ::VSLib.EasyLogic.Cache[idx]))
 		::VSLib.EasyLogic.Cache[idx].Awards <- {};
 	::VSLib.EasyLogic.Cache[idx].Awards[award] <- true;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnAwarded)
 		func(ents.entity, subjectentid, award, params);
 }
@@ -925,7 +925,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	if ( player != 0 )
 		player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local entity = ::VSLib.EasyLogic.GetEventEntity(params, "hint_entindex");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnServerHintCreated)
 		func(player, entity, params);
 }
@@ -933,7 +933,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_instructor_server_hint_stop <- function (params)
 {
 	local entity = ::VSLib.EasyLogic.GetEventEntity(params, "hint_entindex");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnServerHintStopped)
 		func(entity, params);
 }
@@ -945,7 +945,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local y = ::VSLib.EasyLogic.GetEventFloat(params, "y");
 	local z = ::VSLib.EasyLogic.GetEventFloat(params, "z");
 	local origin = Vector( x, y, z );
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnBulletImpact)
 		func(ents.entity, origin, params);
 }
@@ -954,7 +954,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local door = ::VSLib.EasyLogic.GetEventEntity(params, "entindex");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDoorMoving)
 		func(ents.entity, door, params);
 }
@@ -963,7 +963,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local checkpoint = ::VSLib.EasyLogic.GetEventInt(params, "checkpoint");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDoorClosed)
 		func(ents.entity, checkpoint, params);
 }
@@ -972,7 +972,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local checkpoint = ::VSLib.EasyLogic.GetEventInt(params, "checkpoint");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDoorOpened)
 		func(ents.entity, checkpoint, params);
 }
@@ -981,7 +981,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local checkpoint = ::VSLib.EasyLogic.GetEventInt(params, "checkpoint");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDoorUnlocked)
 		func(ents.entity, checkpoint, params);
 }
@@ -990,7 +990,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	if ( !::VSLib.Entity(activator).IsSurvivor() )
 		return;
-	
+
 	if ( !::VSLib.EasyLogic.RescueTrigger || ::VSLib.EasyLogic.RescueVehicleLeaving )
 		return;
 	else
@@ -1009,11 +1009,11 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	if ( !::VSLib.Entity(activator).IsSurvivor() || !::VSLib.EasyLogic.RescueTrigger )
 		return;
-	
+
 	local _id = ::VSLib.Player(activator).GetIndex();
 	if ( !( "_inRescue" in ::VSLib.EasyLogic.Cache[_id] ) )
 		::VSLib.EasyLogic.Cache[_id]._inRescue <- false;
-	
+
 	if ( !::VSLib.EasyLogic.Cache[_id]._inRescue )
 	{
 		::VSLib.EasyLogic.Cache[_id]._inRescue <- true;
@@ -1054,9 +1054,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_finale_vehicle_leaving <- function (params)
 {
 	::VSLib.EasyLogic.RescueVehicleLeaving <- true;
-	
+
 	local count = ::VSLib.EasyLogic.GetEventInt(params, "survivorcount");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnRescueVehicleLeaving)
 		func(count, params);
 }
@@ -1065,9 +1065,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	if ( !::VSLib.EasyLogic.RescueVehicleIncoming )
 		VSLib_ConnectRescueVehicleOutputs();
-	
+
 	local campaign = ::VSLib.EasyLogic.GetEventString(params, "campaign");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnRescueVehicleReady)
 		func(campaign, params);
 }
@@ -1075,11 +1075,11 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_finale_vehicle_incoming <- function (params)
 {
 	::VSLib.EasyLogic.RescueVehicleIncoming <- true;
-	
+
 	VSLib_ConnectRescueVehicleOutputs();
-	
+
 	local campaign = ::VSLib.EasyLogic.GetEventString(params, "campaign");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnRescueVehicleIncoming)
 		func(campaign, params);
 }
@@ -1093,7 +1093,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_finale_start <- function (params)
 {
 	local campaign = ::VSLib.EasyLogic.GetEventString(params, "campaign");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnFinaleStart)
 		func(campaign, params);
 }
@@ -1108,7 +1108,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local map_name = ::VSLib.EasyLogic.GetEventString(params, "map_name");
 	local diff = ::VSLib.EasyLogic.GetEventInt(params, "difficulty");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnFinaleWin)
 		func(map_name, diff, params);
 }
@@ -1134,7 +1134,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_begin_sacrifice_run <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnBeginSacrificeRun)
 		func(player, params);
 }
@@ -1142,7 +1142,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_complete_sacrifice <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnCompleteSacrifice)
 		func(player, params);
 }
@@ -1151,7 +1151,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local playerIndex = ::VSLib.EasyLogic.GetEventInt(params, "player");
 	local achievementID = ::VSLib.EasyLogic.GetEventInt(params, "achievement");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnAchievementEarned)
 		func(playerIndex, achievementID, params);
 }
@@ -1161,7 +1161,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local achievement = ::VSLib.EasyLogic.GetEventString(params, "achievement_name");
 	local cur_val = ::VSLib.EasyLogic.GetEventInt(params, "cur_val");
 	local max_val = ::VSLib.EasyLogic.GetEventInt(params, "max_val");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnAchievementEvent)
 		func(achievement, cur_val, max_val, params);
 }
@@ -1171,7 +1171,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local diff = ::VSLib.EasyLogic.GetEventString(params, "strDifficulty").tolower();
 	local oldDiff = ::VSLib.EasyLogic.GetEventInt(params, "oldDifficulty");
 	local olddiff = "";
-	
+
 	if (oldDiff == 0)
 		olddiff = "easy";
 	else if (oldDiff == 1)
@@ -1180,7 +1180,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 		olddiff = "hard";
 	else if (oldDiff == 3)
 		olddiff = "impossible";
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDifficultyChanged)
 		func(diff, olddiff);
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDifficulty)
@@ -1216,7 +1216,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	// clear the cache
 	::VSLib.EasyLogic.Cache.clear();
-	
+
 	// Re-create entity data cache system
 	::VSLib.EasyLogic.Cache <- {};
 	for (local i = -1; i < 2048; i++)
@@ -1236,7 +1236,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnConcept)
 		func(query);
-	
+
 	return false;
 }
 
@@ -1248,7 +1248,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 		{
 			foreach (func in ::VSLib.EasyLogic.Notifications.OnSurvivorsLeftStartArea)
 				func();
-			
+
 			::VSLib.Timers.RemoveTimerByName("VSLib_LeftStartCheck");
 			break;
 		}
@@ -1267,18 +1267,18 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	if ( ::VSLib.EasyLogic.RoundStartPostNavFired )
 		return;
-	
+
 	if ( !::VSLib.EasyLogic.ScriptStarted )
 		VSLibScriptStart();
-	
+
 	::VSLib.EasyLogic.RoundStartPostNavFired <- true;
-	
+
 	local diff = ::VSLib.Utils.GetDifficulty();
 	local olddiff = diff;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnRoundStart)
 		func();
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDifficulty)
 		func(diff, olddiff);
 }
@@ -1287,7 +1287,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	if ( !::VSLib.EasyLogic.ScriptStarted )
 		VSLibScriptStart();
-	
+
 	if ( !::VSLib.Utils.HasMapRestarted() )
 	{
 		local vsl_query_data =
@@ -1308,10 +1308,10 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 			},
 		]
 		::VSLib.ResponseRules.ProcessRules( vsl_query_data );
-		
+
 		vslib_map_first_start();
 	}
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnRoundBegin)
 		func(params);
 }
@@ -1325,7 +1325,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_map_transition <- function (params)
 {
 	::VSLib.EasyLogic.NextMapContinues <- true;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnMapEnd)
 		func();
 }
@@ -1358,7 +1358,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local round = ::VSLib.EasyLogic.GetEventInt(params, "round");
 	local firsthalf = ::VSLib.EasyLogic.GetEventInt(params, "firsthalf");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnScavengeStart)
 		func(round, (firsthalf > 0) ? true : false, params);
 }
@@ -1390,7 +1390,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_scavenge_match_finished <- function (params)
 {
 	local winners = ::VSLib.EasyLogic.GetEventInt(params, "winners");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnScavengeMatchFinished)
 		func(winners, params);
 }
@@ -1398,7 +1398,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_scavenge_gas_can_destroyed <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnScavengeGascanDestroyed)
 		func(player, params);
 }
@@ -1407,7 +1407,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local marker = ::VSLib.EasyLogic.GetEventInt(params, "marker");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnVersusMarkerReached)
 		func(ents.entity, marker, params);
 }
@@ -1415,7 +1415,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_versus_match_finished <- function (params)
 {
 	local winners = ::VSLib.EasyLogic.GetEventInt(params, "winners");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnVersusMatchFinished)
 		func(winners, params);
 }
@@ -1424,7 +1424,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local spawntime = ::VSLib.EasyLogic.GetEventInt(params, "spawntime");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnGhostSpawnTime)
 		func(player, spawntime, params);
 }
@@ -1438,12 +1438,12 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_round_end <- function (params)
 {
 	::VSLib.EasyLogic.NextMapContinues <- true;
-	
+
 	local winner = ::VSLib.EasyLogic.GetEventInt(params, "winner"); // team or player
 	local reason = ::VSLib.EasyLogic.GetEventInt(params, "reason");
 	local message = ::VSLib.EasyLogic.GetEventString(params, "message");
 	local time = ::VSLib.EasyLogic.GetEventFloat(params, "time");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnRoundEnd)
 		func(winner, reason, message, time, params);
 }
@@ -1452,7 +1452,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local area = ::VSLib.EasyLogic.GetEventInt(params, "area");
 	local blocked = ::VSLib.EasyLogic.GetEventInt(params, "blocked");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnNavBlocked)
 		func(area, (blocked > 0) ? true : false, params);
 }
@@ -1470,37 +1470,37 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ipAddress = ::VSLib.EasyLogic.GetEventString(params, "address");
 	local steamID = ::VSLib.EasyLogic.GetEventString(params, "networkid");
 	local xuid = ::VSLib.EasyLogic.GetEventString(params, "xuid");
-	
+
 	if (ents.entity != null)
 	{
 		local _id = ents.entity.GetIndex();
-		
+
 		if (_id in ::VSLib.GlobalCache)
 			delete ::VSLib.GlobalCache[_id];
-		
+
 		::VSLib.GlobalCache[_id] <- {};
 		::VSLib.GlobalCache[_id]["_name"] <- name;
 		::VSLib.GlobalCache[_id]["_ip"] <- ipAddress;
 		::VSLib.GlobalCache[_id]["_steam"] <- steamID;
 		::VSLib.GlobalCache[_id]["_xuid"] <- xuid;
-		
+
 		// Save our changes to the global cache
 		::VSLib.FileIO.SaveTable( "_vslib_global_cache", ::VSLib.GlobalCache );
-		
+
 		if ( ents.entity.IsHuman() )
 		{
 			local _userid = "_vslUserID_" + ents.entity.GetUserID();
-			
+
 			if (_userid in ::VSLib.EasyLogic.UserCache)
 				delete ::VSLib.EasyLogic.UserCache[_userid];
-			
+
 			::VSLib.EasyLogic.UserCache[_userid] <- {};
 			::VSLib.EasyLogic.UserCache[_userid]["_name"] <- name;
 			::VSLib.EasyLogic.UserCache[_userid]["_ip"] <- ipAddress;
 			::VSLib.EasyLogic.UserCache[_userid]["_steam"] <- steamID;
 			::VSLib.EasyLogic.UserCache[_userid]["_xuid"] <- xuid;
 		}
-		
+
 		foreach (func in ::VSLib.EasyLogic.Notifications.OnPlayerJoined)
 			func(ents.entity, name, ipAddress, steamID, params);
 	}
@@ -1514,7 +1514,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_connect_full <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPlayerConnected)
 		func(ents.entity, params);
 }
@@ -1525,7 +1525,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local name = ::VSLib.EasyLogic.GetEventString(params, "name");
 	local steamID = ::VSLib.EasyLogic.GetEventString(params, "networkid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPlayerLeft)
 		func(ents.entity, name, steamID, params);
 }
@@ -1534,7 +1534,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_activate <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPlayerActivate)
 		func(ents.entity, params);
 }
@@ -1545,11 +1545,11 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local oldname = ::VSLib.EasyLogic.GetEventString(params, "oldname");
 	local newname = ::VSLib.EasyLogic.GetEventString(params, "newname");
-	
+
 	local _id = ents.entity.GetIndex();
 	if(_id in ::VSLib.EasyLogic.Cache)
 		::VSLib.EasyLogic.Cache[_id]._name <- newname;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnNameChanged)
 		func(ents.entity, oldname, newname, params);
 }
@@ -1557,9 +1557,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_death <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	if (ents.entity == null) return;
-	
+
 	if (ents.entity.IsPlayer())
 	{
 		local idx = ents.entity.GetIndex();
@@ -1567,25 +1567,25 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 		::VSLib.EasyLogic.Cache[idx]._deathPos <- ents.entity.GetLocation();
 		::VSLib.EasyLogic.Cache[idx]._isFrustrated <- false;
 	}
-	
+
 	if ( (ents.attacker != null) && (ents.attacker.IsSurvivor()) && (ents.entity.GetTeam() == INFECTED) )
 	{
 		local _id = ents.attacker.GetIndex();
-		
+
 		if ( ents.attacker.IsIncapacitated() )
 		{
 			if ( !("_zombiesKilledWhileIncapacitated" in ::VSLib.EasyLogic.Cache[_id]) )
 				::VSLib.EasyLogic.Cache[_id]._zombiesKilledWhileIncapacitated <- 0;
-			
+
 			::VSLib.EasyLogic.Cache[_id]._zombiesKilledWhileIncapacitated++;
 		}
-		
+
 		if ( !("_zombiesKilled" in ::VSLib.EasyLogic.Cache[_id]) )
 			::VSLib.EasyLogic.Cache[_id]._zombiesKilled <- 0;
-		
+
 		::VSLib.EasyLogic.Cache[_id]._zombiesKilled++;
 	}
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDeath)
 		func(ents.entity, ents.attacker, params);
 }
@@ -1594,10 +1594,10 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local item = ::VSLib.EasyLogic.GetEventString(params, "item");
-	
+
 	if ( !::VSLib.EasyLogic.ScriptStarted )
 		VSLibScriptStart();
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnItemPickup)
 		func(ents.entity, "weapon_" + item, params);
 }
@@ -1605,7 +1605,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_ammo_pickup <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnAmmoPickup)
 		func(ents.entity, params);
 }
@@ -1613,7 +1613,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_ammo_pile_weapon_cant_use_ammo <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnAmmoCantUse)
 		func(ents.entity, params);
 }
@@ -1623,7 +1623,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local reviver = ents.entity;
 	local subject = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDefibBegin)
 		func(subject, reviver, params);
 }
@@ -1633,26 +1633,26 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local reviver = ents.entity;
 	local subject = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDefibInterrupted)
 		func(subject, reviver, params);
 }
-	
+
 ::VSLib.EasyLogic.Events.OnGameEvent_defibrillator_used <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local reviver = ents.entity;
 	local subject = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	local idx = subject.GetIndex();
 	::VSLib.EasyLogic.Cache[idx]._lastDefibBy <- reviver;
-	
+
 	if ( idx in ::VSLib.EasyLogic.SurvivorRagdolls )
 	{
 		::VSLib.EasyLogic.SurvivorRagdolls[idx]["Ragdoll"].Kill();
 		::VSLib.EasyLogic.SurvivorRagdolls.rawdelete(idx);
 	}
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDefibSuccess)
 		func(subject, reviver, params);
 }
@@ -1662,7 +1662,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local reviver = ents.entity;
 	local subject = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDefibFailed)
 		func(subject, reviver, params);
 }
@@ -1670,14 +1670,14 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_entered_checkpoint <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	if ( !::VSLib.EasyLogic.ScriptStarted )
 		VSLibScriptStart();
-	
+
 	local _id = ents.entity.GetIndex();
 	if(_id in ::VSLib.EasyLogic.Cache)
 		::VSLib.EasyLogic.Cache[_id]._inSafeRoom <- true;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnEnterSaferoom)
 		func(ents.entity, params);
 }
@@ -1685,17 +1685,17 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_left_checkpoint <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	if ( !::VSLib.EasyLogic.ScriptStarted )
 		VSLibScriptStart();
-	
+
 	if ( ents.entity )
 	{
 		local _id = ents.entity.GetIndex();
 		if(_id in ::VSLib.EasyLogic.Cache)
 			::VSLib.EasyLogic.Cache[_id]._inSafeRoom <- false;
 	}
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnLeaveSaferoom)
 		func(ents.entity, params);
 }
@@ -1703,7 +1703,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_jump <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnJump)
 		func(ents.entity, params);
 }
@@ -1711,7 +1711,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_jump_apex <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnJumpApex)
 		func(ents.entity, params);
 }
@@ -1719,18 +1719,18 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::_OnPostSpawnEv <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	if (ents.entity == null || !("IsPlayerEntityValid" in ents.entity))
 		return false;
-	
+
 	local name = ents.entity.GetCharacterName();
-	
+
 	if ( (name != "") && !(name in ::VSLib.EasyLogic.PlayerSpawnedOnce) )
 	{
 		::VSLib.EasyLogic.PlayerSpawnedOnce[name] <- true;
 		foreach (func in ::VSLib.EasyLogic.Notifications.OnStartSpawn)
 			func(ents.entity, params);
-		
+
 		if ( ents.entity.GetTeam() == SURVIVORS )
 		{
 			::VSLib.EasyLogic.SurvivorsSpawned[name] <- true;
@@ -1738,7 +1738,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 				func(::VSLib.EasyLogic.SurvivorsSpawned.len());
 		}
 	}
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPostSpawn)
 		func(ents.entity, params);
 }
@@ -1798,7 +1798,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	::VSLib.EasyLogic.SpawnL4D1Francis = false;
 	::VSLib.EasyLogic.SpawnL4D1Louis = false;
 	Convars.SetValue("sb_l4d1_survivor_behavior", ::VSLib.EasyLogic.L4D1Behavior);
-	
+
 	if ( ::VSLib.EasyLogic.ExtraBills.len() > 0 )
 	{
 		foreach( survivor in ::VSLib.EasyLogic.ExtraBills )
@@ -1829,24 +1829,24 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local _id = ents.entity.GetIndex();
-	
+
 	if ( !::VSLib.EasyLogic.ScriptStarted )
 		VSLibScriptStart();
-	
+
 	if (!(_id in ::VSLib.EasyLogic.Cache))
 		::VSLib.EasyLogic.Cache[_id] <- {};
-	
+
 	::VSLib.EasyLogic.Cache[_id]._startPos <- ents.entity.GetLocation();
-	
+
 	// Remove any bots off the global cache
 	if (ents.entity.IsBot() && ents.entity.GetTeam() == INFECTED && _id in ::VSLib.GlobalCache)
 		delete ::VSLib.GlobalCache[_id];
-	
+
 	if ("_isLeaker" in ::VSLib.EasyLogic.Cache[_id])
 		delete ::VSLib.EasyLogic.Cache[_id]["_isLeaker"];
 	if ("_isBoomette" in ::VSLib.EasyLogic.Cache[_id])
 		delete ::VSLib.EasyLogic.Cache[_id]["_isBoomette"];
-	
+
 	if ( ents.entity.GetType() == Z_BOOMER )
 	{
 		if ( ::VSLib.EasyLogic.SpawnLeaker > 0 )
@@ -1855,15 +1855,15 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 			Convars.SetValue("boomer_leaker_chance", ::VSLib.EasyLogic.LeakerChance);
 			::VSLib.Timers.RemoveTimerByName("VSLibLeakerFailsafe");
 		}
-		
+
 		local ability = ents.entity.GetNetPropEntity( "m_customAbility" );
-		
+
 		if ( (ability) && (ability.GetClassname() == "ability_selfdestruct") )
 			::VSLib.EasyLogic.Cache[_id]._isLeaker <- true;
 		if ( ents.entity.GetGender() == FEMALE )
 			::VSLib.EasyLogic.Cache[_id]._isBoomette <- true;
 	}
-	
+
 	if ( ::VSLib.EasyLogic.SpawnExtraSurvivor > 0 && ents.entity.GetSurvivorCharacter() == 4 )
 	{
 		::VSLib.EasyLogic.SpawnExtraSurvivor--;
@@ -1901,14 +1901,14 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 			::VSLib.EasyLogic.SpawnL4D1Francis = false;
 		else if ( ents.entity.GetSurvivorCharacter() == 7 )
 			::VSLib.EasyLogic.SpawnL4D1Louis = false;
-		
+
 		::VSLib.Timers.RemoveTimerByName("VSLibExtraSurvivorFailsafe");
 		::VSLib.Timers.AddTimer(0.1, false, _L4D1SurvivorTeamSwitch, ents.entity);
 	}
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSpawn)
 		func(ents.entity, params);
-	
+
 	::VSLib.Timers.AddTimer(0.1, false, _OnPostSpawnEv, params);
 }
 
@@ -1916,14 +1916,14 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local _id = ents.entity.GetIndex();
-	
+
 	if ( !::VSLib.EasyLogic.ScriptStarted )
 		VSLibScriptStart();
-	
+
 	// Remove any bots off the global cache
 	if (ents.entity.IsBot() && ents.entity.GetTeam() == SURVIVORS && _id in ::VSLib.GlobalCache)
 		delete ::VSLib.GlobalCache[_id];
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnFirstSpawn)
 		func(ents.entity, params);
 }
@@ -1931,7 +1931,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_transitioned <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnTransitioned)
 		func(ents.entity, params);
 }
@@ -1939,11 +1939,11 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_shoved <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	local _id = ents.entity.GetIndex();
 	if(_id in ::VSLib.EasyLogic.Cache)
 		::VSLib.EasyLogic.Cache[_id]._lastShovedBy <- ents.attacker;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPlayerShoved)
 		func(ents.entity, ents.attacker, params);
 }
@@ -1951,7 +1951,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_entity_shoved <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnEntityShoved)
 		func(ents.entity, ents.attacker, params);
 }
@@ -1959,7 +1959,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_waiting_checkpoint_button_used <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnCheckpointButtonWaiting)
 		func(ents.entity, params);
 }
@@ -1967,7 +1967,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_success_checkpoint_button_used <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnCheckpointButtonUsed)
 		func(ents.entity, params);
 }
@@ -1976,7 +1976,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local door = ::VSLib.EasyLogic.GetEventEntity(params, "entindex");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnCheckpointDoorWaiting)
 		func(ents.entity, door, params);
 }
@@ -1985,7 +1985,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local door = ::VSLib.EasyLogic.GetEventEntity(params, "entindex");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnCheckpointDoorWaitingVersus)
 		func(ents.entity, door, params);
 }
@@ -1993,7 +1993,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_hit_safe_room <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHitSafeRoom)
 		func(ents.entity, params);
 }
@@ -2002,7 +2002,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local door = ::VSLib.EasyLogic.GetEventEntity(params, "entindex");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnRescueDoorOpened)
 		func(ents.entity, door, params);
 }
@@ -2010,7 +2010,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_foot_locker_opened <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnFootLockerOpened)
 		func(player, params);
 }
@@ -2019,11 +2019,11 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local targetid = ::VSLib.EasyLogic.GetEventPlayer(params, "targetid");
-	
+
 	local _id = ents.entity.GetIndex();
 	if(_id in ::VSLib.EasyLogic.Cache)
 		::VSLib.EasyLogic.Cache[_id]._lastUse <- targetid;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnUse)
 		func(ents.entity, targetid, params);
 }
@@ -2033,7 +2033,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local oldteam = ::VSLib.EasyLogic.GetEventInt(params, "oldteam");
 	local newteam = ::VSLib.EasyLogic.GetEventInt(params, "team");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnTeamChanged)
 		func(ents.entity, oldteam, newteam, params);
 }
@@ -2041,7 +2041,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_afk <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "player");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnAFK)
 		func(player, params);
 }
@@ -2050,7 +2050,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "player");
 	local bot = ::VSLib.EasyLogic.GetEventPlayer(params, "bot");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnBotReplacedPlayer)
 		func(player, bot, params);
 }
@@ -2059,7 +2059,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "player");
 	local bot = ::VSLib.EasyLogic.GetEventPlayer(params, "bot");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPlayerReplacedBot)
 		func(player, bot, params);
 }
@@ -2068,11 +2068,11 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local ability = ::VSLib.EasyLogic.GetEventString(params, "ability");
-	
+
 	local _id = ents.entity.GetIndex();
 	if(_id in ::VSLib.EasyLogic.Cache)
 		::VSLib.EasyLogic.Cache[_id]._lastAbility <- ability;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnAbilityUsed)
 		func(ents.entity, ability, params);
 }
@@ -2081,7 +2081,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local ability = ::VSLib.EasyLogic.GetEventString(params, "ability");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnAbilityOutOfRange)
 		func(ents.entity, ability, params);
 }
@@ -2089,7 +2089,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_create_panic_event <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPanicEvent)
 		func(ents.entity, params);
 }
@@ -2097,7 +2097,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_gascan_pour_completed <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPourCompleted)
 		func(ents.entity, params);
 }
@@ -2105,7 +2105,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_gascan_pour_blocked <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPourBlocked)
 		func(ents.entity, params);
 }
@@ -2113,7 +2113,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_gascan_pour_interrupted <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPourInterrupted)
 		func(ents.entity, params);
 }
@@ -2121,7 +2121,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_gascan_dropped <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnGascanDropped)
 		func(ents.entity, params);
 }
@@ -2133,7 +2133,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local attacker = null;
 	if (attackerid != 0)
 		attacker = ::VSLib.EasyLogic.GetEventPlayer(params, "attacker");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnInfectedHurt)
 		func(infected, attacker, params);
 }
@@ -2143,7 +2143,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local victim = ::VSLib.EasyLogic.GetEventEntity(params, "entityid");
 	local ambush = ::VSLib.EasyLogic.GetEventInt(params, "ambush");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnMeleeKill)
 		func(player, victim, (ambush > 0) ? true : false, params);
 }
@@ -2154,7 +2154,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local attacker = null;
 	if (attackerid != 0)
 		attacker = ::VSLib.EasyLogic.GetEventPlayer(params, "attacker");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnInfectedDeath)
 		func(attacker, params);
 }
@@ -2180,7 +2180,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_witch_spawn <- function (params)
 {
 	local witchid = ::VSLib.EasyLogic.GetEventEntity(params, "witchid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWitchSpawned)
 		func(witchid, params);
 }
@@ -2189,7 +2189,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local witchid = ::VSLib.EasyLogic.GetEventPlayer(params, "witchid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWitchStartled)
 		func(witchid, ents.entity, params);
 }
@@ -2198,7 +2198,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local witchid = ::VSLib.EasyLogic.GetEventPlayer(params, "witchid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWitchKilled)
 		func(witchid, ents.entity, params);
 }
@@ -2212,7 +2212,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local attacker = null;
 	if (attackerid != 0)
 		attacker = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnZombieIgnited)
 		func(victim, attacker, params);
 }
@@ -2220,7 +2220,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_adrenaline_used <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnAdrenalineUsed)
 		func(ents.entity, params);
 }
@@ -2229,12 +2229,12 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local healer = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local healee = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	if ( healer.GetIndex() == healee.GetIndex() )
 		::VSLib.EasyLogic.Cache[healer.GetIndex()]._isHealing <- true;
 	else
 		::VSLib.EasyLogic.Cache[healee.GetIndex()]._isBeingHealed <- true;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHealStart)
 		func(healee, healer, params);
 }
@@ -2243,13 +2243,13 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local healer = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local healee = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	::VSLib.EasyLogic.Cache[healer.GetIndex()]._isHealing <- false;
-	
+
 	foreach( survivor in ::VSLib.EasyLogic.Players.AllSurvivors() )
 		if ("_isBeingHealed" in ::VSLib.EasyLogic.Cache[survivor.GetIndex()])
 			::VSLib.EasyLogic.Cache[survivor.GetIndex()]._isBeingHealed <- false;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHealEnd)
 		func(healee, healer, params);
 }
@@ -2258,7 +2258,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local healer = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local healee = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHealInterrupted)
 		func(healee, healer, params);
 }
@@ -2268,7 +2268,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local healer = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local healee = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
 	local health = ::VSLib.EasyLogic.GetEventInt(params, "health_restored");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHealSuccess)
 		func(healee, healer, health, params);
 }
@@ -2276,7 +2276,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_pills_used <- function (params)
 {
 	local healee = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPillsUsed)
 		func(healee, params);
 }
@@ -2284,7 +2284,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_pills_used_fail <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPillsFailed)
 		func(player, params);
 }
@@ -2292,7 +2292,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_incapacitated <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnIncapacitated)
 		func(ents.entity, ents.attacker, params);
 }
@@ -2300,7 +2300,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_incapacitated_start <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnIncapacitatedStart)
 		func(ents.entity, ents.attacker, params);
 }
@@ -2308,7 +2308,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_entered_start_area <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnEnterStartArea)
 		func(ents.entity, params);
 }
@@ -2316,7 +2316,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_left_start_area <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.FirstSurvLeftStartArea)
 		func(ents.entity, params);
 }
@@ -2327,7 +2327,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local revivor = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local revivee = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnReviveBegin)
 		func(revivee, revivor, params);
 }
@@ -2336,7 +2336,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local revivor = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local revivee = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnReviveEnd)
 		func(revivee, revivor, params);
 }
@@ -2345,7 +2345,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local revivor = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local revivee = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnReviveSuccess)
 		func(revivee, revivor, params);
 }
@@ -2355,7 +2355,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local giver = ::VSLib.EasyLogic.GetEventPlayer(params, "giver");
 	local weapon = ::VSLib.EasyLogic.GetEventEntity(params, "weaponentid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWeaponGiven)
 		func(ents.entity, giver, weapon, params);
 }
@@ -2364,7 +2364,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local item = ::VSLib.EasyLogic.GetEventEntity(params, "propid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWeaponDropped)
 		func(ents.entity, item, params);
 }
@@ -2374,7 +2374,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local weapon = ::VSLib.EasyLogic.GetEventString(params, "item");
 	local item = ::VSLib.EasyLogic.GetEventEntity(params, "propid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWeaponDroppedToProp)
 		func(ents.entity, item, "weapon_" + weapon, params);
 }
@@ -2383,7 +2383,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local weapon = ::VSLib.EasyLogic.GetEventString(params, "weapon");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWeaponFire)
 		func(ents.entity, "weapon_" + weapon, params);
 }
@@ -2392,7 +2392,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local weapon = ::VSLib.EasyLogic.GetEventString(params, "weapon");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWeaponFireAt40)
 		func(ents.entity, "weapon_" + weapon, params);
 }
@@ -2401,7 +2401,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local weapon = ::VSLib.EasyLogic.GetEventString(params, "weapon");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWeaponFireEmpty)
 		func(ents.entity, "weapon_" + weapon, params);
 }
@@ -2410,7 +2410,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local manual = ::VSLib.EasyLogic.GetEventInt(params, "manual");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWeaponReload)
 		func(ents.entity, (manual > 0) ? true : false, params);
 }
@@ -2418,7 +2418,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_weapon_zoom <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWeaponZoom)
 		func(ents.entity, params);
 }
@@ -2427,7 +2427,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnFriendlyFire)
 		func(ents.entity, victim, params);
 }
@@ -2435,7 +2435,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_charger_charge_start <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnChargerCharged)
 		func(ents.entity, params);
 }
@@ -2445,7 +2445,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnChargerCarryVictimEnd)
 		func(ents.entity, victim, params);
 }
@@ -2455,7 +2455,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnChargerCarryVictim)
 		func(ents.entity, victim, params);
 }
@@ -2465,7 +2465,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnChargerImpact)
 		func(ents.entity, victim, params);
 }
@@ -2475,9 +2475,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- ents.entity;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnChargerPummelBegin)
 		func(ents.entity, victim, params);
 }
@@ -2487,9 +2487,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- null;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnChargerPummelEnd)
 		func(ents.entity, victim, params);
 }
@@ -2499,9 +2499,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- ents.entity;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSmokerChokeBegin)
 		func(ents.entity, victim, params);
 }
@@ -2512,9 +2512,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
 	local smoker = ::VSLib.EasyLogic.GetEventPlayer(params, "smoker");
-	
+
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- null;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSmokerChokeStopped)
 		func(smoker, victim, ents.entity, params);
 }
@@ -2524,9 +2524,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- null;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSmokerChokeEnd)
 		func(ents.entity, victim, params);
 }
@@ -2536,7 +2536,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	local smoker = ::VSLib.EasyLogic.GetEventPlayer(params, "smoker");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSmokerPullStopped)
 		func(ents.entity, victim, smoker, params);
 }
@@ -2549,9 +2549,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	if ( victimid != 0 )
 		victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- null;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSmokerTongueReleased)
 		func(ents.entity, victim, params);
 }
@@ -2561,9 +2561,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- ents.entity;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSmokerTongueGrab)
 		func(ents.entity, victim, params);
 }
@@ -2571,7 +2571,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_tongue_broke_bent <- function (params)
 {
 	local smoker = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSmokerTongueBent)
 		func(smoker, params);
 }
@@ -2580,7 +2580,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local subject = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSpitLanded)
 		func(ents.entity, subject, params);
 }
@@ -2588,7 +2588,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_entered_spit <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnEnterSpit)
 		func(ents.entity, params);
 }
@@ -2598,12 +2598,12 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	local _id = ents.entity.GetIndex();
 	if(_id in ::VSLib.EasyLogic.Cache)
 		::VSLib.EasyLogic.Cache[_id]._lastAbility <- "ability_ride";
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- ents.entity;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnJockeyRideStart)
 		func(ents.entity, victim, params);
 }
@@ -2613,9 +2613,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- null;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnJockeyRideEnd)
 		func(ents.entity, victim, params);
 }
@@ -2625,7 +2625,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHunterPounceShoved)
 		func(ents.entity, victim, params);
 }
@@ -2635,9 +2635,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- ents.entity;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHunterPouncedVictim)
 		func(ents.entity, victim, params);
 }
@@ -2647,7 +2647,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local jockey = ::VSLib.EasyLogic.GetEventPlayer(params, "jockeyuserid");
 	local islunging = ::VSLib.EasyLogic.GetEventInt(params, "islunging");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnJockeyPunched)
 		func(player, jockey, (islunging > 0) ? true : false, params);
 }
@@ -2657,7 +2657,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local jockey = ::VSLib.EasyLogic.GetEventPlayer(params, "jockeyuserid");
 	local islunging = ::VSLib.EasyLogic.GetEventInt(params, "islunging");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnJockeyHeadshot)
 		func(player, jockey, (islunging > 0) ? true : false, params);
 }
@@ -2667,9 +2667,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- null;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHunterPounceStopped)
 		func(ents.entity, victim, params);
 }
@@ -2679,9 +2679,9 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	if (!victim) return; if (!victim.IsPlayerEntityValid()) return;
-	
+
 	::VSLib.EasyLogic.Cache[victim.GetIndex()]._curAttker <- null;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHunterReleasedVictim)
 		func(ents.entity, victim, params);
 }
@@ -2691,7 +2691,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local hunter = ::VSLib.EasyLogic.GetEventPlayer(params, "hunteruserid");
 	local islunging = ::VSLib.EasyLogic.GetEventInt(params, "islunging");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHunterPunched)
 		func(player, hunter, (islunging > 0) ? true : false, params);
 }
@@ -2701,7 +2701,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local hunter = ::VSLib.EasyLogic.GetEventPlayer(params, "hunteruserid");
 	local islunging = ::VSLib.EasyLogic.GetEventInt(params, "islunging");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHunterHeadshot)
 		func(player, hunter, (islunging > 0) ? true : false, params);
 }
@@ -2709,7 +2709,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_pounce_fail <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHunterPounceFailed)
 		func(player, params);
 }
@@ -2717,12 +2717,12 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_now_it <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	local _id = ents.entity.GetIndex();
 	::VSLib.EasyLogic.Cache[_id]._lastVomitedBy <- ents.attacker;
 	::VSLib.EasyLogic.Cache[_id]._wasVomited <- true;
 	::VSLib.EasyLogic.Cache[_id]._isBiled <- true;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPlayerVomited)
 		func(ents.entity, ents.attacker, params);
 }
@@ -2730,10 +2730,10 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_no_longer_it <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	local _id = ents.entity.GetIndex();
 	::VSLib.EasyLogic.Cache[_id]._isBiled <- false;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPlayerVomitEnd)
 		func(ents.entity, params);
 }
@@ -2742,7 +2742,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
 	local boomer = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnFatalVomit)
 		func(victim, boomer, params);
 }
@@ -2751,7 +2751,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local splashedbile = ::VSLib.EasyLogic.GetEventInt(params, "splashedbile");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnBoomerExploded)
 		func(ents.entity, ents.attacker, (splashedbile > 0) ? true : false, params);
 }
@@ -2760,7 +2760,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnBoomerNear)
 		func(ents.entity, victim, params);
 }
@@ -2768,10 +2768,10 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_tank_frustrated <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	local _id = ents.entity.GetIndex();
 	::VSLib.EasyLogic.Cache[_id]._isFrustrated <- true;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnTankFrustrated)
 		func(ents.entity, params);
 }
@@ -2779,7 +2779,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_tank_killed <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnTankKilled)
 		func(ents.entity, ents.attacker, params);
 }
@@ -2787,7 +2787,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_tank_spawn <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnTankSpawned)
 		func(ents.entity, params);
 }
@@ -2795,7 +2795,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_spawned_as_tank <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSpawnedAsTank)
 		func(ents.entity, params);
 }
@@ -2804,7 +2804,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSurvivorCallForHelp)
 		func(ents.entity, subject, params);
 }
@@ -2822,13 +2822,13 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	if (rescuerid != 0)
 		rescuer = ::VSLib.EasyLogic.GetEventPlayer(params, "rescuer");
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
-	
+
 	if ( victim.GetIndex() in ::VSLib.EasyLogic.SurvivorRagdolls )
 	{
 		::VSLib.EasyLogic.SurvivorRagdolls[victim.GetIndex()]["Ragdoll"].Kill();
 		::VSLib.EasyLogic.SurvivorRagdolls.rawdelete(victim.GetIndex());
 	}
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSurvivorRescued)
 		func(rescuer, victim, params);
 }
@@ -2836,7 +2836,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_upgrade_pack_begin <- function (params)
 {
 	local deployer = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnUpgradeDeploying)
 		func(deployer, params);
 }
@@ -2845,7 +2845,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local deployer = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local upgrade = ::VSLib.EasyLogic.GetEventEntity(params, "upgradeid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnUpgradeDeployed)
 		func(deployer, upgrade, params);
 }
@@ -2854,7 +2854,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local receiver = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local upgrade = ::VSLib.EasyLogic.GetEventString(params, "upgrade");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnUpgradeReceived)
 		func(receiver, upgrade, params);
 }
@@ -2863,7 +2863,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local upgrade = ::VSLib.EasyLogic.GetEventString(params, "upgradeclass");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnUpgradeAlreadyUsed)
 		func(player, upgrade, params);
 }
@@ -2872,7 +2872,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local upgrade = ::VSLib.EasyLogic.GetEventString(params, "upgrade");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnUpgradeFailed)
 		func(player, upgrade, params);
 }
@@ -2881,7 +2881,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local causer = ::VSLib.EasyLogic.GetEventPlayer(params, "causer");
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnGrabbedLedge)
 		func(causer, victim, params);
 }
@@ -2889,7 +2889,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_ledge_release <- function (params)
 {
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnReleasedLedge)
 		func(victim, params);
 }
@@ -2900,10 +2900,10 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	if ( player != 0 )
 		player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local text = ::VSLib.EasyLogic.GetEventString(params, "text");
-	
+
 	// Separate the commands and arguments
 	local arr = split(text, " ");
-	
+
 	// Build an argument array
 	local args = {};
 	local idx = -1;
@@ -2915,10 +2915,10 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 			idx++;
 		}
 	}
-	
+
 	// Store it.
 	::VSLib.EasyLogic.LastArgs <- args;
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSay)
 		func(player, text, params);
 }
@@ -2926,7 +2926,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_infected_explosive_barrel_kill <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplosiveBarrelKill)
 		func(player, params);
 }
@@ -2935,7 +2935,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "entityid");
 	local team = ::VSLib.EasyLogic.GetEventInt(params, "team");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnVoteCastYes)
 		func(player, team, params);
 }
@@ -2944,7 +2944,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "entityid");
 	local team = ::VSLib.EasyLogic.GetEventInt(params, "team");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnVoteCastNo)
 		func(player, team, params);
 }
@@ -2952,7 +2952,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_relocated <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnRelocated)
 		func(player, params);
 }
@@ -2960,7 +2960,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_respawning <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnRespawning)
 		func(player, params);
 }
@@ -2968,7 +2968,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_hostname_changed <- function (params)
 {
 	local hostname = ::VSLib.EasyLogic.GetEventString(params, "hostname");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnHostNameChanged)
 		func(hostname, params);
 }
@@ -2977,7 +2977,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local cvar = ::VSLib.EasyLogic.GetEventString(params, "cvarname");
 	local value = ::VSLib.EasyLogic.GetEventString(params, "cvarvalue");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnServerCvarChanged)
 		func(cvar, value, params);
 }
@@ -2988,7 +2988,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local name = ::VSLib.EasyLogic.GetEventString(params, "name");
 	local ipAddress = ::VSLib.EasyLogic.GetEventString(params, "ip");
 	local steamID = ::VSLib.EasyLogic.GetEventString(params, "networkid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnServerAddBan)
 		func(ents.entity, name, ipAddress, steamID, params);
 }
@@ -2997,7 +2997,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ipAddress = ::VSLib.EasyLogic.GetEventString(params, "ip");
 	local steamID = ::VSLib.EasyLogic.GetEventString(params, "networkid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnServerRemoveBan)
 		func(ipAddress, steamID, params);
 }
@@ -3005,7 +3005,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_server_pre_shutdown <- function (params)
 {
 	local reason = ::VSLib.EasyLogic.GetEventString(params, "reason");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnServerPreShutdown)
 		func(reason, params);
 }
@@ -3013,7 +3013,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_server_shutdown <- function (params)
 {
 	local reason = ::VSLib.EasyLogic.GetEventString(params, "reason");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnServerShutdown)
 		func(reason, params);
 }
@@ -3021,7 +3021,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_triggered_car_alarm <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnTriggeredCarAlarm)
 		func(player, params);
 }
@@ -3045,7 +3045,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	if ( userid != 0 )
 		attacker = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local prop = ::VSLib.EasyLogic.GetEventEntity(params, "entindex");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnBrokeProp)
 		func(attacker, prop, params);
 }
@@ -3057,7 +3057,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	if ( userid != 0 )
 		attacker = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local breakable = ::VSLib.EasyLogic.GetEventEntity(params, "entindex");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnBrokeBreakable)
 		func(attacker, breakable, params);
 }
@@ -3082,7 +3082,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	}
 	local entity = ::VSLib.EasyLogic.GetEventEntity(params, "entindex_killed");
 	local damagetype = ::VSLib.EasyLogic.GetEventInt(params, "damagebits");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPlayerKilled)
 		func(entity, attacker, inflictor, damagetype, params);
 }
@@ -3091,7 +3091,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnEntityVisible)
 		func(ents.entity, subject, params);
 }
@@ -3100,7 +3100,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnWeaponSpawnVisible)
 		func(ents.entity, subject, params);
 }
@@ -3109,7 +3109,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local subject = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnDeadSurvivorVisible)
 		func(ents.entity, subject, params);
 }
@@ -3118,7 +3118,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local spawner = ::VSLib.EasyLogic.GetEventEntity(params, "spawner");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSpawnerGaveItem)
 		func(ents.entity, spawner, params);
 }
@@ -3127,7 +3127,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
 	local subject = ::VSLib.EasyLogic.GetEventPlayer(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnMountedGunUsed)
 		func(ents.entity, subject, params);
 }
@@ -3135,7 +3135,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_mounted_gun_overheated <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnMountedGunOverheated)
 		func(ents.entity, params);
 }
@@ -3143,7 +3143,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_grenade_bounce <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPipeBombBounced)
 		func(player, params);
 }
@@ -3151,7 +3151,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_hegrenade_detonate <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPipeBombDetonated)
 		func(player, params);
 }
@@ -3159,7 +3159,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_non_pistol_fired <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnNonPistolFired)
 		func(player, params);
 }
@@ -3167,7 +3167,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_total_ammo_below_40 <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnTotalAmmoBelow40)
 		func(player, params);
 }
@@ -3176,7 +3176,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_punched_clown <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnPunchedClown)
 		func(player, params);
 }
@@ -3185,7 +3185,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local weapon = ::VSLib.EasyLogic.GetEventString(params, "weapon");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnInfectedDecapitated)
 		func(player, weapon, params);
 }
@@ -3193,7 +3193,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_non_melee_fired <- function (params)
 {
 	local ents = ::VSLib.EasyLogic.GetPlayersFromEvent(params);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnNonMeleeFired)
 		func(ents.entity, params);
 }
@@ -3201,7 +3201,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_molotov_thrown <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnMolotovThrown)
 		func(player, params);
 }
@@ -3210,7 +3210,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local attacker = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local victim = ::VSLib.EasyLogic.GetEventPlayer(params, "victim");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnForcedGasCanDrop)
 		func(attacker, victim, params);
 }
@@ -3218,7 +3218,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_strongman_bell_knocked_off <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnStrongmanBellKnockedOff)
 		func(player, params);
 }
@@ -3226,7 +3226,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_stashwhacker_game_won <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnStashwhackerGameWon)
 		func(player, params);
 }
@@ -3240,7 +3240,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 		attacker = ::VSLib.EasyLogic.GetEventPlayer(params, "attacker");
 	local melee = ::VSLib.EasyLogic.GetEventInt(params, "melee");
 	local charging = ::VSLib.EasyLogic.GetEventInt(params, "charging");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnChargerKilled)
 		func(charger, attacker, (melee > 0) ? true : false, (charging > 0) ? true : false, params);
 }
@@ -3253,7 +3253,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	if (attackerid != 0)
 		attacker = ::VSLib.EasyLogic.GetEventPlayer(params, "attacker");
 	local has_spit = ::VSLib.EasyLogic.GetEventInt(params, "has_spit");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSpitterKilled)
 		func(spitter, attacker, (has_spit > 0) ? true : false, params);
 }
@@ -3265,7 +3265,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local attacker = null;
 	if (attackerid != 0)
 		attacker = ::VSLib.EasyLogic.GetEventPlayer(params, "attacker");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnJockeyKilled)
 		func(jockey, attacker, params);
 }
@@ -3273,7 +3273,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_vomit_bomb_tank <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnVomitBombTank)
 		func(player, params);
 }
@@ -3282,7 +3282,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
 	local upgrade = ::VSLib.EasyLogic.GetEventEntity(params, "upgradeid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnUpgradePackAdded)
 		func(player, upgrade, params);
 }
@@ -3290,7 +3290,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_charger_charge_end <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnChargerChargeEnd)
 		func(player, params);
 }
@@ -3298,7 +3298,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_chair_charged <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnChairCharged)
 		func(player, params);
 }
@@ -3318,7 +3318,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_christmas_gift_grab <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnChristmasGiftGrab)
 		func(player, params);
 }
@@ -3326,7 +3326,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_golden_crowbar_pickup <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnGoldenCrowbarPickup)
 		func(player, params);
 }
@@ -3334,7 +3334,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_left_concert_stage <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnLeftConcertStage)
 		func(player, params);
 }
@@ -3342,7 +3342,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_player_left_safe_area <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	if ( !player.IsInStartArea() )
 	{
 		foreach (func in ::VSLib.EasyLogic.Notifications.OnSurvivorsLeftStartArea)
@@ -3350,7 +3350,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	}
 	else
 		::VSLib.Timers.AddTimerByName("VSLib_LeftStartCheck", 0.1, true, VSLib_LeftStartCheck);
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnLeaveSafeArea)
 		func(player, params);
 }
@@ -3363,7 +3363,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local slots = ::VSLib.EasyLogic.GetEventInt(params, "slots");
 	local proxies = ::VSLib.EasyLogic.GetEventInt(params, "proxies");
 	local master = ::VSLib.EasyLogic.GetEventString(params, "master");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSourceTVStatus)
 		func(clients, slots, proxies, master, params);
 }
@@ -3373,10 +3373,10 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 	local entity = ::VSLib.EasyLogic.GetEventEntity(params, "index");
 	if ( entity.IsPlayer() )
 		entity = ::VSLib.EasyLogic.GetEventPlayer(params, "index");
-	
+
 	local rank = ::VSLib.EasyLogic.GetEventFloat(params, "rank");
 	local target = ::VSLib.EasyLogic.GetEventInt(params, "target");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnSourceTVRankEntity)
 		func(entity, rank, target, params);
 }
@@ -3387,7 +3387,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_explain_survivor_glows_disabled <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainSurvivorGlowsDisabled)
 		func(player, params);
 }
@@ -3395,7 +3395,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_explain_item_glows_disabled <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainItemGlowsDisabled)
 		func(player, params);
 }
@@ -3403,7 +3403,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_explain_rescue_disabled <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainRescueDisabled)
 		func(player, params);
 }
@@ -3411,7 +3411,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_explain_bodyshots_reduced <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainBodyshotsReduced)
 		func(player, params);
 }
@@ -3419,7 +3419,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_explain_witch_instant_kill <- function (params)
 {
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainWitchInstantKill)
 		func(player, params);
 }
@@ -3433,7 +3433,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_explain_pills <- function (params)
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainPills)
 		func(subject, params);
 }
@@ -3441,7 +3441,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnGameEvent_explain_weapons <- function (params)
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainWeapons)
 		func(subject, params);
 }
@@ -3450,7 +3450,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainPreRadio)
 		func(player, subject, params);
 }
@@ -3459,7 +3459,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainRadio)
 		func(player, subject, params);
 }
@@ -3468,7 +3468,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainGasTruck)
 		func(player, subject, params);
 }
@@ -3477,7 +3477,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainPanicButton)
 		func(player, subject, params);
 }
@@ -3486,7 +3486,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainElevatorButton)
 		func(player, subject, params);
 }
@@ -3495,7 +3495,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainLiftButton)
 		func(player, subject, params);
 }
@@ -3504,7 +3504,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainChurchDoor)
 		func(player, subject, params);
 }
@@ -3513,7 +3513,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainEmergencyDoor)
 		func(player, subject, params);
 }
@@ -3522,7 +3522,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainCrane)
 		func(player, subject, params);
 }
@@ -3531,7 +3531,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainBridge)
 		func(player, subject, params);
 }
@@ -3540,7 +3540,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainGasCanPanic)
 		func(player, subject, params);
 }
@@ -3549,7 +3549,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainVanPanic)
 		func(player, subject, params);
 }
@@ -3558,7 +3558,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainMainstreet)
 		func(player, subject, params);
 }
@@ -3567,7 +3567,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainTrainLever)
 		func(player, subject, params);
 }
@@ -3576,7 +3576,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainDisturbance)
 		func(player, subject, params);
 }
@@ -3585,7 +3585,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainScavengeGoal)
 		func(player, subject, params);
 }
@@ -3594,7 +3594,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainScavengeLeaveArea)
 		func(player, subject, params);
 }
@@ -3603,7 +3603,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainPreDrawbridge)
 		func(player, subject, params);
 }
@@ -3612,7 +3612,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainDrawbridge)
 		func(player, subject, params);
 }
@@ -3621,7 +3621,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainPerimeter)
 		func(player, subject, params);
 }
@@ -3630,7 +3630,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainDeactivateAlarm)
 		func(player, subject, params);
 }
@@ -3639,7 +3639,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainImpoundLot)
 		func(player, subject, params);
 }
@@ -3648,7 +3648,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainDecon)
 		func(player, subject, params);
 }
@@ -3657,7 +3657,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainDeconWait)
 		func(player, subject, params);
 }
@@ -3666,7 +3666,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainMallWindow)
 		func(player, subject, params);
 }
@@ -3675,7 +3675,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainMallAlarm)
 		func(player, subject, params);
 }
@@ -3684,7 +3684,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainCoaster)
 		func(player, subject, params);
 }
@@ -3693,7 +3693,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainCoasterStop)
 		func(player, subject, params);
 }
@@ -3702,7 +3702,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainFloat)
 		func(player, subject, params);
 }
@@ -3711,7 +3711,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainFerryButton)
 		func(player, subject, params);
 }
@@ -3720,7 +3720,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainHatchButton)
 		func(player, subject, params);
 }
@@ -3729,7 +3729,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainShackButton)
 		func(player, subject, params);
 }
@@ -3738,7 +3738,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainVehicleArrival)
 		func(player, subject, params);
 }
@@ -3747,7 +3747,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainBurgerSign)
 		func(player, subject, params);
 }
@@ -3756,7 +3756,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainCarouselButton)
 		func(player, subject, params);
 }
@@ -3765,7 +3765,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainCarouselDestination)
 		func(player, subject, params);
 }
@@ -3774,7 +3774,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainStageLighting)
 		func(player, subject, params);
 }
@@ -3783,7 +3783,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainStageFinaleStart)
 		func(player, subject, params);
 }
@@ -3792,7 +3792,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainStageSurvivalStart)
 		func(player, subject, params);
 }
@@ -3801,7 +3801,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainStagePyrotechnics)
 		func(player, subject, params);
 }
@@ -3810,7 +3810,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainC3M4Radio1)
 		func(player, subject, params);
 }
@@ -3819,7 +3819,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainC3M4Radio2)
 		func(player, subject, params);
 }
@@ -3828,7 +3828,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainGatesAreOpen)
 		func(player, subject, params);
 }
@@ -3837,7 +3837,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainC2M4Ticketbooth)
 		func(player, subject, params);
 }
@@ -3846,7 +3846,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainC3M4Rescue)
 		func(player, subject, params);
 }
@@ -3855,7 +3855,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainHotelElevatorDoors)
 		func(player, subject, params);
 }
@@ -3864,7 +3864,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainGunShopTanker)
 		func(player, subject, params);
 }
@@ -3873,7 +3873,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainGunShop)
 		func(player, subject, params);
 }
@@ -3882,7 +3882,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainStoreAlarm)
 		func(player, subject, params);
 }
@@ -3891,7 +3891,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainStoreItem)
 		func(player, subject, params);
 }
@@ -3900,7 +3900,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainStoreItemStop)
 		func(player, subject, params);
 }
@@ -3909,7 +3909,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainSurvivalGeneric)
 		func(player, subject, params);
 }
@@ -3918,7 +3918,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainSurvivalAlarm)
 		func(player, subject, params);
 }
@@ -3927,7 +3927,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainSurvivalRadio)
 		func(player, subject, params);
 }
@@ -3936,7 +3936,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainSurvivalCarousel)
 		func(player, subject, params);
 }
@@ -3945,7 +3945,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainReturnItem)
 		func(player, subject, params);
 }
@@ -3954,7 +3954,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainSaveItems)
 		func(player, subject, params);
 }
@@ -3963,7 +3963,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainC4M1GetGas)
 		func(player, subject, params);
 }
@@ -3972,7 +3972,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainC4M3ReturnToBoat)
 		func(player, subject, params);
 }
@@ -3981,7 +3981,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainC1M4Finale)
 		func(player, subject, params);
 }
@@ -3990,7 +3990,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainC1M4ScavengeInstructions)
 		func(player, subject, params);
 }
@@ -3999,7 +3999,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainSewerGate)
 		func(player, subject, params);
 }
@@ -4008,7 +4008,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainSewerRun)
 		func(player, subject, params);
 }
@@ -4017,7 +4017,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainC6M3Finale)
 		func(player, subject, params);
 }
@@ -4026,7 +4026,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainFinaleBridgeLowering)
 		func(player, subject, params);
 }
@@ -4035,7 +4035,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainTrainBoss)
 		func(player, subject, params);
 }
@@ -4044,7 +4044,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainTrainExit)
 		func(player, subject, params);
 }
@@ -4053,7 +4053,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainFreighter)
 		func(player, subject, params);
 }
@@ -4062,7 +4062,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainHighriseFinale2)
 		func(player, subject, params);
 }
@@ -4071,7 +4071,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainStartGenerator)
 		func(player, subject, params);
 }
@@ -4080,7 +4080,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainRestartGenerator)
 		func(player, subject, params);
 }
@@ -4089,7 +4089,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainBridgeButton)
 		func(player, subject, params);
 }
@@ -4098,7 +4098,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainDLC3Howitzer)
 		func(player, subject, params);
 }
@@ -4107,7 +4107,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainDLC3GeneratorButton)
 		func(player, subject, params);
 }
@@ -4116,7 +4116,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainDLC3LiftLever)
 		func(player, subject, params);
 }
@@ -4125,7 +4125,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainDLC3Barrels)
 		func(player, subject, params);
 }
@@ -4134,7 +4134,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainDLC3Radio)
 		func(player, subject, params);
 }
@@ -4143,7 +4143,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainDLC3Door)
 		func(player, subject, params);
 }
@@ -4152,7 +4152,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainOnslaught)
 		func(player, subject, params);
 }
@@ -4161,7 +4161,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainLighthouseGate)
 		func(player, subject, params);
 }
@@ -4170,7 +4170,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainLighthouseGenerator)
 		func(player, subject, params);
 }
@@ -4179,7 +4179,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainLighthouseGenButton)
 		func(player, subject, params);
 }
@@ -4188,7 +4188,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainLighthouseFinaleEvent)
 		func(player, subject, params);
 }
@@ -4197,7 +4197,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainLighthouseRestartGen)
 		func(player, subject, params);
 }
@@ -4206,7 +4206,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainLighthouseGas)
 		func(player, subject, params);
 }
@@ -4215,7 +4215,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainLighthouseFinale)
 		func(player, subject, params);
 }
@@ -4224,7 +4224,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainJunkyardFuel)
 		func(player, subject, params);
 }
@@ -4233,7 +4233,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainContainerDrop)
 		func(player, subject, params);
 }
@@ -4242,7 +4242,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 {
 	local subject = ::VSLib.EasyLogic.GetEventEntity(params, "subject");
 	local player = ::VSLib.EasyLogic.GetEventPlayer(params, "userid");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnExplainContainerReady)
 		func(player, subject, params);
 }
@@ -4256,7 +4256,7 @@ g_MapScript.ScriptMode_AddCriteria <- function ( )
 ::VSLib.EasyLogic.Events.OnScriptEvent_on_resources_changed <- function (params)
 {
 	local newcount = ::VSLib.EasyLogic.GetEventInt(params, "newcount");
-	
+
 	foreach (func in ::VSLib.EasyLogic.Notifications.OnResourcesChanged)
 		func(newcount, params);
 }
@@ -4302,7 +4302,7 @@ function VSLib::EasyLogic::GetEventInt(params, field)
 	if (field in params)
 		if (params[field] != "" && params[field] != null)
 			return params[field].tointeger();
-	
+
 	return null;
 }
 
@@ -4314,7 +4314,7 @@ function VSLib::EasyLogic::GetEventEntity(params, field)
 	if (field in params)
 		if (params[field] != "" && params[field] != null)
 			return ::VSLib.Entity(params[field].tointeger());
-	
+
 	return null;
 }
 
@@ -4326,7 +4326,7 @@ function VSLib::EasyLogic::GetEventFloat(params, field)
 	if (field in params)
 		if (params[field] != "" && params[field] != null)
 			return params[field].tofloat();
-	
+
 	return null;
 }
 
@@ -4338,7 +4338,7 @@ function VSLib::EasyLogic::GetEventString(params, field)
 	if (field in params)
 		if (params[field] != "" && params[field] != null)
 			return params[field].tostring();
-	
+
 	return null;
 }
 
@@ -4356,11 +4356,11 @@ function VSLib::EasyLogic::GetEventPlayer(params, field)
 				ent = ::VSLib.Player(params[field].tointeger());
 			else
 				ent = ::VSLib.Player(ent);
-			
+
 			return ent;
 		}
 	}
-	
+
 	return null;
 }
 
@@ -4374,7 +4374,7 @@ function VSLib::EasyLogic::GetPlayersFromEvent(params)
 {
 	local ent = null;
 	local atk = null;
-	
+
 	if ("userid" in params)
 	{
 		if (params["userid"] != null && params["userid"] != "")
@@ -4385,7 +4385,7 @@ function VSLib::EasyLogic::GetPlayersFromEvent(params)
 		if (params["entityid"] != null && params["entityid"] != "")
 			ent = EntIndexToHScript(params["entityid"]);
 	}
-	
+
 	if ("attacker" in params)
 	{
 		if (params["attacker"] != null && params["attacker"] != "")
@@ -4407,7 +4407,7 @@ function VSLib::EasyLogic::GetPlayersFromEvent(params)
 		if (params["attackerentid"] != null && params["attackerentid"] != "")
 			atk = EntIndexToHScript(params["attackerentid"]);
 	}
-	
+
 	if (ent)
 	{
 		if (ent.IsPlayer())
@@ -4415,7 +4415,7 @@ function VSLib::EasyLogic::GetPlayersFromEvent(params)
 		else
 			ent = ::VSLib.Entity(ent);
 	}
-	
+
 	if (atk)
 	{
 		if (atk.IsPlayer())
@@ -4423,7 +4423,7 @@ function VSLib::EasyLogic::GetPlayersFromEvent(params)
 		else
 			atk = ::VSLib.Entity(atk);
 	}
-	
+
 	return { entity = ent, attacker = atk };
 }
 
@@ -4444,17 +4444,17 @@ function VSLib::EasyLogic::GetPlayersFromEvent(params)
 function VSLib::EasyLogic::AddChatTrigger(trigger_text, func)
 {
 	local trigger = ::VSLib.EasyLogic._triggerStart + trigger_text;
-	
+
 	// do not double up on triggers
 	foreach (idx, v in _itChatTextIndex)
 	{
 		if (v == trigger_text)
 			delete _itChatTextIndex[idx];
 	}
-	
+
 	_itChatTextIndex[_itChatCount] <- trigger;
 	_itChatFunction[_itChatCount] <- func;
-	
+
 	_itChatCount++;
 }
 
@@ -4464,14 +4464,14 @@ function VSLib::EasyLogic::AddChatTrigger(trigger_text, func)
 function VSLib::EasyLogic::RemoveChatTrigger(trigger_text)
 {
 	local trigger = ::VSLib.EasyLogic._triggerStart + trigger_text;
-	
+
 	foreach (i, v in _itChatTextIndex)
 	{
 		if (v == trigger)
 		{
 			_itChatFunction[i] <- null;
 			_itChatTextIndex[i] <- null;
-			
+
 			break;
 		}
 	}
@@ -4505,7 +4505,7 @@ function VSLib::EasyLogic::AddInterceptChat(func)
 		if (v == func)
 			return;
 	}
-	
+
 	_interceptList[_interceptCount] <- func;
 	_interceptCount++;
 }
@@ -4533,7 +4533,7 @@ if (!("InterceptChat" in getroottable()))
 	::InterceptChat <- function (str, srcEnt)
 	{
 		local hideText = false;
-		
+
 		if (srcEnt != null)
 		{
 			// Strip the name from the chat text
@@ -4546,10 +4546,10 @@ if (!("InterceptChat" in getroottable()))
 			{
 				// Separate the commands and arguments
 				local arr = split(text, " ");
-				
+
 				// Identify the command
 				local cmd = arr[0];
-				
+
 				// Build an argument array
 				local args = {};
 				local idx = 0;
@@ -4561,12 +4561,12 @@ if (!("InterceptChat" in getroottable()))
 						idx++;
 					}
 				}
-				
+
 				// Store it.
 				::VSLib.EasyLogic.LastArgs <- args;
-				
+
 				local player = ::VSLib.Player(srcEnt);
-				
+
 				// Execute the permanent triggers
 				local baseCmd = "";
 				if (startTrigger)
@@ -4588,7 +4588,7 @@ if (!("InterceptChat" in getroottable()))
 							hideText = true;
 					}
 				}
-				
+
 				// Execute the removable trigger (if it is a trigger).
 				foreach (i, trigger in ::VSLib.EasyLogic._itChatTextIndex)
 				{
@@ -4602,10 +4602,10 @@ if (!("InterceptChat" in getroottable()))
 				}
 			}
 		}
-		
+
 		local player = null;
 		local text = "";
-		
+
 		if (srcEnt != null)
 		{
 			local name = srcEnt.GetPlayerName() + ": ";
@@ -4622,7 +4622,7 @@ if (!("InterceptChat" in getroottable()))
 			else
 				text = str;
 		}
-		
+
 		// Fire any intercept hooks
 		foreach(v in ::VSLib.EasyLogic._interceptList)
 		{
@@ -4637,7 +4637,7 @@ if (!("InterceptChat" in getroottable()))
 					return false;
 			}
 		}
-		
+
 		if ( "ModeInterceptChat" in g_ModeScript )
 		{
 			if ( g_ModeScript.ModeInterceptChat(str, srcEnt) == false )
@@ -4648,7 +4648,7 @@ if (!("InterceptChat" in getroottable()))
 			if ( g_ModeScript.MapInterceptChat(str, srcEnt) == false )
 				return false;
 		}
-		
+
 		if ( hideText )
 			return false;
 	}
@@ -4677,7 +4677,7 @@ function VSLib::EasyLogic::GetArgument(idx)
 {
 	if (!(idx-1 in ::VSLib.EasyLogic.LastArgs))
 		return null;
-	
+
 	return ::VSLib.EasyLogic.LastArgs[idx-1];
 }
 
@@ -4698,7 +4698,7 @@ if (!("UserConsoleCommand" in getroottable()))
 	{
 		// Separate the commands and arguments
 		local arr = split(arg, ",");
-		
+
 		// Build an argument array
 		local args = {};
 		local idx = -1;
@@ -4710,21 +4710,21 @@ if (!("UserConsoleCommand" in getroottable()))
 				idx++;
 			}
 		}
-		
+
 		// Store it.
 		::VSLib.EasyLogic.LastArgs <- args;
-		
+
 		local argArray = clone args;
 		argArray.rawdelete(-1);
-		
+
 		local player = ::VSLib.Player(playerScript);
-		
+
 		foreach(v in ::VSLib.EasyLogic.OnUserCommand)
 		{
 			if (v != null)
 				v(player, argArray, arg);
 		}
-		
+
 		if ( "ModeUserConsoleCommand" in g_ModeScript )
 			g_ModeScript.ModeUserConsoleCommand(playerScript, arg);
 		if ( "MapUserConsoleCommand" in g_ModeScript )
@@ -4772,7 +4772,7 @@ function VSLib::EasyLogic::Players::Bots()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -4793,7 +4793,7 @@ function VSLib::EasyLogic::Players::SurvivorBots()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -4814,7 +4814,7 @@ function VSLib::EasyLogic::Players::AliveSurvivorBots()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -4835,7 +4835,7 @@ function VSLib::EasyLogic::Players::IncapacitatedSurvivorBots()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -4856,7 +4856,7 @@ function VSLib::EasyLogic::Players::DeadSurvivorBots()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -4877,7 +4877,7 @@ function VSLib::EasyLogic::Players::InfectedBots()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -4897,7 +4897,7 @@ function VSLib::EasyLogic::Players::All()
 			t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -4918,7 +4918,7 @@ function VSLib::EasyLogic::Players::Spectators()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -4939,7 +4939,7 @@ function VSLib::EasyLogic::Players::Infected()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -4960,7 +4960,7 @@ function VSLib::EasyLogic::Players::Survivors()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -4981,7 +4981,7 @@ function VSLib::EasyLogic::Players::AliveSurvivors()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5002,7 +5002,7 @@ function VSLib::EasyLogic::Players::IncapacitatedSurvivors()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5023,7 +5023,7 @@ function VSLib::EasyLogic::Players::DeadSurvivors()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5042,7 +5042,7 @@ function VSLib::EasyLogic::Players::AnySurvivor()
 				return libObj;
 		}
 	}
-	
+
 	return null;
 }
 
@@ -5061,7 +5061,7 @@ function VSLib::EasyLogic::Players::AnyAliveSurvivor()
 				return libObj;
 		}
 	}
-	
+
 	return null;
 }
 
@@ -5080,7 +5080,7 @@ function VSLib::EasyLogic::Players::AnyIncapacitatedSurvivor()
 				return libObj;
 		}
 	}
-	
+
 	return null;
 }
 
@@ -5099,7 +5099,7 @@ function VSLib::EasyLogic::Players::AnyDeadSurvivor()
 				return libObj;
 		}
 	}
-	
+
 	return null;
 }
 
@@ -5151,7 +5151,7 @@ function VSLib::EasyLogic::Players::SurvivorWithHighestFlow()
 			}
 		}
 	}
-	
+
 	return player;
 }
 
@@ -5172,7 +5172,7 @@ function VSLib::EasyLogic::Players::Humans()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5194,7 +5194,7 @@ function VSLib::EasyLogic::Players::OfType(playerType)
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5216,7 +5216,7 @@ function VSLib::EasyLogic::Players::AllSurvivors()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5237,7 +5237,7 @@ function VSLib::EasyLogic::Players::L4D1Survivors()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5255,7 +5255,7 @@ function VSLib::EasyLogic::Zombies::CommonInfected()
 		if (ent.IsValid())
 			t[++i] <- ::VSLib.Entity(ent);
 	}
-	
+
 	return t;
 }
 
@@ -5276,7 +5276,7 @@ function VSLib::EasyLogic::Zombies::UncommonInfected()
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5298,7 +5298,7 @@ function VSLib::EasyLogic::Zombies::OfGender(gender)
 				t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5315,7 +5315,7 @@ function VSLib::EasyLogic::Zombies::Witches()
 		if (ent.IsValid())
 			t[++i] <- ::VSLib.Entity(ent);
 	}
-	
+
 	return t;
 }
 
@@ -5326,14 +5326,14 @@ function VSLib::EasyLogic::Zombies::All()
 {
 	local t = {};
 	local i = -1;
-	
+
 	foreach( ent in ::VSLib.EasyLogic.Players.Infected() )
 		t[i++] <- ent;
 	foreach( ent in ::VSLib.EasyLogic.Zombies.CommonInfected() )
 		t[i++] <- ent;
 	foreach( ent in ::VSLib.EasyLogic.Zombies.Witches() )
 		t[i++] <- ent;
-	
+
 	return t;
 }
 
@@ -5356,7 +5356,7 @@ function VSLib::EasyLogic::Objects::OfClassname(classname)
 			t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5376,7 +5376,7 @@ function VSLib::EasyLogic::Objects::OfClassnameNearest(classname, origin, radius
 			t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5398,7 +5398,7 @@ function VSLib::EasyLogic::Objects::OfClassnameWithin(classname, origin, radius)
 			t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5415,7 +5415,7 @@ function VSLib::EasyLogic::Objects::AnyOfClassname(classname)
 			return ::VSLib.Utils.GetEntityOrPlayer(ent);
 		}
 	}
-	
+
 	return null;
 }
 
@@ -5435,7 +5435,7 @@ function VSLib::EasyLogic::Objects::OfName(targetname)
 			t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5455,7 +5455,7 @@ function VSLib::EasyLogic::Objects::OfNameNearest(targetname, origin, radius)
 			t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5475,7 +5475,7 @@ function VSLib::EasyLogic::Objects::OfNameWithin(targetname, origin, radius)
 			t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5492,7 +5492,7 @@ function VSLib::EasyLogic::Objects::AnyOfName(targetname)
 			return ::VSLib.Utils.GetEntityOrPlayer(ent);
 		}
 	}
-	
+
 	return null;
 }
 
@@ -5512,7 +5512,7 @@ function VSLib::EasyLogic::Objects::OfModel(model)
 			t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5539,7 +5539,7 @@ function VSLib::EasyLogic::Objects::OfModelNearest(model, origin, radius)
 			}
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5566,7 +5566,7 @@ function VSLib::EasyLogic::Objects::OfModelWithin(model, origin, radius)
 			}
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5583,7 +5583,7 @@ function VSLib::EasyLogic::Objects::AnyOfModel(model)
 			return ::VSLib.Utils.GetEntityOrPlayer(ent);
 		}
 	}
-	
+
 	return null;
 }
 
@@ -5603,7 +5603,7 @@ function VSLib::EasyLogic::Objects::OfTarget(target)
 			t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5625,7 +5625,7 @@ function VSLib::EasyLogic::Objects::AroundRadius(pos, radius)
 			t[++i] <- libObj;
 		}
 	}
-	
+
 	return t;
 }
 
@@ -5637,13 +5637,13 @@ function VSLib::EasyLogic::Objects::AroundRadius(pos, radius)
 function VSLib::EasyLogic::Objects::AliveAroundRadius(pos, radius)
 {
 	local t = AroundRadius(pos, radius);
-	
+
 	foreach (idx, ent in t)
 		if (ent.GetClassname() != "player" && ent.GetClassname() != "infected")
 			delete t[idx];
 		else if (::VSLib.Player(ent).IsDead()) // tag on a branched if statement
 			delete t[idx];
-	
+
 	return t;
 }
 
@@ -5654,14 +5654,14 @@ function VSLib::EasyLogic::Objects::MountedGuns()
 {
 	local t = {};
 	local i = -1;
-	
+
 	foreach( ent in ::VSLib.EasyLogic.Objects.OfClassname("prop_minigun") )
 		t[i++] <- ent;
 	foreach( ent in ::VSLib.EasyLogic.Objects.OfClassname("prop_minigun_l4d1") )
 		t[i++] <- ent;
 	foreach( ent in ::VSLib.EasyLogic.Objects.OfClassname("prop_mounted_machine_gun") )
 		t[i++] <- ent;
-	
+
 	return t;
 }
 
@@ -5672,10 +5672,10 @@ function VSLib::EasyLogic::Objects::All()
 {
 	local t = {};
 	local i = -1;
-	
+
 	foreach( ent in ::VSLib.EasyLogic.Objects.OfClassname("*") )
 		t[i++] <- ent;
-	
+
 	return t;
 }
 
@@ -5696,7 +5696,7 @@ if (!("Update" in getroottable()))
 	{
 		foreach (update in ::VSLib.EasyLogic.Update)
 			update();
-		
+
 		if ( "ModeUpdate" in g_ModeScript )
 			g_ModeScript.ModeUpdate();
 	}
