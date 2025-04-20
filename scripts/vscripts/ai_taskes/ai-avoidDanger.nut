@@ -119,11 +119,11 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 420, 120, 420, 800);
 						}
 					} else if (danger.GetZombieType() == 8) {
-						//BotAI.BotRetreatFrom(player, danger);
+						BotAI.BotRetreatFrom(player, danger);
 
 						local nexDis = BotAI.nextTickDistance(player, danger);
 						local cansee = BotAI.VectorDotProduct(BotAI.normalize(danger.EyeAngles().Forward()), BotAI.normalize(player.GetOrigin() - danger.GetOrigin())) > 0.6
-						local innerCircle = 200;
+						local innerCircle = 300;
 						if (BotAI.BotDebugMode) {
 							DebugDrawCircle(player.GetCenter(), Vector(255, 25, 25), 0, innerCircle, true, 0.5);
 						}

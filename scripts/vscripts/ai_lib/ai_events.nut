@@ -272,10 +272,9 @@
 	if(BotAI.BotCombatSkill < 2)
 		return;
 
-	if(victim != null
-		&& (victim.GetClassname() == "witch" || victim.GetClassname() == "infected" || (victim.GetClassname() == "player"
-		&& BotAI.IsPlayerEntityValid(victim)
-		&& !victim.IsSurvivor()))
+
+	if(BotAI.IsEntityValid(victim)
+		&& (victim.GetClassname() == "witch" || victim.GetClassname() == "infected" || (victim.GetClassname() == "player" && !victim.IsSurvivor()))
 		&& IsPlayerABot(p)
 		&& p.IsSurvivor()) {
 		local weapon = p.GetActiveWeapon();

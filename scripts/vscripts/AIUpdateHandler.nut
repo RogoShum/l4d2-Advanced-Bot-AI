@@ -936,8 +936,8 @@ function BotAI::ModifyMolotovVector(args) {
 }
 
 function BotAI::AdjustBotsUpdateRate(args) {
-	if (BotAI.BotCombatSkill > 3) {
-		BotAI.BotCombatSkill = 3;
+	if (BotAI.BotCombatSkill > 4) {
+		BotAI.BotCombatSkill = 4;
 	}
 
 	local FalledPlayer = 0;
@@ -1068,7 +1068,7 @@ function BotAI::AdjustBotsUpdateRate(args) {
 
 	BotAI.WitchList = witchList;
 
-	//BotAI.GiveUpPlayer(true);
+	BotAI.GiveUpPlayer(true);
 }
 
 ::BotAI.GiveUpPlayer <- function(flag) {
@@ -1275,11 +1275,11 @@ function BotAI::locateUseTarget(args)
 	if(args.len() >= 1 && args[0] != null && args[0] != "") {
 		local arg = args[0].tointeger();
 
-		if(arg > 3) {
-			arg = 3;
+		if(arg > 4) {
+			arg = 4;
 		}
 
-		if(arg >= 0 && arg <= 3) {
+		if(arg >= 0 && arg <= 4) {
 			BotAI.BotCombatSkill = arg;
 			BotAI.EasyPrint("botai_bot_combat_skill", 0.2, arg);
 		}

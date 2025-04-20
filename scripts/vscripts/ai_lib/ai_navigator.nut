@@ -273,13 +273,18 @@ class::Navigator {
 			local friction = 1.2;
 
 			foreach(danger in BotAI.SpecialList) {
-				if (danger.GetClassname() == "player" && danger.GetZombieType() == 8 && BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 200) {
-					friction = 2.0;
+				if (danger.GetClassname() == "player" && danger.GetZombieType() == 8) {
+					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 310) {
+						player.OverrideFriction(0.5, friction);
+					}
+
+					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 200) {
+						friction = 1.5;
+					}
 				}
 			}
 
 			NetProps.SetPropFloat(player, "m_flLaggedMovementValue", friction);
-			//player.OverrideFriction(0.5, friction);
 		} else {
 			NetProps.SetPropFloat(player, "m_flLaggedMovementValue", 1.0);
 		}
@@ -299,7 +304,7 @@ class::Navigator {
 			}
 
 			if (BotAI.distanceof(player.GetOrigin(), goalPos) > 10) {
-				BotAI.botCmdMove(player, goalPos);
+				BotAI.botCmdMove(player, goalPos, movingID.find("^") != null);
 			} else if (movingID.find("#") != null) {
 				player.OverrideFriction(0.5, 10);
 			}

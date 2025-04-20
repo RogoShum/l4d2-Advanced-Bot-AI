@@ -2827,15 +2827,16 @@ function BotAI::BotRetreatFrom(boto, otherEntity) {
 	if(BotAI.BotDebugMode) {
 		printl("[Retreat] " + BotAI.getPlayerBaseName(boto));
 	}
+
 	return CommandABot( { cmd = 2, target = otherEntity, bot = boto } );
 }
 
-function BotAI::botCmdMove(boto, vector) {
+function BotAI::botCmdMove(boto, vector, ignoreCooldown = false) {
 	if(!BotAI.IsEntityValid(boto)) return;
 	if(!IsPlayerABot(boto))
 		return;
 
-	if (Time() - BotAI.getBotMoveCooldown(boto) < 1.25) {
+	if (!ignoreCooldown && Time() - BotAI.getBotMoveCooldown(boto) < 1.25) {
 		if(BotAI.BotDebugMode) {
 			printl("[Move Fail] " + BotAI.getPlayerBaseName(boto));
 		}
@@ -2890,20 +2891,6 @@ function BotAI::botStayPos(player, pos, id, priority = 4, stayTime = 3, distance
 	local idStay = id + "Stay#";
 	local stay = stayTime;
 
-		/*
-
-	local position_ = Vector(0, 0, 0);
-	if(typeof pos == "Vector")
-		position_ = pos;
-	else
-		position_ = pos.GetOrigin();
-
-	BotAI.botCmdMove(player, position_);
-	DebugDrawCircle(position_, Vector(0, 0, 255), 1.0, 5, true, 15.0);
-	DebugDrawText(position_, "goal_RunPos", false, 15.0);
-	return;
-		*/
-
 	local function changeAndStay() {
 		if(!BotAI.IsAlive(littleBot)) return true;
 		if(typeof pos != "Vector" && !BotAI.IsAlive(pos)) return true;
@@ -2949,20 +2936,6 @@ function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.tru
 
 	if(BotAI.IsPlayerClimb(player) || BotAI.IsBotHealing(player))
 		return false;
-
-		/*
-
-	local position_ = Vector(0, 0, 0);
-	if(typeof pos == "Vector")
-		position_ = pos;
-	else
-		position_ = pos.GetOrigin();
-
-	BotAI.botCmdMove(player, position_);
-	DebugDrawCircle(position_, Vector(0, 0, 255), 1.0, 5, true, 15.0);
-	DebugDrawText(position_, "goal_RunPos", false, 15.0);
-	return;
-		*/
 
 	local navigator = BotAI.getNavigator(player);
 	foreach(idx, path in navigator.pathCache) {
