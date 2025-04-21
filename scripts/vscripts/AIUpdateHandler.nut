@@ -1,7 +1,6 @@
 Msg("[Bot AI]	Loading BotAI\n");
 
-if (!("VSLib" in getroottable()))
-{
+if (!("VSLib" in getroottable())) {
 	::VSLib <-
 	{
 		GlobalCache = {}
@@ -164,23 +163,22 @@ if (!("VSLib" in getroottable()))
 		MainMenu = {}
 
 		BotDebugMode = false
-		BotCombatSkill = 1
+		BotCombatSkill = 2
 		NeedGasFinding = true
 		NeedThrowGrenade = true
 		Immunity = false
-		PathFinding = true
+		PathFinding = false
 		Unstick = true
 		Melee = true
 		Defibrillator = true
+		BackPack = true
 		ServerMode = false
 		ABA_Admins = {}
 		NoticeText = true
 		NeedBotAlive = true
-		BackPack = true
 	}
 
-	::BotAI.AITaskList <-
-	{
+	::BotAI.AITaskList <- {
 		singleTasks = {}
 		groupTasks = {}
 	}
@@ -855,7 +853,7 @@ function BotAI::ModifyMolotovVector(args) {
 
 		local entT = null;
 		local nearest = null;
-		local nearestDis = 800;
+		local nearestDis = 700;
 
 		while (entT = Entities.FindByModel(entT, "models/infected/hulk.mdl")) {
 			if(!entT.IsValid() || !BotAI.IsAlive(entT) || BotAI.IsOnFire(entT) || !BotAI.CanHitOtherEntity(molotov, entT)) continue;
@@ -867,7 +865,7 @@ function BotAI::ModifyMolotovVector(args) {
 			}
 		}
 
-		if(BotAI.IsEntitySI(nearest)){
+		if(BotAI.IsEntitySI(nearest)) {
 			local originVec = molotov.GetVelocity();
 			local traceVec = BotAI.normalize(nearest.GetOrigin() - molotov.GetOrigin()).Scale(originVec.Length());
 			if(traceVec.z > 0)
@@ -1275,21 +1273,23 @@ function BotAI::locateUseTarget(args)
 	if(args.len() >= 1 && args[0] != null && args[0] != "") {
 		local arg = args[0].tointeger();
 
-		if(arg > 4) {
-			arg = 4;
+		if(arg > 5) {
+			arg = 5;
 		}
 
-		if(arg >= 0 && arg <= 4) {
-			BotAI.BotCombatSkill = arg;
-			BotAI.EasyPrint("botai_bot_combat_skill", 0.2, arg);
+		if(arg < 1) {
+			arg = 1;
 		}
+
+		BotAI.BotCombatSkill = arg - 1;
+		BotAI.EasyPrint("botai_bot_combat_skill", 0.2, arg);
 	} else {
 		if(BotAI.BotCombatSkill > 0) {
 			BotAI.BotCombatSkill = 0;
 			BotAI.EasyPrint("botai_bot_combat_skill", 0.2, 0);
 		} else {
-			BotAI.BotCombatSkill = 1;
-			BotAI.EasyPrint("botai_bot_combat_skill", 0.2, 1);
+			BotAI.BotCombatSkill = 2;
+			BotAI.EasyPrint("botai_bot_combat_skill", 0.2, 2);
 		}
 	}
 
@@ -1450,6 +1450,9 @@ function BotAI::locateUseTarget(args)
 
 ::BotAI.EasyPrint <- function (str, time = 0.2, args = "") {
 	local function cPrint(s) {
+		if (BotAI.BotDebugMode) {
+			printl(str);
+		}
 		ClientPrint(null, 5, "Advanced Bot AI: " + "\x01" + I18n.getTranslationKey(s) + args);
 	}
 
@@ -1799,11 +1802,11 @@ function BotAI::resetBotMeleeAction() {
 function BotAI::ResetBotFireRate() {
 	BotAI.AdjustBotsUpdateRate(1);
 
-	local combatSpeed = 1000;
+	local combatSpeed = 500;
 	local normalSpeed = 350;
 
-	combatSpeed += BotAI.BotCombatSkill * 3000;
-	normalSpeed += BotAI.BotCombatSkill * 2000;
+	combatSpeed += BotAI.BotCombatSkill * 1000;
+	normalSpeed += BotAI.BotCombatSkill * 500;
 
 	Convars.SetValue( "sb_combat_saccade_speed", combatSpeed );
 	Convars.SetValue( "sb_normal_saccade_speed", normalSpeed );
@@ -2128,11 +2131,48 @@ function BotAI::AdjustBotState(args) {
 	}
 }
 
-function BotAI::doNoticeText(args) {
+function BotAI::doNoticeText() {
 	if(!BotAI.NoticeText) return;
-	local lang = BotAI.language;
-	if(lang == "schinese" || lang == "tchinese")
-		BotAI.EasyPrint("通告： 希望每位朋友都能认真看一遍创意工坊的使用说明，学习一番开启或关闭某项功能的指令的用！这条通告可以使用指令!botnotice来关闭。");
+
+	local settings = [
+        { key = "menu_bot_skill", value = ::BotAI.BotCombatSkill + 1, enabled = true, isValue = true },
+        { key = "menu_find_gas", value = "", enabled = ::BotAI.NeedGasFinding, isValue = false },
+        { key = "menu_throw", value = "", enabled = ::BotAI.NeedThrowGrenade, isValue = false },
+        { key = "menu_immunity", value = "", enabled = ::BotAI.Immunity, isValue = false },
+        { key = "menu_pathfinding", value = "", enabled = ::BotAI.PathFinding, isValue = false },
+        { key = "menu_unstick", value = "", enabled = ::BotAI.Unstick, isValue = false },
+        { key = "menu_take_melee", value = "", enabled = ::BotAI.Melee, isValue = false },
+        { key = "menu_defibrillator", value = "", enabled = ::BotAI.Defibrillator, isValue = false },
+        { key = "menu_carry", value = "", enabled = ::BotAI.BackPack, isValue = false }
+    ];
+
+	::BotAI.EasyPrint("botai_current_settings", 15);
+
+	local output = "";
+
+    foreach (setting in settings) {
+        local settingName = I18n.getTranslationKey(setting.key);
+
+        output += "\x04[";
+
+        if (setting.isValue) {
+            output += format("\x01%s: \x05%d", settingName, setting.value);
+        } else {
+            if (setting.enabled) {
+                output += "\x05" + I18n.getTranslationKey("menu_enable");
+            } else {
+                output += "\x01" + I18n.getTranslationKey("menu_disable");
+            }
+            output += "\x01" + settingName;
+        }
+
+        output += "\x04] ";
+    }
+
+    //output += "\n\x01" + I18n.getTranslationKey("botai_use_command_notice");
+
+    ::BotAI.EasyPrint(output, 15.2);
+	::BotAI.EasyPrint("botai_use_command_notice", 15.4);
 }
 
 function BotAI::preAITask() {
@@ -2243,8 +2283,7 @@ function resetAllBots() {
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("DebugFunction", 0.1, true, BotAI.DebugFunction));
 	BotAI.ResetBotFireRate();
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("locateUseTarget", 0.1, true, BotAI.locateUseTarget));
-
-	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("NoticeText", 30, false, BotAI.doNoticeText));
+	//printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("NoticeText", 30, false, BotAI.doNoticeText));
 
 	printl("[Bot AI] Timers loaded.");
 }

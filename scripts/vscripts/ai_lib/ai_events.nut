@@ -114,6 +114,9 @@
 }
 
 ::BotAI.Events.OnGameEvent_bullet_impact <- function(event) {
+	if (BotAI.BotCombatSkill < 1) {
+		return;
+	}
 	local bot = GetPlayerFromUserID(event.userid);
 	local vec = Vector(event.x, event.y, event.z);
 	if(BotAI.IsEntitySurvivorBot(bot)) {
@@ -129,7 +132,7 @@
 				r = 0;
 				g = 255;
 			} else {
-				BotAI.applyDamage(bot, target, BotAI.getDamage(bot.GetActiveWeapon()) * 0.2 * BotAI.BotCombatSkill, DMG_HEADSHOT);
+				BotAI.applyDamage(bot, target, BotAI.getDamage(bot.GetActiveWeapon()) * 0.1 * BotAI.BotCombatSkill, DMG_HEADSHOT);
 			}
 			if(BotAI.BotDebugMode) {
 				DebugDrawBox(target.GetCenter(), Vector(-1, -1, -1), Vector(1, 1, 1), 0, 0, 255, 0.2, 1);
@@ -213,18 +216,20 @@
 		if(ename == "weapon_melee" || ename == "weapon_chainsaw") {
 			local target = null;
 			local damaged = false;
-			local range = Convars.GetFloat("melee_range") + 50;
+			local skillFactor = BotAI.BotCombatSkill * 10;
+			local range = Convars.GetFloat("melee_range") + skillFactor;
 			local TD = 300;
 			local additionAngle = BotAI.BotCombatSkill * 0.2;
+			local damagePos = BotAI.getEntityHeadPos(p);
+			damagePos = Vector(damagePos.x, damagePos.y, p.EyePosition().z);
 			if(ename == "weapon_chainsaw") {
 				TD = 50;
 			}
 
 			while(target = Entities.FindByClassnameWithin(target, "infected", p.GetOrigin(), range)) {
-				if(BotAI.IsEntityValid(target) && BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (-0.2 - additionAngle)) {
+				if(BotAI.IsEntityValid(target) && BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (0.5 - additionAngle)) {
 					damaged = true;
-					target.TakeDamageEx(p, p, p.GetActiveWeapon(), BotAI.normalize(target.GetOrigin() - p.GetOrigin())
-					, BotAI.getEntityHeadPos(target), target.GetHealth(), DMG_MELEE);
+					BotAI.applyDamage(p, target, target.GetHealth(), -2145386492, damagePos);
 					BotAI.spawnParticle("blood_impact_infected_01", target.GetOrigin() + Vector(0, 0, 50), target);
 					BotAI.spawnParticle("blood_melee_slash_TP_swing", target.GetOrigin() + Vector(0, 0, 50), target);
 				}
@@ -232,10 +237,10 @@
 
 			target = null;
 			while(target = Entities.FindByClassnameWithin(target, "player", p.GetOrigin(), range)) {
-				if (BotAI.IsEntitySI(target) && BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range - 50
+				if (BotAI.IsEntitySI(target) && BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range - skillFactor
 				&& BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (0.7 - additionAngle)) {
 					damaged = true;
-					BotAI.applyDamage(p, target, TD, DMG_MELEE);
+					BotAI.applyDamage(p, target, TD, -2145386492, damagePos);
 					BotAI.spawnParticle("blood_impact_infected_01", target.GetOrigin() + Vector(0, 0, 50), target);
 					BotAI.spawnParticle("blood_melee_slash_TP_swing", target.GetOrigin() + Vector(0, 0, 50), target);
 				}
@@ -243,10 +248,10 @@
 
 			target = null;
 			while(target = Entities.FindByClassnameWithin(target, "witch", p.GetOrigin(), range)) {
-				if (BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range - 50
+				if (BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range - skillFactor
 				&& BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (0.7 - additionAngle)) {
 					damaged = true;
-					BotAI.applyDamage(p, target, TD, DMG_MELEE);
+					BotAI.applyDamage(p, target, TD, -2145386492, damagePos);
 					BotAI.spawnParticle("blood_impact_infected_01", target.GetOrigin() + Vector(0, 0, 50), target);
 					BotAI.spawnParticle("blood_melee_slash_TP_swing", target.GetOrigin() + Vector(0, 0, 50), target);
 				}
@@ -324,12 +329,14 @@
 
 	if(p != null && p.IsSurvivor() && IsPlayerABot(p)) {
 		weapon <- p.GetActiveWeapon();
-		if(BotAI.BotCombatSkill > 2 || weapon.GetClassname() == "weapon_pistol" || weapon.GetClassname() == "weapon_pistol_magnum") {
+
+		if (BotAI.BotCombatSkill > 2 || weapon.GetClassname() == "weapon_pistol" || weapon.GetClassname() == "weapon_pistol_magnum") {
 			NetProps.SetPropInt(weapon, "m_iClip1", NetProps.GetPropInt(weapon, "m_iClip1") + 1);
-		}
-		else if(victim != null && ((victim.GetClassname() == "player" && !victim.IsSurvivor()) || victim.GetClassname() == "witch"))
+		} else if (victim != null
+			&& ((victim.GetClassname() == "player" && !victim.IsSurvivor())
+			|| victim.GetClassname() == "witch")) {
 			NetProps.SetPropInt(weapon, "m_iClip1", NetProps.GetPropInt(weapon, "m_iClip1") + 1);
-		else if(RandomInt(0, 2) == 0) {
+		} else if (RandomInt(0, 2) == 0) {
 			NetProps.SetPropInt(weapon, "m_iClip1", NetProps.GetPropInt(weapon, "m_iClip1") + 1);
 		}
 	}
@@ -550,7 +557,7 @@
 	local victim = GetPlayerFromUserID(event.victim);
 	local attacker = GetPlayerFromUserID(event.userid);
 
-	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.BotCombatSkill > 1 && RandomInt(0, BotAI.BotCombatSkill + 1) > 0) {
+	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.BotCombatSkill > 2 && RandomInt(0, BotAI.BotCombatSkill + 1) > 0) {
 		NetProps.SetPropInt(victim, "m_jockeyAttacker", -1);
 		NetProps.SetPropInt(attacker, "m_jockeyVictim", 1);
 		return;
@@ -584,7 +591,7 @@
 	local victim = GetPlayerFromUserID(event.victim);
 	local attacker = GetPlayerFromUserID(event.userid);
 
-	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.BotCombatSkill > 1 && RandomInt(0, BotAI.BotCombatSkill + 1) > 0) {
+	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.BotCombatSkill > 2 && RandomInt(0, BotAI.BotCombatSkill + 1) > 0) {
 		NetProps.SetPropInt(victim, "m_pounceAttacker", -1);
 		NetProps.SetPropInt(attacker, "m_pounceVictim", 1);
 		return;
@@ -686,8 +693,7 @@
 
 	if(BotAI.IsPlayerEntityValid(attacker) && attacker.IsSurvivor() && IsPlayerABot(attacker) && !attacker.IsDead() && BotAI.IsPlayerEntityValid(victim) && !victim.IsSurvivor() && IsPlayerABot(victim) && !victim.IsDead())
 	{
-		if(BotAI.IsOnGround(victim))
-		{
+		if(BotAI.IsOnGround(victim)) {
 			victim.SetSenseFlags(victim.GetSenseFlags() | BOT_CANT_SEE);
 			::BotAI.Timers.AddTimer(1.4, false, BotAI.EnableSight {infect = victim});
 		}
@@ -828,6 +834,10 @@
 	BotAI.FinaleStart = true;
 }
 
+::BotAI.Events.OnGameEvent_round_start <- function(event) {
+	BotAI.doNoticeText();
+}
+
 ::BotAI.Events.OnGameEvent_round_end <- function(event)
 {
 	BotAI.SaveSetting();
@@ -871,10 +881,12 @@
 	if(victim == null || (victim != null && victim.GetClassname() != "infected"))
 		return;
 
-	if(BotAI.IsPlayerEntityValid(attacker) && attacker.IsSurvivor() && IsPlayerABot(attacker) && !attacker.IsDead()) {
-			BotAI.applyDamage(attacker, victim, 15, DMG_HEADSHOT);
-		if(BotAI.IsAlive(victim))
-		BotAI.applyPushVelocity(attacker, victim);
+	if(BotAI.IsPlayerEntityValid(attacker) && attacker.IsSurvivor() && !attacker.IsDead() && IsPlayerABot(attacker)) {
+		BotAI.applyDamage(attacker, victim, 15, DMG_HEADSHOT);
+
+		if(BotAI.IsAlive(victim)) {
+			BotAI.applyPushVelocity(attacker, victim);
+		}
 	}
 }
 
@@ -1126,16 +1138,17 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 			return false;
 	}
 
-	if(BotAI.Immunity && BotAI.IsPlayerEntityValid(attacker) && !IsPlayerABot(attacker) && attacker.IsSurvivor() && BotAI.IsPlayerEntityValid(victim) && IsPlayerABot(victim) && victim.IsSurvivor())
-	{
+	if(BotAI.Immunity && BotAI.IsPlayerEntityValid(attacker) && !IsPlayerABot(attacker) && attacker.IsSurvivor() && BotAI.IsPlayerEntityValid(victim) && IsPlayerABot(victim) && victim.IsSurvivor()) {
 		return false;
 	}
 
 	if(BotAI.IsEntitySI(victim) && victim.GetZombieType() == 8 && victim.GetLastKnownArea().IsUnderwater() && damageTable.DamageType & DMG_BURN) {
 		damageTable.DamageDone *= 0.75;
 	}
+
 	if(victim != null && BotAI.IsPlayerEntityValid(attacker) && IsPlayerABot(attacker) && attacker.IsSurvivor()) {
 		local className = victim.GetClassname();
+
 		if(className == "player" && victim.GetZombieType() == 8) {
 			if(damageTable.DamageType & DMG_BURN) {
 				BotAI.dontYouWannaExtinguish[victim] <- victim;

@@ -98,7 +98,8 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			local distance = BotAI.nextTickDistance(target, player);
 			local targetName = target.GetClassname();
 			local isTank = targetName == "player" && target.GetZombieType() == 8;
-			local meleeRange = Convars.GetFloat("melee_range") + 50;
+			local skillFactor = BotAI.BotCombatSkill * 10;
+			local meleeRange = Convars.GetFloat("melee_range") + skillFactor;
 
 			if(targetName == "player" && target.IsSurvivor() && target != player) {
 				if((target.IsIncapacitated() || target.IsHangingFromLedge()) && !target.IsGettingUp() && !target.IsDominatedBySpecialInfected() && distance < 150 && !BotAI.HasTank) {

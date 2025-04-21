@@ -1005,21 +1005,24 @@ function BotAI::getEntityHeadPos(ent_b) {
 		x = ent_b.GetOrigin().x;
 		y = ent_b.GetOrigin().y;
 		z = ent_b.GetOrigin().z;
-	} else if("LookupAttachment" in ent_b) {
+	} else if(ent_b.GetClassname() == "infected") {
+		//ValveBiped.Bip01_Head1
+		local bonePos = ent_b.GetBoneOrigin(14);
+
+		x = bonePos.x;
+		y = bonePos.y;
+		z = bonePos.z;
+	} else if(ent_b.GetClassname() == "player" && ent_b.GetZombieType() == 8) {
+		x = ent_b.EyePosition().x;
+		y = ent_b.EyePosition().y;
+		z = ent_b.EyePosition().z;
+	} else if("LookupAttachment" in ent_b ) {
 		local attachId = ent_b.LookupAttachment("forward");
 		local position = ent_b.GetAttachmentOrigin(attachId);
 
 		x = position.x;
 		y = position.y;
 		z = position.z;
-	} else if("EyePosition" in ent_b ) {
-		x = ent_b.EyePosition().x;
-		y = ent_b.EyePosition().y;
-		z = ent_b.EyePosition().z;
-	} else if("GetBoneOrigin" in ent_b) {
-		x = ent_b.GetBoneOrigin(14).x;
-		y = ent_b.GetBoneOrigin(14).y;
-		z = ent_b.GetBoneOrigin(14).z;
 	} else {
 		x = ent_b.GetCenter().x;
 		y = ent_b.GetCenter().y;
@@ -1067,6 +1070,7 @@ function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1) {
 		local dirction = Vector(headPos.x - ent_self.EyePosition().x, headPos.y - ent_self.EyePosition().y, headPos.z - ent_self.EyePosition().z);
 		local qAngleDirction = BotAI.CreateQAngle(dirction.x, dirction.y, dirction.z);
 
+		/*
 		if(BotAI.BotCombatSkill == 0) {
 			local eyeAngle = ent_self.EyeAngles();
 			local angle = (qAngleDirction.Yaw() - eyeAngle.Yaw()) / 4;
@@ -1076,6 +1080,7 @@ function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1) {
 				angle = eyeAngle.Yaw() + angle;
 			qAngleDirction = QAngle(qAngleDirction.Pitch(), angle, qAngleDirction.Roll());
 		}
+		*/
 
 		ent_self.SnapEyeAngles(qAngleDirction);
 
@@ -1416,9 +1421,13 @@ function BotAI::CanHumanSeePlace(posIn) {
 	return false;
 }
 
-function BotAI::applyDamage(owner, target, amount, damageType) {
+function BotAI::applyDamage(owner, target, amount, damageType, damagepos = null) {
+	if (damagepos == null) {
+		damagepos = BotAI.getEntityHeadPos(target);
+	}
+
 	target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), BotAI.normalize(target.GetOrigin() - owner.GetOrigin())
-					, BotAI.getEntityHeadPos(target), amount, damageType);
+					, damagepos, amount, damageType);
 }
 
 function BotAI::IsInCombat(player, lowCheck = false) {

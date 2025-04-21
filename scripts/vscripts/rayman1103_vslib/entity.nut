@@ -1,21 +1,21 @@
-/*  
+/*
  * Copyright (c) 2013 LuKeM aka Neil - 119 and Rayman1103
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  * and associated documentation files (the "Software"), to deal in the Software without
  * restriction, including without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or
  * substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
  * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  */
 
 
@@ -47,10 +47,10 @@ class ::VSLib.Entity
 		else if ((typeof index) == "string" && index.find("!") != 0)
 		{
 			_ent = Entities.FindByName(null, index);
-			
+
 			if (_ent == null)
 				_ent = Entities.FindByClassname(null, index);
-			
+
 			if (_ent == null)
 			{
 				printf("VSLib Warning: Invalid targetname or classname (target not found)");
@@ -65,13 +65,13 @@ class ::VSLib.Entity
 			_idx = GetBaseIndex();
 		}
 	}
-	
-	
+
+
 	function _typeof()
 	{
 		return "VSLIB_ENTITY";
 	}
-	
+
 	function _cmp(other)
 	{
 		if ("_ent" in other && "_idx" in other)
@@ -102,8 +102,8 @@ class ::VSLib.Entity
 				return -1;
 		}
 	}
-	
-	
+
+
 	static _vsEntityClass = "VSLIB_ENTITY";
 	_ent = null;
 	_idx = null;
@@ -123,13 +123,13 @@ if (!("EntData" in ::VSLib))
 		_hurtIntent = -1
 		_hurtDmg = 0
 		_hurtIgnore = []
-		
+
 		_objPickupTimer = {}
 		_objBtnPickup = {}
 		_objBtnThrow = {}
 		_objOldBtnMask = {}
 		_objHolding = {}
-		
+
 		_objValveTimer = {}
 		_objValveHolding = {}
 		_objValveThrowPower = {}
@@ -137,7 +137,7 @@ if (!("EntData" in ::VSLib))
 		_objValveThrowDmg = {}
 		_objValveHoldDmg = {}
 		_objEnableDmg = {}
-		
+
 		_inv = {}
 		_invItems = {}
 	}
@@ -517,10 +517,10 @@ function VSLib::Entity::IsEntityValid()
 {
 	if (_ent == null)
 		return false;
-	
+
 	if (!("IsValid" in _ent))
 		return false;
-	
+
 	return _ent.IsValid();
 }
 
@@ -534,7 +534,7 @@ function VSLib::Entity::GetNetPropString( prop, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return NetProps.GetPropStringArray( _ent, prop.tostring(), element.tointeger() );
 }
 
@@ -548,7 +548,7 @@ function VSLib::Entity::GetNetPropInt( prop, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return NetProps.GetPropIntArray( _ent, prop.tostring(), element.tointeger() );
 }
 
@@ -562,7 +562,7 @@ function VSLib::Entity::GetNetPropFloat( prop, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return NetProps.GetPropFloatArray( _ent, prop.tostring(), element.tointeger() );
 }
 
@@ -576,7 +576,7 @@ function VSLib::Entity::GetNetPropVector( prop, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return NetProps.GetPropVectorArray( _ent, prop.tostring(), element.tointeger() );
 }
 
@@ -590,7 +590,7 @@ function VSLib::Entity::GetNetPropEntity( prop, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local entity = NetProps.GetPropEntityArray( _ent, prop.tostring(), element.tointeger() );
 	if (!entity)
 		return null;
@@ -607,7 +607,7 @@ function VSLib::Entity::GetNetPropBool( prop, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return (NetProps.GetPropIntArray( _ent, prop.tostring(), element.tointeger() ) > 0) ? true : false;
 }
 
@@ -621,16 +621,16 @@ function VSLib::Entity::GetNetProp( prop, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (!HasNetProp( prop ))
 		return null;
-	
+
 	local type = GetNetPropType( prop );
-	
+
 	if (type == "integer")
 	{
 		local entity = GetNetPropEntity( prop, element );
-		
+
 		if ( entity != null )
 			return entity;
 		else
@@ -642,7 +642,7 @@ function VSLib::Entity::GetNetProp( prop, element = 0 )
 		return GetNetPropString( prop, element );
 	else if (type == "Vector")
 		return GetNetPropVector( prop, element );
-	
+
 	return null;
 }
 
@@ -656,7 +656,7 @@ function VSLib::Entity::SetNetPropString( prop, value, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	NetProps.SetPropStringArray( _ent, prop.tostring(), value.tostring(), element.tointeger() );
 }
 
@@ -670,7 +670,7 @@ function VSLib::Entity::SetNetPropInt( prop, value, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	NetProps.SetPropIntArray( _ent, prop.tostring(), value.tointeger(), element.tointeger() );
 }
 
@@ -684,7 +684,7 @@ function VSLib::Entity::SetNetPropFloat( prop, value, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	NetProps.SetPropFloatArray( _ent, prop.tostring(), value.tofloat(), element.tointeger() );
 }
 
@@ -698,7 +698,7 @@ function VSLib::Entity::SetNetPropVector( prop, value, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	NetProps.SetPropVectorArray( _ent, prop.tostring(), value, element.tointeger() );
 }
 
@@ -712,10 +712,10 @@ function VSLib::Entity::SetNetPropEntity( prop, value, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( typeof value == "VSLIB_ENTITY" || typeof value == "VSLIB_PLAYER" )
 		value = value.GetBaseEntity();
-	
+
 	NetProps.SetPropEntityArray( _ent, prop.tostring(), value, element.tointeger() );
 }
 
@@ -729,7 +729,7 @@ function VSLib::Entity::SetNetProp( prop, value, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (typeof value == "string")
 		SetNetPropString( prop, value, element );
 	else if (typeof value == "integer" || typeof value == "bool")
@@ -752,7 +752,7 @@ function VSLib::Entity::GetNetPropArraySize( prop )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return NetProps.GetPropArraySize( _ent, prop.tostring() );
 }
 
@@ -766,7 +766,7 @@ function VSLib::Entity::HasNetProp( prop )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return NetProps.HasProp( _ent, prop.tostring() );
 }
 
@@ -780,7 +780,7 @@ function VSLib::Entity::GetNetPropType( prop )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return NetProps.GetPropType( _ent, prop.tostring() );
 }
 
@@ -794,7 +794,7 @@ function VSLib::Entity::GetResponseCriterion( criterion )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return ResponseCriteria.GetValue( _ent, criterion.tostring() );
 }
 
@@ -808,10 +808,10 @@ function VSLib::Entity::GatherResponseCriteria()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local table = {};
 	ResponseCriteria.GetTable( _ent, table );
-	
+
 	return table;
 }
 
@@ -825,7 +825,7 @@ function VSLib::Entity::HasResponseCriterion( criterion )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return ResponseCriteria.HasCriterion( _ent, criterion.tostring() );
 }
 
@@ -839,7 +839,7 @@ function VSLib::Entity::GetResponseCriteriaValue( criterion )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return ResponseCriteria.GetValue( _ent, criterion.tostring() );
 }
 
@@ -853,7 +853,7 @@ function VSLib::Entity::HasOutput( output )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return EntityOutputs.HasOutput( _ent, output.tostring() );
 }
 
@@ -867,7 +867,7 @@ function VSLib::Entity::HasOutputAction( output )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return EntityOutputs.HasAction( _ent, output.tostring() );
 }
 
@@ -881,7 +881,7 @@ function VSLib::Entity::GetNumOutputElements( output )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return EntityOutputs.GetNumElements( _ent, output.tostring() );
 }
 
@@ -895,7 +895,7 @@ function VSLib::Entity::GetOutputTable( output, element = 0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local table = {};
 	EntityOutputs.GetOutputTable( _ent, output.tostring(), table, element );
 	return table;
@@ -911,7 +911,7 @@ function VSLib::Entity::AddOutput( output, target, input, parameter = "", delay 
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	EntityOutputs.AddOutput( _ent, output.tostring(), target.tostring(), input.tostring(), parameter.tostring(), delay,tofloat(), timesToFire.tointeger() );
 }
 
@@ -925,7 +925,7 @@ function VSLib::Entity::RemoveOutput( output, target = "", input = "", parameter
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	EntityOutputs.RemoveOutput( _ent, output.tostring(), target.tostring(), input.tostring(), parameter.tostring() );
 }
 
@@ -939,7 +939,7 @@ function VSLib::Entity::GetGlowColor()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return ::VSLib.Utils.GetColor32( GetNetPropInt( "m_Glow.m_glowColorOverride" ) );
 }
 
@@ -953,7 +953,7 @@ function VSLib::Entity::SetGlowColor( red, green, blue, alpha = 255 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	SetNetProp( "m_Glow.m_glowColorOverride", ::VSLib.Utils.SetColor32( red, green, blue, alpha ) );
 }
 
@@ -969,11 +969,11 @@ function VSLib::Entity::GetHealth()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local hp = _ent.GetHealth();
 	if (IsPlayer())
 		hp += _ent.GetHealthBuffer();
-	
+
 	return hp;
 }
 
@@ -989,7 +989,7 @@ function VSLib::Entity::GetRawHealth()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetHealth();
 }
 
@@ -1003,7 +1003,7 @@ function VSLib::Entity::GetMaxHealth()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetMaxHealth();
 }
 
@@ -1017,7 +1017,7 @@ function VSLib::Entity::GetHealthFraction()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetRawHealth() / GetMaxHealth().tofloat();
 }
 
@@ -1032,14 +1032,14 @@ function VSLib::Entity::__HurtInt__(value, dmgtype, weapon, attacker, radius, _h
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	value = value.tointeger();
 	dmgtype = dmgtype.tointeger();
-	
+
 	local spawn = { classname = "point_hurt", targetname = "vslib_tmp_" + UniqueString(), origin = GetLocation(), angles = QAngle(0,0,0), Damage = value, DamageType = dmgtype, DamageRadius = radius.tostring() };
-	
+
 	local point_hurt = g_ModeScript.CreateSingleSimpleEntityFromTable(spawn);
-	
+
 	// if the entity is not valid (e.g. entdata has reached the max), then try something else.
 	if (!point_hurt)
 	{
@@ -1047,23 +1047,23 @@ function VSLib::Entity::__HurtInt__(value, dmgtype, weapon, attacker, radius, _h
 		SetRawHealth(GetHealth() - value);
 		return;
 	}
-	
+
 	local vsHurt = ::VSLib.Entity(point_hurt);
-	
+
 	if(weapon != "")
 		vsHurt.SetKeyValue("classname", weapon);
-	
+
 	if (!attacker)
 		attacker = vsHurt;
-	
+
 	::VSLib.EntData._lastHurt = attacker.GetBaseEntity();
 	::VSLib.EntData._hurtIntent = _hurtIntent;
 	::VSLib.EntData._hurtDmg = value;
 	::VSLib.EntData._hurtIgnore = _hurtIgnore;
-	
+
 	vsHurt.Input("Hurt", "", 0, attacker);
 	vsHurt.SetKeyValue("classname", "point_hurt");
-	
+
 	vsHurt.Kill();
 }
 
@@ -1082,7 +1082,7 @@ function VSLib::Entity::Hurt(value, dmgtype = 0, weapon = "", attacker = null, r
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	__HurtInt__(value, dmgtype, weapon, attacker, radius, _ent, []);
 }
 
@@ -1101,7 +1101,7 @@ function VSLib::Entity::HurtAround(value, dmgtype = 0, weapon = "", attacker = n
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	ignoreEntities.push(this);
 	__HurtInt__(value, dmgtype, weapon, attacker, radius, null, ignoreEntities);
 }
@@ -1116,10 +1116,10 @@ function VSLib::Entity::Damage(value, dmgtype = 0, attacker = null)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( typeof attacker == "VSLIB_ENTITY" || typeof attacker == "VSLIB_PLAYER" )
 		attacker = attacker.GetBaseEntity();
-	
+
 	_ent.TakeDamage(value, dmgtype.tointeger(), attacker);
 }
 
@@ -1133,12 +1133,12 @@ function VSLib::Entity::Input(input, value = "", delay = 0, activator = null)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (activator != null)
 	{
 		if ( typeof activator == "VSLIB_ENTITY" || typeof activator == "VSLIB_PLAYER" )
 			activator = activator.GetBaseEntity();
-		
+
 		DoEntFire("!self", input.tostring(), value.tostring(), delay.tofloat(), activator, _ent);
 	}
 	else
@@ -1155,7 +1155,7 @@ function VSLib::Entity::Break()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	Input("Break");
 }
 
@@ -1169,15 +1169,15 @@ function VSLib::Entity::BecomeRagdoll()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local origin = GetLocation();
 	local angles = GetAngles();
-	
+
 	local function VSLib_RagdollDeathModel( player )
 	{
 		player.GetSurvivorDeathModel().Input( "BecomeRagdoll" );
 	}
-	
+
 	if ( IsSurvivor() )
 	{
 		if ( GetTeam() == 4 )
@@ -1209,7 +1209,7 @@ function VSLib::Entity::SetKeyValue(key, value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if (typeof value == "string")
 		return _ent.__KeyValueFromString(key.tostring(), value.tostring());
 	else if (typeof value == "integer" || typeof value == "float")
@@ -1231,12 +1231,12 @@ function VSLib::Entity::HurtTime(value, dmgtype, interval, time, weapon = "", at
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	value = value.tointeger();
 	dmgtype = dmgtype.tointeger();
 	time = time.tofloat();
 	interval = interval.tofloat();
-	
+
 	::VSLib.Timers.AddTimer( interval, true, @(params) params.player.Hurt(params.val, params.dmgt, params.wep, params.activator, params.rad), { player = this, val = value, dmgt = dmgtype, wep = weapon, activator = attacker, rad = radius }, TIMER_FLAG_DURATION, { duration = time } );
 }
 
@@ -1251,12 +1251,12 @@ function VSLib::Entity::DamageTime(value, dmgtype, attacker, interval, time)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	value = value.tointeger();
 	dmgtype = dmgtype.tointeger();
 	time = time.tofloat();
 	interval = interval.tofloat();
-	
+
 	::VSLib.Timers.AddTimer( interval, true, @(params) params.player.Damage(params.val, params.dmgt), { player = this, val = value, dmgt = dmgtype, attacker = attacker }, TIMER_FLAG_DURATION, { duration = time } );
 }
 
@@ -1272,7 +1272,7 @@ function VSLib::Entity::SetRawHealth(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.SetHealth(value.tointeger());
 }
 
@@ -1289,9 +1289,9 @@ function VSLib::Entity::SetHealth(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	value = value.tointeger();
-	
+
 	local hp = GetHealth();
 	if ( IsPlayer() )
 		Input("SetHealth", value);
@@ -1320,7 +1320,7 @@ function VSLib::Entity::SetMaxHealth(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.SetMaxHealth(value.tointeger());
 }
 
@@ -1334,7 +1334,7 @@ function VSLib::Entity::IncreaseHealth(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.SetHealth(_ent.GetHealth() + value.tointeger());
 }
 
@@ -1348,7 +1348,7 @@ function VSLib::Entity::DecreaseHealth(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.SetHealth(_ent.GetHealth() - value.tointeger());
 }
 
@@ -1362,7 +1362,7 @@ function VSLib::Entity::AddHealth(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.SetRawHealth(_ent.GetRawHealth() + value.tointeger());
 }
 
@@ -1376,7 +1376,7 @@ function VSLib::Entity::RemoveHealth(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.SetRawHealth(_ent.GetRawHealth() - value.tointeger());
 }
 
@@ -1389,7 +1389,7 @@ function VSLib::Entity::GetClassname()
 {
 	if (!IsEntityValid())
 		return null;
-	
+
 	return _ent.GetClassname();
 }
 
@@ -1407,7 +1407,7 @@ function VSLib::Entity::SetGlobalName(name)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromString("globalname", name.tostring());
 }
 
@@ -1424,7 +1424,7 @@ function VSLib::Entity::SetParentName(name)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromString("parentname", name.tostring());
 }
 
@@ -1438,7 +1438,7 @@ function VSLib::Entity::SetName(name)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromString("targetname", name.tostring());
 }
 
@@ -1454,7 +1454,7 @@ function VSLib::Entity::SetSpeed(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromString("speed", value.tostring());
 }
 
@@ -1495,7 +1495,7 @@ function VSLib::Entity::SetRenderEffects(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromInt("renderfx", value.tointeger());
 }
 
@@ -1523,7 +1523,7 @@ function VSLib::Entity::SetRenderMode(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromInt("rendermode", value.tointeger());
 }
 
@@ -1540,7 +1540,7 @@ function VSLib::Entity::SetNextThinkTime(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromInt("nextthink", value.tointeger());
 }
 
@@ -1557,7 +1557,7 @@ function VSLib::Entity::SetEffects(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromInt("effects", value.tointeger());
 }
 
@@ -1575,7 +1575,7 @@ function VSLib::Entity::SetColor(red, green, blue, alpha)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromString("rendercolor", red + " " + green + " " + blue + " " + alpha);
 }
 
@@ -1587,13 +1587,13 @@ function VSLib::Entity::SetColor(red, green, blue, alpha)
 function VSLib::Entity::SetVisible(canSee)
 {
 	local visible = (canSee.tointeger() > 0) ? true : false;
-	
+
 	if (!IsEntityValid())
 	{
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (visible)
 	{
 		SetRenderMode(0); // Render mode: normal
@@ -1620,7 +1620,7 @@ function VSLib::Entity::SetModelIndex(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromInt("modelindex", value.tointeger());
 }
 
@@ -1634,7 +1634,7 @@ function VSLib::Entity::SetModel(mdl)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	::VSLib.Utils.PrecacheModel(mdl);
 	_ent.SetModel(mdl);
 }
@@ -1654,7 +1654,7 @@ function VSLib::Entity::SetResponseContext(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromString("ResponseContext", value.tostring());
 }
 
@@ -1668,10 +1668,10 @@ function VSLib::Entity::SetSurvivorCharacter(character)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (GetType() != Z_SURVIVOR)
 		return;
-	
+
 	SetNetProp( "m_survivorCharacter", character.tointeger() );
 }
 
@@ -1687,7 +1687,7 @@ function VSLib::Entity::SetTarget(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromString("target", value.tostring());
 }
 
@@ -1706,7 +1706,7 @@ function VSLib::Entity::SetDamageFilter(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromString("damagefilter", value.tostring());
 }
 
@@ -1723,7 +1723,7 @@ function VSLib::Entity::SetShadowCastDistance(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromString("shadowcastdist", value.tostring());
 }
 
@@ -1742,7 +1742,7 @@ function VSLib::Entity::Push(vec)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.ApplyAbsVelocityImpulse(vec);
 }
 
@@ -1757,7 +1757,7 @@ function VSLib::Entity::Spin(vec)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.ApplyLocalAngularVelocityImpulse(vec);
 }
 
@@ -1771,7 +1771,7 @@ function VSLib::Entity::SetGravity(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromString("gravity", value.tostring());
 }
 
@@ -1785,7 +1785,7 @@ function VSLib::Entity::SetFriction(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromString("friction", value.tostring());
 }
 
@@ -1799,7 +1799,7 @@ function VSLib::Entity::GetGravity()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetNetPropFloat( "m_flGravity" );
 }
 
@@ -1813,7 +1813,7 @@ function VSLib::Entity::GetFriction()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetNetPropFloat( "m_flFriction" );
 }
 
@@ -1827,7 +1827,7 @@ function VSLib::Entity::OverrideFriction(duration, friction)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.OverrideFriction(duration, friction);
 }
 
@@ -1841,7 +1841,7 @@ function VSLib::Entity::PrecacheModel(mdl)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return -1;
 	}
-	
+
 	return _ent.PrecacheModel(mdl);
 }
 
@@ -1855,7 +1855,7 @@ function VSLib::Entity::PrecacheScriptSound(sound)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.PrecacheScriptSound(sound);
 }
 
@@ -1869,7 +1869,7 @@ function VSLib::Entity::GetForwardVector()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetForwardVector();
 }
 
@@ -1883,7 +1883,7 @@ function VSLib::Entity::SetForwardVector(direction)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.SetForwardVector(direction);
 }
 
@@ -1897,7 +1897,7 @@ function VSLib::Entity::GetBaseVelocity()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetBaseVelocity();
 }
 
@@ -1911,7 +1911,7 @@ function VSLib::Entity::GetLocalAngularVelocity()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetLocalAngularVelocity();
 }
 
@@ -1925,7 +1925,7 @@ function VSLib::Entity::GetLocalVelocity()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetLocalVelocity();
 }
 
@@ -1939,7 +1939,7 @@ function VSLib::Entity::GetVelocity()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetVelocity();
 }
 
@@ -1954,7 +1954,7 @@ function VSLib::Entity::SetVelocity(vec)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.SetVelocity(vec);
 }
 
@@ -1968,7 +1968,7 @@ function VSLib::Entity::SetVelocityKV(vec)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	SetKeyValue("velocity", vec);
 }
 
@@ -1982,7 +1982,7 @@ function VSLib::Entity::SetBaseVelocity(vec)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	SetKeyValue("basevelocity", vec);
 }
 
@@ -1996,7 +1996,7 @@ function VSLib::Entity::SetAngularVelocity(vec)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	SetKeyValue("avelocity", vec);
 }
 
@@ -2010,7 +2010,7 @@ function VSLib::Entity::SetWaterLevel(lvl)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	SetKeyValue("waterlevel", lvl.tostring());
 }
 
@@ -2024,7 +2024,7 @@ function VSLib::Entity::SetSpawnFlags(flags)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	SetKeyValue("spawnflags", flags.tostring());
 }
 
@@ -2038,7 +2038,7 @@ function VSLib::Entity::GetSpawnFlags()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetNetPropInt( "m_spawnflags" );
 }
 
@@ -2052,9 +2052,9 @@ function VSLib::Entity::HasSpawnFlags( flag )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local flags = GetNetPropInt( "m_spawnflags" );
-	
+
 	return flags == ( flags | flag );
 }
 
@@ -2068,12 +2068,12 @@ function VSLib::Entity::AddSpawnFlags( flag )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local flags = GetNetPropInt( "m_spawnflags" );
-	
+
 	if ( HasSpawnFlags(flag) )
 		return;
-	
+
 	SetNetProp( "m_spawnflags", ( flags | flag ) );
 }
 
@@ -2087,12 +2087,12 @@ function VSLib::Entity::RemoveSpawnFlags( flag )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local flags = GetNetPropInt( "m_spawnflags" );
-	
+
 	if ( !HasSpawnFlags(flag) )
 		return;
-	
+
 	SetNetProp( "m_spawnflags", ( flags & ~flag ) );
 }
 
@@ -2106,7 +2106,7 @@ function VSLib::Entity::GetMoveType()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetNetPropInt( "movetype" );
 }
 
@@ -2120,7 +2120,7 @@ function VSLib::Entity::SetMoveType( moveType )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return SetNetProp( "movetype", moveType.tointeger() );
 }
 
@@ -2134,13 +2134,13 @@ function VSLib::Entity::GetEyeAngles()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (!("EyeAngles" in _ent))
 	{
 		printl("VSLib Warning: Entity " + _idx + " does not have Eye Angles.");
 		return;
 	}
-	
+
 	return _ent.EyeAngles();
 }
 
@@ -2170,7 +2170,7 @@ function VSLib::Entity::GetModel()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetModelName();
 }
 
@@ -2184,7 +2184,7 @@ function VSLib::Entity::GetOrigin()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetOrigin();
 }
 
@@ -2198,7 +2198,7 @@ function VSLib::Entity::GetLocation()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetOrigin();
 }
 
@@ -2212,7 +2212,7 @@ function VSLib::Entity::SetOrigin(vec)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.SetOrigin(vec);
 }
 
@@ -2226,7 +2226,7 @@ function VSLib::Entity::SetLocation(vec)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.SetOrigin(vec);
 }
 
@@ -2275,7 +2275,7 @@ function VSLib::Entity::GetTeam()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetNetPropInt( "m_iTeamNum" );
 }
 
@@ -2289,7 +2289,7 @@ function VSLib::Entity::SetTeam( team )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	SetNetProp( "m_iTeamNum", team.tointeger() );
 }
 
@@ -2303,7 +2303,7 @@ function VSLib::Entity::GetType()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname() == "infected" )
 		return Z_COMMON;
 	else if ( _ent.GetClassname() == "witch" )
@@ -2312,10 +2312,10 @@ function VSLib::Entity::GetType()
 	{
 		if (!("GetZombieType" in _ent))
 			return;
-		
+
 		return _ent.GetZombieType();
 	}
-	
+
 	return;
 }
 
@@ -2329,10 +2329,10 @@ function VSLib::Entity::GetWeaponSlot()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname().find("weapon_") == null )
 		return;
-	
+
 	local WeaponNames =
 	{
 		weapon_smg = SLOT_PRIMARY,
@@ -2372,7 +2372,7 @@ function VSLib::Entity::GetWeaponSlot()
 		weapon_cola_bottles = SLOT_CARRIED,
 		weapon_fireworkcrate = SLOT_CARRIED,
 	}
-	
+
 	foreach( weapon, slot in WeaponNames )
 	{
 		foreach( wep in ::VSLib.EasyLogic.Objects.OfClassname(weapon) )
@@ -2394,10 +2394,10 @@ function VSLib::Entity::GetDefaultAmmoType()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname().find("weapon_") == null )
 		return;
-	
+
 	if ( _ent.GetClassname() == "weapon_pistol" )
 		return 1;
 	else if ( _ent.GetClassname() == "weapon_pistol_magnum" )
@@ -2446,12 +2446,12 @@ function VSLib::Entity::GetMaxAmmo()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname().find("weapon_") == null )
 		return;
-	
+
 	local AmmoType = GetNetPropInt( "m_iPrimaryAmmoType" );
-	
+
 	if ( AmmoType == 1 || AmmoType == 2 )
 		return Convars.GetFloat( "ammo_pistol_max" ).tointeger();
 	else if ( AmmoType == 3 )
@@ -2498,15 +2498,15 @@ function VSLib::Entity::GetAmmo()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname().find("weapon_") == null )
 		return;
-	
+
 	local owner = GetNetPropEntity( "m_hOwner" );
-	
+
 	if ( (!owner) || (!owner.IsPlayer()) )
 		return;
-	
+
 	return owner.GetNetPropInt( "m_iAmmo", GetNetPropInt( "m_iPrimaryAmmoType" ) );
 }
 
@@ -2520,15 +2520,15 @@ function VSLib::Entity::SetAmmo( amount )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname().find("weapon_") == null )
 		return;
-	
+
 	local owner = GetNetPropEntity( "m_hOwner" );
-	
+
 	if ( (!owner) || (!owner.IsPlayer()) )
 		return;
-	
+
 	owner.SetNetProp( "m_iAmmo", amount.tointeger(), GetNetPropInt( "m_iPrimaryAmmoType" ) );
 }
 
@@ -2542,10 +2542,10 @@ function VSLib::Entity::GetClip()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("Clip1" in _ent) )
 		return;
-	
+
 	return _ent.Clip1();
 }
 
@@ -2559,10 +2559,10 @@ function VSLib::Entity::SetClip( amount )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("SetClip1" in _ent) )
 		return;
-	
+
 	_ent.SetClip1( amount.tointeger() );
 }
 
@@ -2576,10 +2576,10 @@ function VSLib::Entity::GetMaxClip()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetMaxClip1" in _ent) )
 		return;
-	
+
 	return _ent.GetMaxClip1();
 }
 
@@ -2593,10 +2593,10 @@ function VSLib::Entity::GetDefaultClip()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetDefaultClip1" in _ent) )
 		return;
-	
+
 	return _ent.GetDefaultClip1();
 }
 
@@ -2610,10 +2610,10 @@ function VSLib::Entity::GetUpgrades()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname().find("weapon_") == null )
 		return;
-	
+
 	return GetNetPropInt( "m_upgradeBitVec" );
 }
 
@@ -2627,13 +2627,13 @@ function VSLib::Entity::SetUpgrades( upgrades )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname().find("weapon_") == null )
 		return;
-	
+
 	if ( upgrades == 1 || upgrades == 2 || upgrades == 3 || upgrades == 5 || upgrades == 6 || upgrades == 7 )
 		SetNetProp( "m_nUpgradedPrimaryAmmoLoaded", GetNetPropInt( "m_iClip1" ) );
-	
+
 	SetNetProp( "m_nUpgradedPrimaryAmmoLoaded", GetNetPropInt( "m_iClip1" ) );
 	SetNetProp( "m_upgradeBitVec", upgrades.tointeger() );
 }
@@ -2648,12 +2648,12 @@ function VSLib::Entity::HasUpgrade( upgrade )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname().find("weapon_") == null )
 		return;
-	
+
 	local upgrades = GetNetPropInt( "m_upgradeBitVec" );
-	
+
 	return upgrades == ( upgrades | upgrade );
 }
 
@@ -2667,18 +2667,18 @@ function VSLib::Entity::AddUpgrade( upgrade )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname().find("weapon_") == null )
 		return;
-	
+
 	local upgrades = GetNetPropInt( "m_upgradeBitVec" );
-	
+
 	if ( HasUpgrade(upgrade) )
 		return;
-	
+
 	if ( upgrade == 1 || upgrade == 2 )
 		SetNetProp( "m_nUpgradedPrimaryAmmoLoaded", GetNetPropInt( "m_iClip1" ) );
-	
+
 	SetNetProp( "m_upgradeBitVec", ( upgrades | upgrade ) );
 }
 
@@ -2692,18 +2692,18 @@ function VSLib::Entity::RemoveUpgrade( upgrade )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname().find("weapon_") == null )
 		return;
-	
+
 	local flags = GetNetPropInt( "m_upgradeBitVec" );
-	
+
 	if ( !HasUpgrade(upgrade) )
 		return;
-	
+
 	if ( upgrade == 1 || upgrade == 2 )
 		SetNetProp( "m_nUpgradedPrimaryAmmoLoaded", 0 );
-	
+
 	SetNetProp( "m_upgradeBitVec", ( flags & ~upgrade ) );
 }
 
@@ -2717,7 +2717,7 @@ function VSLib::Entity::GetLastHitGroup()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetNetPropInt( "m_LastHitGroup" );
 }
 
@@ -2731,7 +2731,7 @@ function VSLib::Entity::SetLastHitGroup( nHitGroup )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return SetNetPropInt( "m_LastHitGroup", nHitGroup );
 }
 
@@ -2745,7 +2745,7 @@ function VSLib::Entity::GetFlags()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetNetPropInt( "m_fFlags" );
 }
 
@@ -2759,7 +2759,7 @@ function VSLib::Entity::SetFlags( flags )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	SetNetProp( "m_fFlags", flags.tointeger() );
 }
 
@@ -2773,9 +2773,9 @@ function VSLib::Entity::HasFlag( flag )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local flags = GetNetPropInt( "m_fFlags" );
-	
+
 	return flags == ( flags | flag );
 }
 
@@ -2789,12 +2789,12 @@ function VSLib::Entity::AddFlag( flag )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local flags = GetNetPropInt( "m_fFlags" );
-	
+
 	if ( HasFlag(flag) )
 		return;
-	
+
 	SetNetProp( "m_fFlags", ( flags | flag ) );
 }
 
@@ -2808,12 +2808,12 @@ function VSLib::Entity::RemoveFlag( flag )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local flags = GetNetPropInt( "m_fFlags" );
-	
+
 	if ( !HasFlag(flag) )
 		return;
-	
+
 	SetNetProp( "m_fFlags", ( flags & ~flag ) );
 }
 
@@ -2827,7 +2827,7 @@ function VSLib::Entity::GetEFlags()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetNetPropInt( "m_iEFlags" );
 }
 
@@ -2841,7 +2841,7 @@ function VSLib::Entity::SetEFlags( flags )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	SetNetProp( "m_iEFlags", flags.tointeger() );
 }
 
@@ -2855,9 +2855,9 @@ function VSLib::Entity::IsEFlagSet( flag )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local flags = GetNetPropInt( "m_iEFlags" );
-	
+
 	return flags == ( flags | flag );
 }
 
@@ -2871,12 +2871,12 @@ function VSLib::Entity::AddEFlags( flag )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local flags = GetNetPropInt( "m_iEFlags" );
-	
+
 	if ( IsEFlagSet(flag) )
 		return;
-	
+
 	SetNetProp( "m_iEFlags", ( flags | flag ) );
 }
 
@@ -2890,12 +2890,12 @@ function VSLib::Entity::RemoveEFlags( flag )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local flags = GetNetPropInt( "m_iEFlags" );
-	
+
 	if ( !IsEFlagSet(flag) )
 		return;
-	
+
 	SetNetProp( "m_iEFlags", ( flags & ~flag ) );
 }
 
@@ -2909,7 +2909,7 @@ function VSLib::Entity::GetGender()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetNetPropInt( "m_Gender" );
 }
 
@@ -2923,7 +2923,7 @@ function VSLib::Entity::IsMale()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( GetGender() == 1 || GetGender() == 3 || GetGender() == 5 || GetGender() == 6 || GetGender() == 7 || GetGender() == 9 || GetGender() == 10 || IsUncommonInfected() )
 		return true;
 	else if ( GetGender() == 18 )
@@ -2931,7 +2931,7 @@ function VSLib::Entity::IsMale()
 		if ( GetModel().find("_male") != null )
 			return true;
 	}
-	
+
 	return false;
 }
 
@@ -2945,7 +2945,7 @@ function VSLib::Entity::IsFemale()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( GetGender() == 2 || GetGender() == 4 || GetGender() == 8 || GetGender() == 19 )
 		return true;
 	else if ( GetGender() == 18 )
@@ -2953,7 +2953,7 @@ function VSLib::Entity::IsFemale()
 		if ( GetModel().find("_female") != null )
 			return true;
 	}
-	
+
 	return false;
 }
 
@@ -2967,7 +2967,7 @@ function VSLib::Entity::GetUncommonInfected()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname() == "infected" )
 	{
 		if ( IsUncommonInfected() )
@@ -2975,7 +2975,7 @@ function VSLib::Entity::GetUncommonInfected()
 		else
 			return Z_COMMON;
 	}
-	
+
 	return;
 }
 
@@ -2989,7 +2989,7 @@ function VSLib::Entity::GetZombieName()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname() == "infected" )
 		return "Infected";
 	else if ( _ent.GetClassname() == "witch" )
@@ -3003,7 +3003,7 @@ function VSLib::Entity::GetZombieName()
 	{
 		if (!("GetZombieType" in _ent))
 			return;
-		
+
 		if ( _ent.GetZombieType() == Z_SMOKER )
 			return "Smoker";
 		else if ( _ent.GetZombieType() == Z_BOOMER )
@@ -3021,7 +3021,7 @@ function VSLib::Entity::GetZombieName()
 		else if ( _ent.GetZombieType() == Z_SURVIVOR )
 			return "Survivor";
 	}
-	
+
 	return;
 }
 
@@ -3035,11 +3035,11 @@ function VSLib::Entity::Kill( dmgtype = 0, attacker = null )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( _ent.GetClassname() == "infected" || _ent.GetClassname() == "witch" )
 	{
 		Damage(GetHealth(), dmgtype, attacker);
-		
+
 		if ( IsAlive() && Entities.FindByClassname( null, "worldspawn" ) )
 			Damage(GetHealth(), dmgtype, ::VSLib.Entity("worldspawn"));
 	}
@@ -3057,7 +3057,7 @@ function VSLib::Entity::KillEntity()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.Kill();
 }
 
@@ -3071,7 +3071,7 @@ function VSLib::Entity::GetAngles()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetAngles();
 }
 
@@ -3085,7 +3085,7 @@ function VSLib::Entity::SetAngles(x, y = 0.0, z = 0.0)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( typeof x == "QAngle" )
 		return _ent.SetAngles(x);
 	else
@@ -3104,7 +3104,7 @@ function VSLib::Entity::SetAnglesFrom(ent)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.SetAngles(ent.GetAngles());
 }
 
@@ -3119,7 +3119,7 @@ function VSLib::Entity::SetAnglesVec(vec)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.SetAngles(vec);
 }
 
@@ -3134,7 +3134,7 @@ function VSLib::Entity::SetAnglesFromQAngle(qangle)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.SetAngles(qangle);
 }
 
@@ -3148,7 +3148,7 @@ function VSLib::Entity::KillHierarchy()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	DoEntFire("!self", "KillHierarchy", "", 0, null, _ent);
 }
 
@@ -3162,7 +3162,7 @@ function VSLib::Entity::Use(otherEntity)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	DoEntFire("!self", "Use", "", 0, _ent, otherEntity.GetBaseEntity());
 }
 
@@ -3184,7 +3184,7 @@ function VSLib::Entity::UsedByOther(otherEntity)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	DoEntFire("!self", "Use", "", 0, otherEntity.GetBaseEntity(), _ent);
 }
 
@@ -3199,7 +3199,7 @@ function VSLib::Entity::SetAlpha(value)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	DoEntFire("!self", "Alpha", value.tostring(), 0, null, _ent);
 }
 
@@ -3213,7 +3213,7 @@ function VSLib::Entity::InputColor(red, green, blue)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	DoEntFire("!self", "Color", red + " " + green + " " + blue, 0, null, _ent);
 }
 
@@ -3232,12 +3232,12 @@ function VSLib::Entity::AttachOther(otherEntity, teleportOther, delay = 0)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	teleportOther = (teleportOther.tointeger() > 0) ? true : false;
-	
+
 	if (teleportOther)
 		otherEntity.SetLocation(GetLocation());
-	
+
 	DoEntFire("!self", "SetParent", "!activator", delay, _ent, otherEntity.GetBaseEntity());
 }
 
@@ -3259,10 +3259,10 @@ function VSLib::Entity::SetAttachmentPoint(otherEntity, attachment, bShouldMaint
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	attachment = attachment.tostring();
 	bShouldMaintainOffset = (bShouldMaintainOffset.tointeger() > 0) ? true : false;
-	
+
 	if (bShouldMaintainOffset)
 		DoEntFire("!self", "SetParentAttachmentMaintainOffset", attachment, delay, _ent, otherEntity.GetBaseEntity());
 	else
@@ -3281,14 +3281,14 @@ function VSLib::Entity::RemoveAttached(otherEntity, delay = 0)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	DoEntFire("!self", "ClearParent", "", delay, _ent, otherEntity.GetBaseEntity());
 }
 
 /**
  * Get move parent
  *
- * @authors shotgunefx 
+ * @authors shotgunefx
  */
 function VSLib::Entity::GetParent()
 {
@@ -3297,7 +3297,7 @@ function VSLib::Entity::GetParent()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetMoveParent();
 }
 
@@ -3311,11 +3311,11 @@ function VSLib::Entity::GetEyePosition()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	// If the entity has an eyeposition function, return it.
 	if ("EyePosition" in _ent)
 		return _ent.EyePosition();
-	
+
 	// if it's not a player, it probably doesn't have eyes...
 	return GetLocation();
 }
@@ -3333,25 +3333,25 @@ function VSLib::Entity::GetLookingEntity(mask = 33579137)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (!("EyeAngles" in _ent))
 	{
 		printl("VSLib Warning: Entity " + _idx + " does not have Eye Angles.");
 		return;
 	}
-	
+
 	local startPt = GetEyePosition();
 	local endPt = startPt + _ent.EyeAngles().Forward().Scale(999999);
-	
+
 	local m_trace = { start = startPt, end = endPt, ignore = _ent, mask = mask };
 	TraceLine(m_trace);
-	
+
 	if (!m_trace.hit || m_trace.enthit == null || m_trace.enthit == _ent)
 		return null;
-	
+
 	if (m_trace.enthit.GetClassname() == "worldspawn" || !m_trace.enthit.IsValid())
 		return null;
-	
+
 	return ::VSLib.Utils.GetEntityOrPlayer(m_trace.enthit);
 }
 
@@ -3365,7 +3365,7 @@ function VSLib::Entity::GetBaseIndex()
 		printl("VSLib Warning: Entity is invalid.");
 		return -1;
 	}
-	
+
 	return _ent.GetEntityIndex();
 }
 
@@ -3379,7 +3379,7 @@ function VSLib::Entity::KillDelayed(seconds)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	DoEntFire("!self", "Kill", "", seconds.tofloat(), null, _ent);
 }
 
@@ -3400,7 +3400,7 @@ function VSLib::Entity::IsBehind(otherEnt)
 	local product = (o1["x"] - o2["x"]) * fwd["x"] + (o1["y"] - o2["y"]) * fwd["y"] + (o1["z"] - o2["z"]) * fwd["z"];
 	if (product > 0.0)
 		return false;
-	else 
+	else
 		return true;
 }
 
@@ -3423,22 +3423,22 @@ function VSLib::Entity::GetLookingLocation()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (!("EyeAngles" in _ent))
 	{
 		printl("VSLib Warning: Entity " + _idx + " does not have Eye Angles.");
 		return;
 	}
-	
+
 	local startPt = GetEyePosition();
 	local endPt = startPt + _ent.EyeAngles().Forward().Scale(999999);
-	
+
 	local m_trace = { start = startPt, end = endPt, ignore = _ent, mask = TRACE_MASK_SHOT };
 	TraceLine(m_trace);
-	
+
 	if (!m_trace.hit || m_trace.enthit == _ent)
 		return null;
-	
+
 	return m_trace.pos;
 }
 
@@ -3452,9 +3452,9 @@ function VSLib::Entity::Ignite(time)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	time = time.tostring();
-	
+
 	HurtTime(1, 2056, 0.3, time);
 	DoEntFire("!self", "IgniteLifetime", time, 0, null, _ent);
 }
@@ -3474,25 +3474,25 @@ function VSLib::Entity::AttachParticle(particleName, duration)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	particleName = particleName.tostring();
 	duration = duration.tofloat();
-	
+
 	local particle = g_ModeScript.CreateSingleSimpleEntityFromTable({ classname = "info_particle_system", targetname = "vslib_tmp_" + UniqueString(), origin = GetLocation(), angles = QAngle(0,0,0), start_active = true, effect_name = particleName });
-	
+
 	if (!particle)
 	{
 		Msg("Warning: Could not create info_particle_system entity.");
 		return;
 	}
-	
+
 	DoEntFire("!self", "Start", "", 0, null, particle);
-	
+
 	local vsParticle = ::VSLib.Entity(particle);
-	
+
 	vsParticle.KillDelayed(duration);
 	AttachOther(vsParticle, true);
-	
+
 	return vsParticle;
 }
 
@@ -3506,10 +3506,10 @@ function VSLib::Entity::IsPlayer()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if ("IsPlayer" in _ent)
 		return _ent.IsPlayer();
-	
+
 	return "player" == _ent.GetClassname().tolower();
 }
 
@@ -3523,10 +3523,10 @@ function VSLib::Entity::IsSurvivor()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if (!IsPlayer())
 		return false;
-	
+
 	return _ent.IsSurvivor();
 }
 
@@ -3540,7 +3540,7 @@ function VSLib::Entity::IsAlive()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if ( _ent.GetClassname() == "infected" || _ent.GetClassname() == "witch" || _ent.GetClassname() == "player" )
 		return GetNetPropInt( "m_lifeState" ) == 0;
 	else
@@ -3557,7 +3557,7 @@ function VSLib::Entity::IsOnFire()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if ( _ent.GetClassname() == "infected" || _ent.GetClassname() == "witch" )
 		return GetNetPropBool( "m_bIsBurning" );
 	else if ( _ent.GetClassname() == "player" )
@@ -3577,17 +3577,17 @@ function VSLib::Entity::Extinguish()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if (IsOnFire())
 	{
 		if ( _ent.GetClassname() == "player" )
 			_ent.Extinguish();
 		else
 			Input( "IgniteLifetime", 0 );
-		
+
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -3601,7 +3601,7 @@ function VSLib::Entity::IsBiled()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if ( _ent.GetClassname() == "infected" || _ent.GetClassname() == "witch" )
 	{
 		if ( GetNetPropInt( "m_Glow.m_glowColorOverride" ) == -4713783 )
@@ -3613,7 +3613,7 @@ function VSLib::Entity::IsBiled()
 			if ("_isBiled" in ::VSLib.EasyLogic.Cache[_idx])
 				return ::VSLib.EasyLogic.Cache[_idx]._isBiled;
 	}
-	
+
 	return false;
 }
 
@@ -3627,10 +3627,10 @@ function VSLib::Entity::GetSurvivorCharacter()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (GetType() != Z_SURVIVOR)
 		return;
-	
+
 	return GetNetPropInt( "m_survivorCharacter" );
 }
 
@@ -3644,7 +3644,7 @@ function VSLib::Entity::GetName()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return _ent.GetName();
 }
 
@@ -3658,7 +3658,7 @@ function VSLib::Entity::GetGlobalName()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return GetNetPropString( "m_iGlobalname" );
 }
 
@@ -3672,7 +3672,7 @@ function VSLib::Entity::GetTargetname()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if ( IsPlayer() && GetType() == Z_SURVIVOR && _ent.GetName() == "" )
 	{
 		if ( GetSurvivorCharacter() == 0 )
@@ -3692,7 +3692,7 @@ function VSLib::Entity::GetTargetname()
 		else if ( GetSurvivorCharacter() == 7 )
 			return "!louis";
 	}
-	
+
 	return _ent.GetName();
 }
 
@@ -3706,7 +3706,7 @@ function VSLib::Entity::GetActorName()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return "";
 	}
-	
+
 	if ( _ent.GetClassname() == "infected" )
 	{
 		if ( IsUncommonInfected() )
@@ -3775,7 +3775,7 @@ function VSLib::Entity::GetActorName()
 			return GetZombieName();
 		}
 	}
-	
+
 	return "";
 }
 
@@ -3789,7 +3789,7 @@ function VSLib::Entity::FirstMoveChild()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local firstMoveChild = _ent.FirstMoveChild();
 	if (!firstMoveChild)
 		return null;
@@ -3806,7 +3806,7 @@ function VSLib::Entity::GetMoveParent()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local moveParent = _ent.GetMoveParent();
 	if (!moveParent)
 		return null;
@@ -3823,7 +3823,7 @@ function VSLib::Entity::NextMovePeer()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local nextMovePeer = _ent.NextMovePeer();
 	if (!nextMovePeer)
 		return null;
@@ -3840,7 +3840,7 @@ function VSLib::Entity::GetRootMoveParent()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local rootMoveParent = _ent.GetRootMoveParent();
 	if (!rootMoveParent)
 		return null;
@@ -3857,7 +3857,7 @@ function VSLib::Entity::GetContext(str)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetContext(str);
 }
 
@@ -3871,10 +3871,10 @@ function VSLib::Entity::SetContext( name, value, duration )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( duration == 0 )
 		duration = 999999;
-	
+
 	_ent.SetContext(name, value.tostring(), duration);
 }
 
@@ -3888,10 +3888,10 @@ function VSLib::Entity::SetContextNum( name, value, duration )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( duration == 0 )
 		duration = 999999;
-	
+
 	_ent.SetContextNum(name, value, duration);
 }
 
@@ -3905,7 +3905,7 @@ function VSLib::Entity::GetEntityHandle()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetEntityHandle();
 }
 
@@ -3919,16 +3919,16 @@ function VSLib::Entity::GetDistanceToGround()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local startPt = GetLocation();
 	local endPt = startPt + Vector(0, 0, -9999999);
-	
+
 	local m_trace = { start = startPt, end = endPt, ignore = _ent, mask = TRACE_MASK_SHOT };
 	TraceLine(m_trace);
-	
+
 	if (m_trace.enthit == _ent || !m_trace.hit)
 		return 0.0;
-	
+
 	return ::VSLib.Utils.CalculateDistance(startPt, m_trace.pos);
 }
 
@@ -3943,16 +3943,16 @@ function VSLib::Entity::GetLocationBelow()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local startPt = GetLocation();
 	local endPt = startPt + Vector(0, 0, -9999999);
-	
+
 	local m_trace = { start = startPt, end = endPt, ignore = _ent, mask = TRACE_MASK_SHOT };
 	TraceLine(m_trace);
-	
+
 	if (!m_trace.hit)
 		return;
-	
+
 	return m_trace.pos;
 }
 
@@ -3966,7 +3966,7 @@ function VSLib::Entity::IsEntityInAir()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetDistanceToGround() > 5.0;
 }
 
@@ -3980,7 +3980,7 @@ function VSLib::Entity::GetPressedButtons()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return _ent.GetButtonMask();
 }
 
@@ -3994,7 +3994,7 @@ function VSLib::Entity::IsPressingButton(btn)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & btn) > 0;
 }
 
@@ -4009,7 +4009,7 @@ function VSLib::Entity::IsPressingLookspin()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & 0x2000000) > 0;
 }
 
@@ -4024,7 +4024,7 @@ function VSLib::Entity::IsPressingAttack()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 0)) > 0;
 }
 
@@ -4038,7 +4038,7 @@ function VSLib::Entity::IsPressingJump()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 1)) > 0;
 }
 
@@ -4052,7 +4052,7 @@ function VSLib::Entity::IsPressingDuck()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 2)) > 0;
 }
 
@@ -4066,7 +4066,7 @@ function VSLib::Entity::IsPressingForward()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 3)) > 0;
 }
 
@@ -4080,7 +4080,7 @@ function VSLib::Entity::IsPressingBackward()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 4)) > 0;
 }
 
@@ -4094,7 +4094,7 @@ function VSLib::Entity::IsPressingUse()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 5)) > 0;
 }
 
@@ -4108,7 +4108,7 @@ function VSLib::Entity::IsPressingLeft()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 9)) > 0;
 }
 
@@ -4122,7 +4122,7 @@ function VSLib::Entity::IsPressingRight()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 10)) > 0;
 }
 
@@ -4136,7 +4136,7 @@ function VSLib::Entity::IsPressingShove()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 11)) > 0;
 }
 
@@ -4150,7 +4150,7 @@ function VSLib::Entity::IsPressingReload()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 13)) > 0;
 }
 
@@ -4164,7 +4164,7 @@ function VSLib::Entity::IsPressingWalk()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 17)) > 0;
 }
 
@@ -4178,7 +4178,7 @@ function VSLib::Entity::IsPressingZoom()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return (_ent.GetButtonMask() & (1 << 19)) > 0;
 }
 
@@ -4192,7 +4192,7 @@ function VSLib::Entity::GetOwnerEntity()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local owner = _ent.GetOwnerEntity();
 	if (!owner)
 		return null;
@@ -4209,7 +4209,7 @@ function VSLib::Entity::GetPreTemplateName()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetPreTemplateName();
 }
 
@@ -4224,7 +4224,7 @@ function VSLib::Entity::BotMoveToLocation(newpos)
 		printl("VSLib Warning: Bot " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return CommandABot( { cmd = 1, pos = newpos, bot = _ent } );
 }
 
@@ -4238,7 +4238,7 @@ function VSLib::Entity::BotMoveToOther(otherEntity)
 		printl("VSLib Warning: Bot " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return CommandABot( { cmd = 1, pos = otherEntity.GetLocation(), bot = _ent } );
 }
 
@@ -4252,7 +4252,7 @@ function VSLib::Entity::BotMoveOtherToThis(otherEntity)
 		printl("VSLib Warning: Bot " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return CommandABot( { cmd = 1, pos = GetLocation(), bot = otherEntity.GetBaseEntity() } );
 }
 
@@ -4266,7 +4266,7 @@ function VSLib::Entity::BotAttack(otherEntity)
 		printl("VSLib Warning: Bot " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return CommandABot( { cmd = 0, target = otherEntity.GetBaseEntity(), bot = _ent } );
 }
 
@@ -4280,7 +4280,7 @@ function VSLib::Entity::BotRetreatFrom(otherEntity)
 		printl("VSLib Warning: Bot " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return CommandABot( { cmd = 2, target = otherEntity.GetBaseEntity(), bot = _ent } );
 }
 
@@ -4294,7 +4294,7 @@ function VSLib::Entity::BotReset()
 		printl("VSLib Warning: Bot " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return CommandABot( { cmd = 3, bot = _ent } );
 }
 
@@ -4308,17 +4308,17 @@ function VSLib::Entity::EmitSound( file )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (file == "" || !file)
 		return;
-	
+
 	if ( !(file in ::EasyLogic.PrecachedSounds) )
 	{
 		printf("VSLib: Precaching named sound: %s", file);
 		_ent.PrecacheScriptSound(file);
 		::EasyLogic.PrecachedSounds[file] <- 1;
 	}
-	
+
 	g_MapScript.EmitSoundOn(file, _ent);
 }
 
@@ -4332,7 +4332,7 @@ function VSLib::Entity::StopSound( file )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	g_MapScript.StopSoundOn( file, _ent );
 }
 
@@ -4346,10 +4346,10 @@ function VSLib::Entity::EmitAmbientSound( file, volume = 1.0, soundlevel = 350, 
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (file == "" || !file)
 		return;
-	
+
 	if ( file.find(".wav") == null && file.find(".mp3") == null )
 	{
 		if ( !(file in ::EasyLogic.PrecachedSounds) )
@@ -4359,7 +4359,7 @@ function VSLib::Entity::EmitAmbientSound( file, volume = 1.0, soundlevel = 350, 
 			::EasyLogic.PrecachedSounds[file] <- 1;
 		}
 	}
-	
+
 	EmitAmbientSoundOn(file, volume, soundlevel, pitch, _ent);
 }
 
@@ -4373,7 +4373,7 @@ function VSLib::Entity::StopAmbientSound( file )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	StopAmbientSoundOn( file, _ent );
 }
 
@@ -4387,10 +4387,10 @@ function VSLib::Entity::PlaySoundFile( file, volume = 10, pitch = 100, radius = 
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (file == "" || !file || GetTargetname() == "")
 		return;
-	
+
 	if ( file.find(".wav") == null && file.find(".mp3") == null )
 	{
 		if ( !(file in ::EasyLogic.PrecachedSounds) )
@@ -4400,7 +4400,7 @@ function VSLib::Entity::PlaySoundFile( file, volume = 10, pitch = 100, radius = 
 			::EasyLogic.PrecachedSounds[file] <- 1;
 		}
 	}
-	
+
 	local t = { health = volume, message = file, SourceEntityName = GetTargetname(), pitch = pitch, pitchstart = pitch, radius = radius, spawnflags = "32", };
 	foreach (idx, val in t)
 		keyvalues[idx] <- val;
@@ -4419,7 +4419,7 @@ function VSLib::Entity::IsBot()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return IsPlayerABot(_ent);
 }
 
@@ -4433,10 +4433,10 @@ function VSLib::Entity::SetSenseFlags(flags)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (!IsBot())
 		return;
-	
+
 	_ent.SetSenseFlags(flags);
 }
 
@@ -4450,10 +4450,10 @@ function VSLib::Entity::ChangeBotEyes(hasEyes)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if (!IsBot())
 		return;
-	
+
 	if (!hasEyes)
 		_ent.SetSenseFlags(_ent.GetSenseFlags() | BOT_CANT_SEE);
 	else
@@ -4470,10 +4470,10 @@ function VSLib::Entity::GetSenseFlags()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return 0;
 	}
-	
+
 	if (!IsBot())
 		return 0;
-	
+
 	return _ent.GetSenseFlags();
 }
 
@@ -4487,7 +4487,7 @@ function VSLib::Entity::IsHuman()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return !IsBot();
 }
 
@@ -4501,10 +4501,10 @@ function VSLib::Entity::IsWitchBride()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if ( _ent.GetClassname() == "witch" && GetGender() == 19 )
 		return true;
-	
+
 	return false;
 }
 
@@ -4518,10 +4518,10 @@ function VSLib::Entity::IsUncommonInfected()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if ( GetGender() >= 11 && GetGender() <= 17 )
 		return true;
-	
+
 	return false;
 }
 
@@ -4535,7 +4535,7 @@ function VSLib::Entity::IsOnGround()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return HasFlag(1);
 }
 
@@ -4549,7 +4549,7 @@ function VSLib::Entity::IsDucking()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	return HasFlag(3);
 }
 
@@ -4563,10 +4563,10 @@ function VSLib::Entity::IsJumping()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if (IsDucking())
 		return false;
-	
+
 	return HasFlag(2);
 }
 
@@ -4580,16 +4580,16 @@ function VSLib::Entity::IsCarryingItem()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if ( _ent.GetClassname() == "infected" )
 		return GetNetPropBool( "m_nFallenFlags" );
-	
+
 	return false;
 }
 
 /**
  * Adds to the entity's THINK function. You can use "this.ent" when you need to use the VSLib::Entity.
- * 
+ *
  * @param func A function to add to the think timer.
  */
 function VSLib::Entity::AddThinkFunction( func )
@@ -4599,7 +4599,7 @@ function VSLib::Entity::AddThinkFunction( func )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local funcName = "_thnk_" + UniqueString();
 	_ent.ValidateScriptScope();
 	local scrScope = _ent.GetScriptScope();
@@ -4618,7 +4618,7 @@ function VSLib::Entity::GetScriptScope( )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.ValidateScriptScope();
 	return _ent.GetScriptScope();
 }
@@ -4633,7 +4633,7 @@ function VSLib::Entity::GetScriptID( )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return _ent.GetScriptId();
 }
 
@@ -4651,14 +4651,14 @@ function VSLib::Entity::ConnectOutput( output, func, name = "" )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local oname = "";
-	
+
 	if ( name != "" )
 		oname = "_vslib_out" + name;
 	else
 		oname = "_vslib_out" + UniqueString();
-	
+
 	GetScriptScope()[oname] <- func;
 	_ent.ConnectOutput( output, oname );
 }
@@ -4676,7 +4676,7 @@ function VSLib::Entity::DisconnectOutput( output, name )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local oname = "_vslib_out" + name;
 	_ent.DisconnectOutput( output, oname );
 }
@@ -4691,10 +4691,10 @@ function VSLib::Entity::GetClosestEntityFromTable( table )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local dist = null;
 	local ent = null;
-	
+
 	foreach( entity in table )
 	{
 		if ( entity.GetEntityHandle() != GetEntityHandle() )
@@ -4706,7 +4706,7 @@ function VSLib::Entity::GetClosestEntityFromTable( table )
 			}
 		}
 	}
-	
+
 	return ent;
 }
 
@@ -4720,7 +4720,7 @@ function VSLib::Entity::GetClosestSurvivor()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Players.Survivors() );
 }
 
@@ -4734,7 +4734,7 @@ function VSLib::Entity::GetClosestL4D1Survivor()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Players.L4D1Survivors() );
 }
 
@@ -4748,7 +4748,7 @@ function VSLib::Entity::GetAnyClosestSurvivor()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Players.AllSurvivors() );
 }
 
@@ -4762,10 +4762,10 @@ function VSLib::Entity::GetClosestHumanSurvivor()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local dist = null;
 	local surv = null;
-	
+
 	foreach( survivor in ::VSLib.EasyLogic.Players.AllSurvivors() )
 	{
 		if ( survivor.IsHuman() && survivor.GetEntityHandle() != GetEntityHandle() )
@@ -4777,7 +4777,7 @@ function VSLib::Entity::GetClosestHumanSurvivor()
 			}
 		}
 	}
-	
+
 	return surv;
 }
 
@@ -4791,12 +4791,12 @@ function VSLib::Entity::GetDistanceToClosestSurvivor()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local survivor = GetClosestSurvivor();
-	
+
 	if ( !survivor )
 		return;
-	
+
 	return ::VSLib.Utils.CalculateDistance(GetLocation(), survivor.GetLocation());
 }
 
@@ -4810,12 +4810,12 @@ function VSLib::Entity::GetDistanceToClosestL4D1Survivor()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local survivor = GetClosestL4D1Survivor();
-	
+
 	if ( !survivor )
 		return;
-	
+
 	return ::VSLib.Utils.CalculateDistance(GetLocation(), survivor.GetLocation());
 }
 
@@ -4829,12 +4829,12 @@ function VSLib::Entity::GetDistanceToAnyClosestSurvivor()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	local survivor = GetAnyClosestSurvivor();
-	
+
 	if ( !survivor )
 		return;
-	
+
 	return ::VSLib.Utils.CalculateDistance(GetLocation(), survivor.GetLocation());
 }
 
@@ -4848,7 +4848,7 @@ function VSLib::Entity::GetClosestInfected()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Zombies.All() );
 }
 
@@ -4862,7 +4862,7 @@ function VSLib::Entity::GetClosestSpecialInfected()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Players.Infected() );
 }
 
@@ -4876,7 +4876,7 @@ function VSLib::Entity::GetClosestSmoker()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Players.OfType(Z_SMOKER) );
 }
 
@@ -4890,7 +4890,7 @@ function VSLib::Entity::GetClosestBoomer()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Players.OfType(Z_BOOMER) );
 }
 
@@ -4904,7 +4904,7 @@ function VSLib::Entity::GetClosestHunter()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Players.OfType(Z_HUNTER) );
 }
 
@@ -4918,7 +4918,7 @@ function VSLib::Entity::GetClosestSpitter()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Players.OfType(Z_SPITTER) );
 }
 
@@ -4932,7 +4932,7 @@ function VSLib::Entity::GetClosestJockey()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Players.OfType(Z_JOCKEY) );
 }
 
@@ -4946,7 +4946,7 @@ function VSLib::Entity::GetClosestCharger()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Players.OfType(Z_CHARGER) );
 }
 
@@ -4960,7 +4960,7 @@ function VSLib::Entity::GetClosestTank()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Players.OfType(Z_TANK) );
 }
 
@@ -4974,7 +4974,7 @@ function VSLib::Entity::GetClosestWitch()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Zombies.Witches() );
 }
 
@@ -4988,7 +4988,7 @@ function VSLib::Entity::GetClosestCommonInfected()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Zombies.CommonInfected() );
 }
 
@@ -5002,7 +5002,7 @@ function VSLib::Entity::GetClosestUncommonInfected()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetClosestEntityFromTable( ::VSLib.EasyLogic.Zombies.UncommonInfected() );
 }
 
@@ -5016,7 +5016,7 @@ function VSLib::Entity::GetMovementSpeed()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	return GetNetPropFloat( "m_flGroundSpeed" );
 }
 
@@ -5033,7 +5033,7 @@ function VSLib::Entity::SetEntityRenderAmt( value )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	_ent.__KeyValueFromInt("renderamt", value.tointeger());
 }
 
@@ -5049,23 +5049,23 @@ function VSLib::Entity::CanTraceToOtherEntity(otherEntity, height = 5)
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	local begin = GetLocation() + Vector(0, 0, height);
 	local finish = otherEntity.GetLocation() + Vector(0, 0, height);
-	
+
 	// add 5 to z-axis so it doesn't collide with level ground
 	local m_trace = { start = begin, end = finish, ignore = _ent, mask = TRACE_MASK_SHOT };
 	TraceLine(m_trace);
-	
+
 	if (!m_trace.hit || m_trace.enthit == null || m_trace.enthit == _ent)
 		return false;
-	
+
 	if (m_trace.enthit.GetClassname() == "worldspawn" || !m_trace.enthit.IsValid())
 		return false;
-	
+
 	if (m_trace.enthit == otherEntity.GetBaseEntity() || ::VSLib.Utils.AreVectorsEqual(m_trace.pos, finish))
 		return true;
-	
+
 	return false;
 }
 
@@ -5085,10 +5085,10 @@ function VSLib::Entity::LookupAttachment( name )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("LookupAttachment" in _ent) )
 		return;
-	
+
 	return _ent.LookupAttachment( name );
 }
 
@@ -5102,10 +5102,10 @@ function VSLib::Entity::GetAttachmentOrigin( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetAttachmentOrigin" in _ent) )
 		return;
-	
+
 	return _ent.GetAttachmentOrigin( id );
 }
 
@@ -5119,10 +5119,10 @@ function VSLib::Entity::GetAttachmentAngles( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetAttachmentAngles" in _ent) )
 		return;
-	
+
 	return _ent.GetAttachmentAngles( id );
 }
 
@@ -5136,10 +5136,10 @@ function VSLib::Entity::IsSequenceFinished()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("IsSequenceFinished" in _ent) )
 		return;
-	
+
 	return _ent.IsSequenceFinished();
 }
 
@@ -5153,10 +5153,10 @@ function VSLib::Entity::SetBodygroup( group, value )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("SetBodygroup" in _ent) )
 		return;
-	
+
 	_ent.SetBodygroup( group, value );
 }
 
@@ -5170,10 +5170,10 @@ function VSLib::Entity::GetAttachmentBone( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetAttachmentBone" in _ent) )
 		return;
-	
+
 	return _ent.GetAttachmentBone( id );
 }
 
@@ -5187,10 +5187,10 @@ function VSLib::Entity::GetBoneOrigin( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetBoneOrigin" in _ent) )
 		return;
-	
+
 	return _ent.GetBoneOrigin( id );
 }
 
@@ -5204,10 +5204,10 @@ function VSLib::Entity::GetBoneAngles( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetBoneAngles" in _ent) )
 		return;
-	
+
 	return _ent.GetBoneAngles( id );
 }
 
@@ -5221,10 +5221,10 @@ function VSLib::Entity::LookupActivity( name )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("LookupActivity" in _ent) )
 		return;
-	
+
 	return _ent.LookupActivity( name );
 }
 
@@ -5238,10 +5238,10 @@ function VSLib::Entity::LookupBone( name )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("LookupBone" in _ent) )
 		return;
-	
+
 	return _ent.LookupBone( name );
 }
 
@@ -5255,10 +5255,10 @@ function VSLib::Entity::LookupSequence( name )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("LookupSequence" in _ent) )
 		return;
-	
+
 	return _ent.LookupSequence( name );
 }
 
@@ -5272,10 +5272,10 @@ function VSLib::Entity::SetSequence( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("SetSequence" in _ent) )
 		return;
-	
+
 	_ent.SetSequence( id );
 }
 
@@ -5289,10 +5289,10 @@ function VSLib::Entity::ResetSequence( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("ResetSequence" in _ent) )
 		return;
-	
+
 	_ent.ResetSequence( id );
 }
 
@@ -5306,10 +5306,10 @@ function VSLib::Entity::GetSequence()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetSequence" in _ent) )
 		return;
-	
+
 	return _ent.GetSequence();
 }
 
@@ -5323,10 +5323,10 @@ function VSLib::Entity::GetSequenceActivityName( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetSequenceActivityName" in _ent) )
 		return;
-	
+
 	return _ent.GetSequenceActivityName( id );
 }
 
@@ -5340,10 +5340,10 @@ function VSLib::Entity::GetSequenceName( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetSequenceName" in _ent) )
 		return;
-	
+
 	return _ent.GetSequenceName( id );
 }
 
@@ -5357,10 +5357,10 @@ function VSLib::Entity::GetSequenceDuration( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetSequenceDuration" in _ent) )
 		return;
-	
+
 	return _ent.GetSequenceDuration( id );
 }
 
@@ -5374,10 +5374,10 @@ function VSLib::Entity::GetBodygroup( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetBodygroup" in _ent) )
 		return;
-	
+
 	return _ent.GetBodygroup( id );
 }
 
@@ -5391,10 +5391,10 @@ function VSLib::Entity::GetBodygroupName( id )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetBodygroupName" in _ent) )
 		return;
-	
+
 	return _ent.GetBodygroupName( id );
 }
 
@@ -5408,10 +5408,10 @@ function VSLib::Entity::FindBodygroupByName( name )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("FindBodygroupByName" in _ent) )
 		return;
-	
+
 	return _ent.FindBodygroupByName( name );
 }
 
@@ -5425,10 +5425,10 @@ function VSLib::Entity::GetBodygroupPartName( group, part )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetBodygroupPartName" in _ent) )
 		return;
-	
+
 	return _ent.GetBodygroupPartName( group, part );
 }
 
@@ -5442,10 +5442,10 @@ function VSLib::Entity::GetModelScale()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetModelScale" in _ent) )
 		return GetNetPropFloat( "m_flModelScale" );
-	
+
 	return _ent.GetModelScale();
 }
 
@@ -5459,13 +5459,13 @@ function VSLib::Entity::SetModelScale( scale, changeDuration = 0.0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("SetModelScale" in _ent) )
 	{
 		SetNetProp( "m_flModelScale", scale.tofloat() );
 		return;
 	}
-	
+
 	_ent.SetModelScale( id, changeDuration );
 }
 
@@ -5479,10 +5479,10 @@ function VSLib::Entity::SetPoseParameter( id, value )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("SetPoseParameter" in _ent) )
 		return;
-	
+
 	return _ent.SetPoseParameter( id, value );
 }
 
@@ -5502,14 +5502,14 @@ function VSLib::Entity::GetCurrentScene()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return null;
 	}
-	
+
 	if ( !("GetCurrentScene" in _ent) )
 		return null;
-	
+
 	local instancedScene = _ent.GetCurrentScene();
 	if (!instancedScene)
 		return null;
-	
+
 	return ::VSLib.Entity(instancedScene);
 }
 
@@ -5523,14 +5523,14 @@ function VSLib::Entity::GetSceneByIndex( index )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return null;
 	}
-	
+
 	if ( !("GetSceneByIndex" in _ent) )
 		return null;
-	
+
 	local instancedScene = _ent.GetSceneByIndex( index );
 	if (!instancedScene)
 		return null;
-	
+
 	return ::VSLib.Entity(instancedScene);
 }
 
@@ -5544,10 +5544,10 @@ function VSLib::Entity::PlayScene( sceneName, postDelay = 0.0 )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("PlayScene" in _ent) )
 		return;
-	
+
 	return _ent.PlayScene( sceneName, postDelay );
 }
 
@@ -5567,10 +5567,10 @@ function VSLib::Entity::Clip1()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("Clip1" in _ent) )
 		return;
-	
+
 	return _ent.Clip1();
 }
 
@@ -5584,10 +5584,10 @@ function VSLib::Entity::Clip2()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("Clip2" in _ent) )
 		return;
-	
+
 	return _ent.Clip2();
 }
 
@@ -5601,10 +5601,10 @@ function VSLib::Entity::GetDefaultClip1()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetDefaultClip1" in _ent) )
 		return;
-	
+
 	return _ent.GetDefaultClip1();
 }
 
@@ -5618,10 +5618,10 @@ function VSLib::Entity::GetDefaultClip2()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetDefaultClip2" in _ent) )
 		return;
-	
+
 	return _ent.GetDefaultClip2();
 }
 
@@ -5635,10 +5635,10 @@ function VSLib::Entity::GetMaxClip1()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetMaxClip1" in _ent) )
 		return;
-	
+
 	return _ent.GetMaxClip1();
 }
 
@@ -5652,10 +5652,10 @@ function VSLib::Entity::GetMaxClip2()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GetMaxClip2" in _ent) )
 		return;
-	
+
 	return _ent.GetMaxClip2();
 }
 
@@ -5669,10 +5669,10 @@ function VSLib::Entity::SetClip1( amount )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("SetClip1" in _ent) )
 		return;
-	
+
 	_ent.SetClip1( amount );
 }
 
@@ -5686,10 +5686,10 @@ function VSLib::Entity::SetClip2( amount )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("SetClip2" in _ent) )
 		return;
-	
+
 	_ent.SetClip2( amount );
 }
 
@@ -5703,10 +5703,10 @@ function VSLib::Entity::GiveDefaultAmmo()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("GiveDefaultAmmo" in _ent) )
 		return;
-	
+
 	_ent.GiveDefaultAmmo();
 }
 
@@ -5720,10 +5720,10 @@ function VSLib::Entity::Reload()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("Reload" in _ent) )
 		return;
-	
+
 	_ent.Reload();
 }
 
@@ -5743,10 +5743,10 @@ function VSLib::Entity::Disable()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("Disable" in _ent) )
 		return;
-	
+
 	_ent.Disable();
 }
 
@@ -5760,10 +5760,10 @@ function VSLib::Entity::Enable()
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return;
 	}
-	
+
 	if ( !("Enable" in _ent) )
 		return;
-	
+
 	_ent.Enable();
 }
 
@@ -5777,13 +5777,13 @@ function VSLib::Entity::IsTouching( entity )
 		printl("VSLib Warning: Entity " + _idx + " is invalid.");
 		return false;
 	}
-	
+
 	if ( !("IsTouching" in _ent) )
 		return false;
-	
+
 	if ( typeof entity == "VSLIB_ENTITY" || typeof entity == "VSLIB_PLAYER" )
 		entity = entity.GetBaseEntity();
-	
+
 	return _ent.IsTouching( entity );
 }
 
@@ -5802,16 +5802,16 @@ if (!("AllowTakeDamage" in getroottable()))
 			foreach (hEnt in ::VSLib.EntData._hurtIgnore)
 				if (hEnt.GetIndex() == damageTable.Victim.GetEntityIndex())
 					return false;
-			
+
 			if (!::VSLib.EntData._hurtIntent || damageTable.Victim == ::VSLib.EntData._hurtIntent)
 			{
 				damageTable.DamageDone = ::VSLib.EntData._hurtDmg;
 				return true;
 			}
-			
+
 			return false;
 		}
-		
+
 		// Process hooks
 		if ("EasyLogic" in ::VSLib)
 		{
@@ -5822,31 +5822,31 @@ if (!("AllowTakeDamage" in getroottable()))
 				{
 					local victim = ::VSLib.Utils.GetEntityOrPlayer(damageTable.Victim);
 					local attacker = ::VSLib.Utils.GetEntityOrPlayer(damageTable.Attacker);
-					
+
 					local damagesave = damageTable.DamageDone;
 					damageTable.DamageDone = ::VSLib.EasyLogic.OnDamage[name](victim, attacker, damageTable.DamageDone, damageTable);
-					
+
 					if (damageTable.DamageDone == null)
 						damageTable.DamageDone = damagesave;
 					else if (damageTable.DamageDone <= 0)
 						return false;
-					
+
 					return true;
 				}
 			}
-			
+
 			foreach (func in ::VSLib.EasyLogic.OnTakeDamage)
 			{
 				if (func(damageTable) == false)
 					return false;
 			}
 		}
-		
+
 		if ( "ModeAllowTakeDamage" in g_ModeScript )
 			return g_ModeScript.ModeAllowTakeDamage(damageTable);
 		if ( "MapAllowTakeDamage" in g_ModeScript )
 			return g_ModeScript.MapAllowTakeDamage(damageTable);
-		
+
 		return true;
 	}
 }
@@ -5877,13 +5877,13 @@ if (!("AllowBash" in getroottable()))
 	{
 		local attacker = ::VSLib.Utils.GetEntityOrPlayer(basher);
 		local victim = ::VSLib.Utils.GetEntityOrPlayer(bashee);
-		
+
 		foreach(func in ::VSLib.EasyLogic.OnBash)
 		{
 			if (func != null)
 			{
 				local res = func(attacker, victim);
-				
+
 				if (res != null)
 				switch ( res )
 				{
@@ -5894,12 +5894,12 @@ if (!("AllowBash" in getroottable()))
 				}
 			}
 		}
-		
+
 		if ( "ModeAllowBash" in g_ModeScript )
 			return g_ModeScript.ModeAllowBash(basher, bashee);
 		if ( "MapAllowBash" in g_ModeScript )
 			return g_ModeScript.MapAllowBash(basher, bashee);
-		
+
 		return ALLOW_BASH_ALL;
 	}
 }
@@ -5930,12 +5930,12 @@ if (!("BotQuery" in getroottable()))
 	{
 		foreach (func in ::VSLib.EasyLogic.OnBotQuery)
 			func(queryflag, entity, defaultvalue);
-		
+
 		if ( "ModeBotQuery" in g_ModeScript )
 			return g_ModeScript.ModeBotQuery(queryflag, entity, defaultvalue);
 		if ( "MapBotQuery" in g_ModeScript )
 			return g_ModeScript.MapBotQuery(queryflag, entity, defaultvalue);
-		
+
 		return defaultvalue;
 	}
 }

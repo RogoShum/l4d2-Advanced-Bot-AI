@@ -82,7 +82,7 @@ class ::AITaskShoveInfected extends AITaskSingle {
 				}
 
 				if(target.GetClassname() == "player" && !target.IsSurvivor() && (target.GetZombieType() == 1 || target.GetZombieType() == 3 || target.GetZombieType() == 5)) {
-					if(BotAI.BotCombatSkill < 1)
+					if(BotAI.BotCombatSkill < 2)
 						chance += 2;
 
 					if (BotAI.BotCombatSkill > 2) {

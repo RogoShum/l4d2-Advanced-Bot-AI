@@ -347,7 +347,7 @@ function BotAI::createPlayerTargetTimer(player) {
                 infoTarget.Kill();
         }
 
-		//local com = null;
+
 		local selected = null;
 		local closestCom = null;
 		local selectedDis = 120;
@@ -357,10 +357,11 @@ function BotAI::createPlayerTargetTimer(player) {
 		local isHealing = BotAI.IsBotHealing(player);
 
 		local com = null;
-		//local map = ChunkMap(120);
+
 		if(BotAI.BotDebugMode) {
-			DebugDrawCircle(player.GetCenter(), Vector(25, 25, 255), 0, 200, true, 0.3);
+			DebugDrawCircle(player.GetCenter(), Vector(25, 25, 255), 0, 125, true, 0.3);
 		}
+
 		while(com = Entities.FindByClassnameWithin(com, "infected", player.GetCenter(), 200)) {
 			if(!BotAI.IsAlive(com) || (BotAI.IsInfectedBeShoved(com) && isShove && !isHealing) || BotAI.IsEntitySI(BotAI.GetTarget(com))) continue;
 			local dis = BotAI.nextTickDistance(player, com);
@@ -368,7 +369,7 @@ function BotAI::createPlayerTargetTimer(player) {
 
 			if(selected != null && selectedDis < dis) continue;
 
-			if(dis <= 120 && isTarget) {
+			if(dis <= 125 && isTarget && dis < closestDis) {
 				selected = com;
 				selectedDis = dis;
 			} else if(!BotAI.HasTank && BotAI.CanSeeOtherEntityWithoutLocation(player, com) && dis < closestDis) {
@@ -383,7 +384,6 @@ function BotAI::createPlayerTargetTimer(player) {
 			BotAI.dangerInfected[player] <- closestCom;
 		else
 			BotAI.dangerInfected[player] <- null;
-		//printl(BotAI.getPlayerBaseName(player) + " " + BotAI.dangerInfected[player]);
 
 		return 0.2;
     }
