@@ -158,6 +158,7 @@ function BotAI::taskTimer::avoidDanger() {
 
 function BotAI::resetTaskTimers() {
 	BotAI.timerTask <- {};
+
 	BotAI.timerTask.hitinfected <- AITaskHitInfected(0, 2, true, true);
 	BotAI.timerTask.updateFireState <- AITaskUpdateBotFireState(0, 1, true, true);
 	BotAI.timerTask.shoveInfected <- AITaskShoveInfected(0, 1, true, true);
@@ -350,9 +351,10 @@ function BotAI::createPlayerTargetTimer(player) {
 
 		local selected = null;
 		local closestCom = null;
-		local selectedDis = 100;
-		local closestDis = 450 + BotAI.BotCombatSkill * 50;
-		local awareAngle = 0.0 - (BotAI.BotCombatSkill * 0.37);
+		local selectedDis = 60 + BotAI.BotCombatSkill * 20;
+		local closestDis = 150 + BotAI.BotCombatSkill * 20;
+		local awareAngle = 0.75 - (BotAI.BotCombatSkill * 0.5);
+		local dangerAwareAngle = 0.5 - (BotAI.BotCombatSkill * 0.5);
 
 		local isShove = BotAI.IsPressingShove(player);
 		local isHealing = BotAI.IsBotHealing(player);
@@ -360,17 +362,18 @@ function BotAI::createPlayerTargetTimer(player) {
 		local com = null;
 
 		if(BotAI.BotDebugMode) {
-			DebugDrawCircle(player.GetCenter(), Vector(25, 25, 255), 0, 125, true, 0.3);
+			DebugDrawCircle(player.GetCenter(), Vector(255, 25, 25), 0, selectedDis, true, 0.2);
+			DebugDrawCircle(player.GetCenter(), Vector(25, 255, 25), 0, closestDis, true, 0.2);
 		}
 
-		while(com = Entities.FindByClassnameWithin(com, "infected", player.GetCenter(), 200)) {
+		while(com = Entities.FindByClassnameWithin(com, "infected", player.GetCenter(), closestDis)) {
 			if(!BotAI.IsAlive(com) || (BotAI.IsInfectedBeShoved(com) && isShove && !isHealing) || BotAI.IsEntitySI(BotAI.GetTarget(com))) continue;
 			local dis = BotAI.nextTickDistance(player, com);
 			local isTarget = BotAI.IsTarget(player, com);
 
 			if(selected != null && selectedDis < dis) continue;
 
-			if(dis <= 100 && isTarget && dis < closestDis) {
+			if(dis <= selectedDis && isTarget && dis < closestDis && BotAI.CanShotOtherEntityInSight(player, com, dangerAwareAngle)) {
 				selected = com;
 				selectedDis = dis;
 			} else if(!BotAI.HasTank && BotAI.CanShotOtherEntityInSight(player, com, awareAngle) && dis < closestDis) {

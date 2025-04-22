@@ -18,6 +18,11 @@ class ::AITaskHitInfected extends AITaskSingle {
 	danger = {};
 
 	function singleUpdateChecker(player) {
+		this.tick = 14 - BotAI.BotCombatSkill * 3;
+		if (this.tick < 2) {
+			this.tick = 2;
+		}
+
 		danger[player] <- false;
 
 		if(player in BotAI.targetLocked && BotAI.IsAlive(BotAI.targetLocked[player])) {

@@ -13,20 +13,19 @@ class ::AITaskSingle extends AITask
 		if(!BotAI.IsPlayerEntityValid(player)) return false;
 		if(!(player in playerTick))
 			playerTick[player] <- BotAI.tickExisted;
-		
+
 		return BotAI.tickExisted >= playerTick[player];
 	}
-	
+
 	function getLastTickTime(player) {
 		if(!BotAI.IsPlayerEntityValid(player)) return 0;
-		
+
 		if(!(player in playerTick))
-			playerTick[player] <- BotAI.tickExisted; 
+			playerTick[player] <- BotAI.tickExisted;
 		return playerTick[player];
 	}
-	
-	function setLastTickTime(player, tickTimeIn)
-	{
+
+	function setLastTickTime(player, tickTimeIn) {
 		if(BotAI.IsPlayerEntityValid(player))
 			playerTick[player] <- tickTimeIn;
 	}
@@ -39,7 +38,7 @@ class ::AITaskSingle extends AITask
 			local needUpdate = false;
 			needUpdate = singleUpdateChecker(player);
 			try{
-				
+
 			} catch(excaption) {
 				BotAI.EasyPrint("botai_report", 0.1);
 				BotAI.EasyPrint(excaption.tostring(), 0.2);
@@ -56,22 +55,22 @@ class ::AITaskSingle extends AITask
 				return false;
 			}
 		}
-		
+
 		return false;
 	}
 
 	//abstract
 	function playerUpdate(player = null) {}
-	
+
 	function isUpdating(player = null) {
 		return BotAI.IsPlayerEntityValid(player) && player in updating && updating[player];
 	}
-	
+
 	function taskUpdate(player = null) {
 		if(BotAI.IsPlayerEntityValid(player)) {
 			playerUpdate(player);
 			try{
-				
+
 			} catch(excaption) {
 				BotAI.EasyPrint("botai_report", 0.1);
 				BotAI.EasyPrint(excaption.tostring(), 0.2);
@@ -81,7 +80,7 @@ class ::AITaskSingle extends AITask
 			}
 		}
 	}
-	
+
 	function taskReset(player = null) {
 		if(BotAI.IsPlayerEntityValid(player)) {
 			updating[player] <- false;

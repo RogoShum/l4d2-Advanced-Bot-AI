@@ -797,8 +797,10 @@ function BotAI::taskHandler(player, tasks, order, orderTable) {
 
 	foreach(idx, task in tasks) {
 		local shouldTick = task.shouldTick(player) && !(idx in BotAI.disabledTask);
-		if(shouldTick)
+
+		if(shouldTick) {
 			task.setLastTickTime(player, BotAI.tickExisted + task.tick);
+		}
 
 		if((task.getOrder() == order || task.isForce())) {
 			if(shouldTick && (task.isUpdating(player) || task.shouldUpdate(player)) && (queueOver || task.isCompatible())) {
