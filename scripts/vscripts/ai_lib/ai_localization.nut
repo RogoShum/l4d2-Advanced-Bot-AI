@@ -92,6 +92,8 @@ function I18n::init() {
 		botai_bot_combat_skill = "Bot Combat Skill set to: ",
 		botai_use_command_notice = "Use command !botnotice to disable config notifications.",
 		botai_current_settings = "Current Settings",
+		botai_notice_on = "Configuration notifications enabled.",
+    	botai_notice_off = "Configuration notifications disabled.",
 
 		menu_title = "Advanced Bot Settings",
 		menu_add_bot = "Add a bot",
@@ -157,6 +159,8 @@ function I18n::init() {
 		botai_bot_combat_skill = "Bot战斗能力设置为: ",
 		botai_use_command_notice = "使用指令!botnotice关闭配置提示",
 		botai_current_settings = "当前配置",
+		botai_notice_on = "已开启配置提示",
+		botai_notice_off = "已关闭配置提示",
 
 		menu_title = "进阶Bot设置模组",
 		menu_bot_skill = "Bot战斗能力",
@@ -222,6 +226,8 @@ function I18n::init() {
 		botai_bot_combat_skill = "Bot战斗能力设置为: ",
 		botai_use_command_notice = "使用指令!botnotice關閉配置提示",
 		botai_current_settings = "當前配置",
+		botai_notice_on = "已開啟配置提示",
+		botai_notice_off = "已關閉配置提示",
 
 		menu_title = "進階Bot設定模組",
 		menu_add_bot = "新增Bot",

@@ -372,7 +372,7 @@ function BotAI::createPlayerTargetTimer(player) {
 			if(dis <= 125 && isTarget && dis < closestDis) {
 				selected = com;
 				selectedDis = dis;
-			} else if(!BotAI.HasTank && BotAI.CanSeeOtherEntityWithoutLocation(player, com) && dis < closestDis) {
+			} else if(!BotAI.HasTank && BotAI.CanShotOtherEntityInSight(player, com) && dis < closestDis) {
 				closestCom = com;
 				closestDis = dis;
 			}

@@ -50,7 +50,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 		dist = 700;
 		local witch = null;
 		foreach(infected in BotAI.WitchList) {
-			if (BotAI.IsAlive(infected) && (BotAI.witchKilling(infected) || (BotAI.witchRunning(infected) && !BotAI.witchRetreat(infected))) && BotAI.CanSeeOtherEntityWithoutLocation(player, infected, 0, true)) {
+			if (BotAI.IsAlive(infected) && (BotAI.witchKilling(infected) || (BotAI.witchRunning(infected) && !BotAI.witchRetreat(infected))) && BotAI.CanShotOtherEntityInSight(player, infected)) {
 				if (BotAI.distanceof(player.GetOrigin(), infected.GetOrigin()) < dist) {
 					dist = BotAI.distanceof(player.GetOrigin(), infected.GetOrigin());
 					witch = infected;
@@ -91,17 +91,18 @@ class ::AITaskHitInfected extends AITaskSingle {
 			selected = BotAI.dangerInfected[player];
 		}
 
-		local dist = 650;
+		local dist = 500 + BotAI.BotCombatSkill * 50;
 		local entS = null;
 		local highestPriority = -1;
+		local awareAngle = 0.3 - (BotAI.BotCombatSkill * 0.33);
 		foreach(infected in BotAI.SpecialList) {
-			if (BotAI.IsAlive(infected) && !infected.IsGhost() && !BotAI.IsEntitySI(BotAI.GetTarget(infected)) && (infected.GetZombieType() != 8 || entS == null) && BotAI.CanSeeOtherEntityWithoutLocation(player, infected, 0, true)) {
+			if (BotAI.IsAlive(infected) && !infected.IsGhost() && !BotAI.IsEntitySI(BotAI.GetTarget(infected)) && (infected.GetZombieType() != 8 || entS == null) && BotAI.CanShotOtherEntityInSight(player, infected, awareAngle)) {
 				if (infected.GetZombieType() == 1) {
 					dist = BotAI.tongueRange*1.2;
 				} else if (infected.GetZombieType() == 8) {
 					dist = 800;
 				} else {
-					dist = 650;
+					dist = 500 + BotAI.BotCombatSkill * 50;
 				}
 
 				local currentPriority = 0;
@@ -188,7 +189,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 	function playerUpdate(player) {
 		if(player in infectedList && infectedList[player] != null) {
 			local val = infectedList[player];
-			if(BotAI.IsAlive(val) && BotAI.CanSeeOtherEntityWithoutLocation(player, val, 0)) {
+			if(BotAI.IsAlive(val) && BotAI.CanShotOtherEntityInSight(player, val)) {
 				if(danger[player]) {
 					BotAI.setBotShoveTarget(player, val);
 				}

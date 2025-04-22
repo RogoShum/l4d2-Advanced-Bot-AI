@@ -15,8 +15,7 @@ if (!("VSLib" in getroottable())) {
 
 //if (!("BotAI" in getroottable()))
 {
-	::BotAI <-
-	{
+	::BotAI <- {
 		timerTick = 0
 		timerTick_2 = 0
 		debugTick = 0
@@ -174,7 +173,7 @@ if (!("VSLib" in getroottable())) {
 		BackPack = true
 		ServerMode = false
 		ABA_Admins = {}
-		NoticeText = true
+		NoticeConfig = true
 		NeedBotAlive = true
 	}
 
@@ -405,7 +404,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 	"\nDefibrillator = " + BotAI.Defibrillator.tostring() +
 	"\nServerMode = " + BotAI.ServerMode.tostring() +
 	"\nMelee = " + BotAI.Melee.tostring() +
-	"\nNoticeText = " + BotAI.NoticeText.tostring() +
+	"\nNoticeConfig = " + BotAI.NoticeConfig.tostring() +
 	"\nNeedBotAlive = " + BotAI.NeedBotAlive.tostring() +
 	"\nBackPack = " + BotAI.BackPack.tostring();
 
@@ -2098,6 +2097,11 @@ function BotAI::AdjustBotState(args) {
 				if(BotAI.BotStuckCount[bot] >= 4) {
 					stuck = true;
 					navigator.stop();
+				} else {
+					if(BotAI.BotStuckCount[bot] >= 2 && BotAI.HasTank) {
+						stuck = true;
+						navigator.stop();
+					}
 				}
 			}
 
@@ -2132,7 +2136,7 @@ function BotAI::AdjustBotState(args) {
 }
 
 function BotAI::doNoticeText() {
-	if(!BotAI.NoticeText) return;
+	if(!BotAI.NoticeConfig) return;
 
 	local settings = [
         { key = "menu_bot_skill", value = ::BotAI.BotCombatSkill + 1, enabled = true, isValue = true },

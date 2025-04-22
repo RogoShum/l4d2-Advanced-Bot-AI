@@ -1713,9 +1713,7 @@ function BotAI::getBotGasFinding(player) {
 	}
 }
 
-function BotAI::CanSeeOtherEntityWithoutBarrier(player, otherEntity, tolerance = 50, MaskSet = null)
-{
-	BotAI.debugCall("CanSeeOtherEntityWithoutBarrier");
+function BotAI::CanSeeOtherEntityWithoutBarrier(player, otherEntity, tolerance = 50, MaskSet = null) {
 	local clientPos = player.EyePosition();
 	local clientToTargetVec = otherEntity.GetOrigin() - clientPos;
 	local clientAimVector = player.EyeAngles().Forward();
@@ -1743,8 +1741,7 @@ function BotAI::CanSeeOtherEntityWithoutBarrier(player, otherEntity, tolerance =
 	if (mT && m_trace.enthit == otherEntity)
 		return true;
 
-	if("EyePosition" in otherEntity)
-	{
+	if ("EyePosition" in otherEntity) {
 		local n_trace = { start = player.EyePosition(), end = otherEntity.EyePosition(), ignore = player, mask = MaskSet};
 		TraceLine(n_trace);
 
@@ -1760,8 +1757,7 @@ function BotAI::CanSeeOtherEntityWithoutBarrier(player, otherEntity, tolerance =
 			return true;
 	}
 
-	if("GetBoneOrigins" in otherEntity)
-	{
+	if ("GetBoneOrigins" in otherEntity) {
 		local n_trace = { start = player.EyePosition(), end = otherEntity.GetBoneOrigin(14), ignore = player, mask = MaskSet};
 		TraceLine(n_trace);
 
@@ -1780,100 +1776,16 @@ function BotAI::CanSeeOtherEntityWithoutBarrier(player, otherEntity, tolerance =
 	return false;
 }
 
-::BotAI.CanGetWithoutDanger <- function(player, otherEntity = null, certainVec = null)
-{
-	BotAI.debugCall("CanGetWithoutDanger");
-	if((otherEntity == null && certainVec == null) || !BotAI.IsPlayerEntityValid(player))
-		return false;
-
-	local height = 0;
-
-	if(otherEntity != null)
-		height = player.GetOrigin().z - otherEntity.GetOrigin().z + 15
-
-	if(certainVec != null)
-		height = player.GetOrigin().z - certainVec.z;
-
-	if(	height < 65)
-		return true;
-
-	local startVec = player.GetOrigin();
-	local endVec = player.GetOrigin();
-	local startPt = player.GetOrigin();
-
-	if(otherEntity != null)
-	{
-		startVec = otherEntity.GetOrigin() + Vector(0, 0, height);
-		endVec = otherEntity.GetOrigin() + Vector(0, 0, 60);
-		startPt = otherEntity.GetOrigin() + Vector(0, 0, 64);
-	}
-
-	if(certainVec != null)
-	{
-		startVec = Vector(certainVec.x, certainVec.y, player.GetOrigin().z);
-		endVec = certainVec;
-		startPt = endVec;
-	}
-
-	/*local playerVec = player.GetOrigin() + Vector(0, 0, 20);
-	local n_trace = { start = playerVec, end = endVec, ignore = player, mask = MASK_UNTHROUGHABLE};
-	TraceLine(n_trace);
-	if (n_trace.hit && n_trace.enthit != null)
-		return true;
-	*/
-	local twoDEndVec = BotAI.fakeTwoD(endVec);
-	local twoDStartVec = BotAI.fakeTwoD(startVec);
-	if(otherEntity == null && BotAI.GetDistanceToWall(player, twoDEndVec) <= (twoDStartVec - twoDEndVec).Length())
-		return true;
-
-	local m_trace = { start = startVec, end = endVec, mask = MASK_UNTHROUGHABLE};
-	TraceLine(m_trace);
-
-	if (!m_trace.hit || m_trace.enthit == null)
-		return false;
-
-	//have floor
-	if (m_trace.enthit.GetClassname() == "worldspawn" || m_trace.enthit.GetClassname() == "player")
-	{
-		if(height < 300)
-			return true;
-		else
-		{
-			local endPt = startPt + Vector(0, 0, 300);
-			local b_trace = { start = startPt, end = endPt, mask = MASK_UNTHROUGHABLE};
-			TraceLine(b_trace);
-			if (b_trace.hit && b_trace.enthit != null)
-			{
-				if (b_trace.enthit.GetClassname() == "worldspawn" || b_trace.enthit.GetClassname() == "player")
-					return true;
-			}
-
-			local w_trace = { start = startVec, end = endVec, mask = MASK_UNTHROUGHABLE_WATER};
-			TraceLine(w_trace);
-			if (w_trace.hit && w_trace.enthit != null)
-			{
-				if (w_trace.enthit.GetClassname() != "worldspawn")
-					return true;
-
-				if (w_trace.enthit.GetClassname() == "worldspawn" && height < 100)
-					return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-function BotAI::CanSeeOtherEntityWithoutLocation(player, otherEntity, height = 0, attack = false, _mask = g_MapScript.TRACE_MASK_SHOT)
-{
+function BotAI::CanShotOtherEntityInSight(player, otherEntity, angle = -1, _mask = g_MapScript.TRACE_MASK_SHOT) {
 	if (!BotAI.IsPlayerEntityValid(player)) return false;
 
 	local eyevec = otherEntity.GetOrigin() + Vector(0, 0, 50);
 
-	if("EyePosition" in otherEntity)
+	if("EyePosition" in otherEntity) {
 		eyevec = otherEntity.EyePosition();
-	else if("GetBoneOrigin" in otherEntity)
+	} else if("GetBoneOrigin" in otherEntity) {
 		eyevec = otherEntity.GetBoneOrigin(14);
+	}
 
 	local mpHit = true;
 
@@ -1902,8 +1814,7 @@ function BotAI::CanSeeOtherEntityWithoutLocation(player, otherEntity, height = 0
 	return false;
 }
 
-function BotAI::CanHitOtherEntity(molotov, tank, _mask = null)
-{
+function BotAI::CanHitOtherEntity(molotov, tank, _mask = null) {
 	if(_mask == null)
 		_mask = MASK_UNTHROUGHABLE;
 

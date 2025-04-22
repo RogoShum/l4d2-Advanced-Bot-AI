@@ -251,7 +251,7 @@
 				if (BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range - skillFactor
 				&& BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (0.7 - additionAngle)) {
 					damaged = true;
-					BotAI.applyDamage(p, target, TD, -2145386492, damagePos);
+					BotAI.applyDamage(p, target, target.GetHealth() * 0.15, -2145386492, damagePos);
 					BotAI.spawnParticle("blood_impact_infected_01", target.GetOrigin() + Vector(0, 0, 50), target);
 					BotAI.spawnParticle("blood_melee_slash_TP_swing", target.GetOrigin() + Vector(0, 0, 50), target);
 				}
@@ -309,6 +309,7 @@
 		local function hit(health) {
 			BotAI.applyDamage(p, victim, health, DMG_HEADSHOT);
 		}
+
 		if(victim.GetClassname() == "witch") {
 			if(BotAI.witchKilling(victim) || BotAI.witchRunning(victim) || BotAI.witchRetreat(victim)) {
 				if(mp_gamemode == "realism")
@@ -1000,9 +1001,15 @@ function ChatTriggers::imbot( player, args, text ) {
 }
 
 function ChatTriggers::botnotice( player, args, text ) {
-	BotAI.NoticeText = false;
-	BotAI.EasyPrint("通告已关闭.");
-	BotAI.SaveSetting();
+	if (BotAI.NoticeConfig) {
+        BotAI.NoticeConfig = false;
+        BotAI.EasyPrint("botai_notice_off");
+        BotAI.SaveSetting();
+    } else {
+        BotAI.NoticeConfig = true;
+        BotAI.EasyPrint("botai_notice_on");
+        BotAI.SaveSetting();
+    }
 }
 
 function ChatTriggers::botcrash( player, args, text ) {
