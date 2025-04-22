@@ -274,7 +274,7 @@
 		}
 	}
 
-	if(BotAI.BotCombatSkill < 2)
+	if(BotAI.BotCombatSkill < 3)
 		return;
 
 
