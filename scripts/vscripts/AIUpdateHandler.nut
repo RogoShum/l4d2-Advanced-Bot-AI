@@ -1077,7 +1077,7 @@ function BotAI::AdjustBotsUpdateRate(args) {
 				local danger = false;
 				local area = player.GetLastKnownArea();
 				foreach(sp in SpecialList) {
-					if(BotAI.IsEntitySI(sp) && sp.GetZombieType() == 8 && BotAI.distanceof(sp.GetOrigin(), player.GetOrigin()) < 800) {
+					if(BotAI.IsEntitySI(sp) && sp.GetZombieType() == 8 && BotAI.distanceof(sp.GetOrigin(), player.GetOrigin()) < 650) {
 						danger = true;
 					}
 				}
@@ -1807,7 +1807,7 @@ function BotAI::ResetBotFireRate() {
 	local normalSpeed = 350;
 
 	combatSpeed += BotAI.BotCombatSkill * 1000;
-	normalSpeed += BotAI.BotCombatSkill * 500;
+	normalSpeed += BotAI.BotCombatSkill * 50;
 
 	Convars.SetValue( "sb_combat_saccade_speed", combatSpeed );
 	Convars.SetValue( "sb_normal_saccade_speed", normalSpeed );
@@ -1926,7 +1926,7 @@ function BotAI::PossibleBotStuck(bot) {
 	}
 	total = total * 0.1;
 
-	if(total <= 80) {
+	if(total <= 70) {
 		return true;
 	}
 
@@ -2090,7 +2090,7 @@ function BotAI::AdjustBotState(args) {
 					BotAI.BotStuckCount[bot] <- 0;
 				}
 
-				BotAI.BotStuckCount[bot] = BotAI.BotStuckCount[bot]+1;
+				BotAI.BotStuckCount[bot] = BotAI.BotStuckCount[bot] + 1;
 			} else {
 				BotAI.BotStuckCount[bot] <- 0;
 			}
@@ -2099,11 +2099,6 @@ function BotAI::AdjustBotState(args) {
 				if(BotAI.BotStuckCount[bot] >= 4) {
 					stuck = true;
 					navigator.stop();
-				} else {
-					if(BotAI.BotStuckCount[bot] >= 2 && BotAI.HasTank) {
-						stuck = true;
-						navigator.stop();
-					}
 				}
 			}
 
@@ -2282,7 +2277,7 @@ function resetAllBots() {
 
 	printl("[Bot AI] Loading timers...");
 
-	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("CheckBotPosition", 1, true, BotAI.CheckBotPosition));
+	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("CheckBotPosition", 0.5, true, BotAI.CheckBotPosition));
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("AdjustBotState", 1.5, true, BotAI.AdjustBotState));
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("TriggerHandler", 20, true, BotAI.TriggerHandler));
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("ModifyMolotovVector", 0.1, true, BotAI.ModifyMolotovVector));

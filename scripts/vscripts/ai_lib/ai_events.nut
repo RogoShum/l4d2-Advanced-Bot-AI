@@ -1109,8 +1109,9 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 					if(BotAI.IsAlive(findPlayer) && (findPlayer.IsIncapacitated() || findPlayer.IsHangingFromLedge()))
 						falledPlayer = findPlayer;
 				}
-			} else
+			} else {
 				falledPlayer = player;
+			}
 
 			if(BotAI.IsPlayerEntityValid(falledPlayer)) {
 				RushVictim(falledPlayer, 210);
