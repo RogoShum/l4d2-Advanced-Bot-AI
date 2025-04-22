@@ -1789,7 +1789,7 @@ function BotAI::CanShotOtherEntityInSight(player, otherEntity, angle = -1, _mask
 
 	local mpHit = true;
 
-	local mp_trace = { start = player.EyePosition() + Vector(0, 0, height), end = eyevec, ignore = player, mask = _mask};
+	local mp_trace = { start = player.EyePosition(), end = eyevec, ignore = player, mask = _mask};
 	TraceLine(mp_trace);
 
 	if (!mp_trace.hit || mp_trace.enthit == null || mp_trace.enthit == player)
@@ -1801,7 +1801,7 @@ function BotAI::CanShotOtherEntityInSight(player, otherEntity, angle = -1, _mask
 
 	local npHit = true;
 
-	local np_trace = { start = eyevec + Vector(0, 0, height), end = player.EyePosition(), ignore = otherEntity, mask = _mask};
+	local np_trace = { start = eyevec, end = player.EyePosition(), ignore = otherEntity, mask = _mask};
 	TraceLine(np_trace);
 
 	if (!np_trace.hit || np_trace.enthit == null || np_trace.enthit == otherEntity)

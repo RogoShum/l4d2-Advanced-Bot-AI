@@ -91,7 +91,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 			selected = BotAI.dangerInfected[player];
 		}
 
-		local dist = 500 + BotAI.BotCombatSkill * 50;
+		local dist = 450 + BotAI.BotCombatSkill * 50;
 		local entS = null;
 		local highestPriority = -1;
 		local awareAngle = 0.3 - (BotAI.BotCombatSkill * 0.33);
@@ -102,7 +102,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 				} else if (infected.GetZombieType() == 8) {
 					dist = 800;
 				} else {
-					dist = 500 + BotAI.BotCombatSkill * 50;
+					dist = 450 + BotAI.BotCombatSkill * 50;
 				}
 
 				local currentPriority = 0;

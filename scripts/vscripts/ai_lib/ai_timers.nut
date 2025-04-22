@@ -350,8 +350,9 @@ function BotAI::createPlayerTargetTimer(player) {
 
 		local selected = null;
 		local closestCom = null;
-		local selectedDis = 120;
-		local closestDis = 600;
+		local selectedDis = 100;
+		local closestDis = 450 + BotAI.BotCombatSkill * 50;
+		local awareAngle = 0.0 - (BotAI.BotCombatSkill * 0.37);
 
 		local isShove = BotAI.IsPressingShove(player);
 		local isHealing = BotAI.IsBotHealing(player);
@@ -369,10 +370,10 @@ function BotAI::createPlayerTargetTimer(player) {
 
 			if(selected != null && selectedDis < dis) continue;
 
-			if(dis <= 125 && isTarget && dis < closestDis) {
+			if(dis <= 100 && isTarget && dis < closestDis) {
 				selected = com;
 				selectedDis = dis;
-			} else if(!BotAI.HasTank && BotAI.CanShotOtherEntityInSight(player, com) && dis < closestDis) {
+			} else if(!BotAI.HasTank && BotAI.CanShotOtherEntityInSight(player, com, awareAngle) && dis < closestDis) {
 				closestCom = com;
 				closestDis = dis;
 			}
