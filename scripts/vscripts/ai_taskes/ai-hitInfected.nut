@@ -52,35 +52,21 @@ class ::AITaskHitInfected extends AITaskSingle {
 			return true;
 		}
 
-		dist = 700;
-		local witch = null;
-		foreach(infected in BotAI.WitchList) {
-			if (BotAI.IsAlive(infected) && (BotAI.witchKilling(infected) || (BotAI.witchRunning(infected) && !BotAI.witchRetreat(infected))) && BotAI.CanShotOtherEntityInSight(player, infected)) {
-				if (BotAI.distanceof(player.GetOrigin(), infected.GetOrigin()) < dist) {
-					dist = BotAI.distanceof(player.GetOrigin(), infected.GetOrigin());
-					witch = infected;
-				}
-			}
-		}
-
-		if (witch != null) {
-			infectedList[player] <- witch;
-			return true;
-		}
-
 		local playerNeedSave = null;
 		local playerFallingDown = null;
-		dist = 120;
+		dist = 80;
 
-		if (!BotAI.HasTank) {
-			foreach(savePlayer in BotAI.SurvivorList) {
-				if(BotAI.IsAlive(savePlayer) && savePlayer != player) {
-					local dis = BotAI.nextTickDistance(player, savePlayer) < dist;
-					if (savePlayer.IsDominatedBySpecialInfected() && dis) {
+		foreach(savePlayer in BotAI.SurvivorList) {
+			if(BotAI.IsAlive(savePlayer) && savePlayer != player) {
+				local dis = BotAI.nextTickDistance(player, savePlayer) < dist;
+				if (savePlayer.IsDominatedBySpecialInfected() && dis) {
+					local bad = savePlayer.GetSpecialInfectedDominatingMe();
+					if (BotAI.IsEntitySI(bad) && (bad.GetZombieType() == 1 || bad.GetZombieType() == 2 || bad.GetZombieType() == 3 || bad.GetZombieType() == 5)) {
 						playerNeedSave = savePlayer;
-					} else if ((savePlayer.IsIncapacitated() || savePlayer.IsHangingFromLedge()) && !savePlayer.IsGettingUp() && dis) {
-						playerFallingDown = savePlayer;
 					}
+
+				} else if (!BotAI.HasTank && (savePlayer.IsIncapacitated() || savePlayer.IsHangingFromLedge()) && !savePlayer.IsGettingUp() && dis) {
+					playerFallingDown = savePlayer;
 				}
 			}
 		}
@@ -101,7 +87,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 		local highestPriority = -1;
 		local awareAngle = 0.3 - (BotAI.BotCombatSkill * 0.33);
 		foreach(infected in BotAI.SpecialList) {
-			if (BotAI.IsAlive(infected) && !infected.IsGhost() && !BotAI.IsEntitySI(BotAI.GetTarget(infected)) && (infected.GetZombieType() != 8 || entS == null) && BotAI.CanShotOtherEntityInSight(player, infected, awareAngle)) {
+			if (BotAI.IsAlive(infected) && !infected.IsGhost() && !BotAI.IsEntitySI(BotAI.GetTarget(infected)) && (infected.GetZombieType() != 8 || entS == null) && (BotAI.CanShotOtherEntityInSight(player, infected, awareAngle) || BotAI.IsEntityValid(BotAI.getSiVictim(infected)))) {
 				if (infected.GetZombieType() == 1) {
 					dist = BotAI.tongueRange*1.2;
 				} else if (infected.GetZombieType() == 8) {
@@ -187,7 +173,22 @@ class ::AITaskHitInfected extends AITaskSingle {
 			return true;
 		}
 
-		BotAI.hookViewEntity(player, null);
+		dist = 700;
+		local witch = null;
+		foreach(infected in BotAI.WitchList) {
+			if (BotAI.IsAlive(infected) && (BotAI.witchKilling(infected) || (BotAI.witchRunning(infected) && !BotAI.witchRetreat(infected))) && BotAI.CanShotOtherEntityInSight(player, infected)) {
+				if (BotAI.distanceof(player.GetOrigin(), infected.GetOrigin()) < dist) {
+					dist = BotAI.distanceof(player.GetOrigin(), infected.GetOrigin());
+					witch = infected;
+				}
+			}
+		}
+
+		if (witch != null) {
+			infectedList[player] <- witch;
+			return true;
+		}
+
 		return false;
 	}
 

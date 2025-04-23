@@ -830,13 +830,12 @@
 	BotAI.FinaleStart = true;
 }
 
-::BotAI.Events.OnGameEvent_finale_radio_start <- function(event)
-{
+::BotAI.Events.OnGameEvent_finale_radio_start <- function(event) {
 	BotAI.FinaleStart = true;
 }
 
-::BotAI.Events.OnGameEvent_round_start <- function(event) {
-	BotAI.doNoticeText();
+::BotAI.Events.OnGameEvent_player_connect_full <- function(event) {
+	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("NoticeText", 15, false, BotAI.doNoticeText));
 }
 
 ::BotAI.Events.OnGameEvent_round_end <- function(event)

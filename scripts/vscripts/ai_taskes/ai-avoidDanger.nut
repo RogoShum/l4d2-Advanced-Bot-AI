@@ -120,6 +120,19 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							DebugDrawCircle(player.GetCenter(), Vector(255, 25, 25), 0, innerCircle, true, 0.5);
 						}
 
+						local function isTankBetweenHeights(random) {
+							local playerHeight = player.GetOrigin().z;
+							local tankHeight = danger.GetOrigin().z;
+							local randomHeight = random.z;
+
+							local heightTolerance = 50;
+							if (playerHeight < randomHeight) {
+								return (tankHeight > (playerHeight - heightTolerance)) && (tankHeight < (randomHeight + heightTolerance));
+							} else {
+								return (tankHeight < (playerHeight + heightTolerance)) && (tankHeight > (randomHeight - heightTolerance));
+							}
+						}
+
 						local function canHitTank(point) {
 							local playerPos = player.GetCenter();
 							local tankPos = danger.GetCenter();
@@ -146,7 +159,9 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							for (local count = 0; count < 5; ++count) {
 								local randomSpot = player.TryGetPathableLocationWithin(270);
 
-								if (targetSpot == null && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 170 && !canHitTank(randomSpot)) {
+								if (targetSpot == null && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 170
+								&& !canHitTank(randomSpot)
+								&& !isTankBetweenHeights(randomSpot)) {
 									targetSpot = randomSpot - player.GetOrigin();
 								}
 							}
@@ -187,7 +202,9 @@ class::AITaskAvoidDanger extends AITaskSingle {
 									//vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
 									local randomSpot = player.TryGetPathableLocationWithin(300);
 
-									if (BotAI.distanceof(danger.GetOrigin(), randomSpot) > 500) {
+									if (BotAI.distanceof(danger.GetOrigin(), randomSpot) > 500
+									&& !canHitTank(randomSpot)
+									&& !isTankBetweenHeights(randomSpot)) {
 										vecList[vecList.len()] <- randomSpot - player.GetOrigin();
 									} else {
 										vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
@@ -199,7 +216,9 @@ class::AITaskAvoidDanger extends AITaskSingle {
 								//vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 15, 35, 35, 35);
 								local randomSpot = player.TryGetPathableLocationWithin(300);
 
-								if (BotAI.distanceof(danger.GetOrigin(), randomSpot) > 500) {
+								if (BotAI.distanceof(danger.GetOrigin(), randomSpot) > 500
+								&& !canHitTank(randomSpot)
+								&& !isTankBetweenHeights(randomSpot)) {
 									vecList[vecList.len()] <- randomSpot - player.GetOrigin();
 								} else {
 									vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);

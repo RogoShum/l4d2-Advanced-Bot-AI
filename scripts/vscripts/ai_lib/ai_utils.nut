@@ -1426,8 +1426,10 @@ function BotAI::applyDamage(owner, target, amount, damageType, damagepos = null)
 		damagepos = BotAI.getEntityHeadPos(target);
 	}
 
-	target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), BotAI.normalize(target.GetOrigin() - owner.GetOrigin())
+	if (BotAI.IsAlive(target)) {
+		target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), Vector(0, 0, 0)
 					, damagepos, amount, damageType);
+	}
 }
 
 function BotAI::IsInCombat(player, lowCheck = false) {
@@ -1854,8 +1856,7 @@ function BotAI::witchRunning(witch) {
 	return false;
 }
 
-function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, trace_mask = g_MapScript.TRACE_MASK_SHOT)
-{
+function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, trace_mask = g_MapScript.TRACE_MASK_SHOT) {
 	local m_trace = { start = player.EyePosition(), end = player.EyePosition() + player.EyeAngles().Forward().Scale(distan), ignore = player, mask = trace_mask};
 	TraceLine(m_trace);
 

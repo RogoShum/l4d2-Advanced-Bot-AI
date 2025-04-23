@@ -883,8 +883,10 @@ function BotAI::ModifyMolotovVector(args) {
 
 		local throwable = g_ModeScript.CreateSingleSimpleEntityFromTable({classname = "weapon_vomitjar"});
 
-		if(throwable)
+		if(throwable) {
 			throwable.ValidateScriptScope();
+		}
+
 		if(BotAI.IsEntityValid(throwable)) {
 			local eyevec = thrower.EyeAngles().Forward();
 			throwable.SetOrigin(Vector(thrower.EyePosition().x + eyevec.x * 70, thrower.EyePosition().y + eyevec.y * 70, thrower.EyePosition().z + eyevec.z * 70));
@@ -1454,14 +1456,14 @@ function BotAI::locateUseTarget(args)
 		if (BotAI.BotDebugMode) {
 			printl(str);
 		}
-		ClientPrint(null, 5, "Advanced Bot AI: " + "\x01" + I18n.getTranslationKey(s) + args);
+		ClientPrint(null, 5, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(s) + args);
 	}
 
 	::BotAI.Timers.AddTimer(time, false, cPrint, str);
 }
 
 ::BotAI.SendPlayer <- function (player, str) {
-	ClientPrint(player, 5, "Advanced Bot AI: " + "\x01" + I18n.getTranslationKey(str));
+	ClientPrint(player, 5, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(str));
 }
 
 function BotAI::registerMenu() {
@@ -1892,6 +1894,60 @@ function BotAI::DebugFunction( args ) {
 
 			if(BotAI.BotDebugMode) {
 				local target = BotAI.CanSeeOtherEntityPrintName(player, 9999, 1, g_MapScript.TRACE_MASK_ALL);
+				/*
+				local function kill(mob) {
+					local wep = player.GetActiveWeapon();
+					local ename = " ";
+					local dama = 300;
+					if (BotAI.BotCombatSkill == 1) {
+						dama = mob.GetHealth();
+					}
+
+					if (BotAI.BotCombatSkill == 2) {
+						dama = 20;
+					}
+
+					if (BotAI.BotCombatSkill == 3) {
+						dama = 50;
+					}
+
+					if (BotAI.BotCombatSkill == 4) {
+						dama = 100;
+					}
+
+					if(BotAI.IsEntityValid(wep)) {
+						ename = wep.GetClassname();
+					}
+
+					local isMelee = ename == "weapon_melee" || ename == "weapon_chainsaw";
+
+					if (!isMelee) {
+						BotAI.applyDamage(player, mob, dama, DMG_HEADSHOT);
+					} else {
+						local damagePos = BotAI.getEntityHeadPos(player);
+						damagePos = Vector(damagePos.x, damagePos.y, player.EyePosition().z);
+						BotAI.applyDamage(player, mob, dama, DMG_HEADSHOT, damagePos);
+						BotAI.spawnParticle("blood_impact_infected_01", mob.GetOrigin() + Vector(0, 0, 50), mob);
+						BotAI.spawnParticle("blood_melee_slash_TP_swing", mob.GetOrigin() + Vector(0, 0, 50), mob);
+					}
+				}
+				local infected = null;
+				while(infected = Entities.FindByClassnameWithin(infected, "infected", player.GetCenter(), 300)) {
+					kill(infected);
+				}
+
+				local sp = null;
+				while(sp = Entities.FindByClassnameWithin(sp, "player", player.GetCenter(), 300)) {
+					if (BotAI.IsEntitySI(sp)) {
+						kill(sp);
+					}
+				}
+
+				local witch = null;
+				while(witch = Entities.FindByClassnameWithin(witch, "witch", player.GetCenter(), 300)) {
+					kill(witch);
+				}
+				*/
 			}
 		} else if (leader == null || GetFlowDistanceForPosition(player.GetOrigin()) > GetFlowDistanceForPosition(leader.GetOrigin())) {
 			leader = player;
@@ -2132,7 +2188,7 @@ function BotAI::AdjustBotState(args) {
 	}
 }
 
-function BotAI::doNoticeText() {
+function BotAI::doNoticeText(args) {
 	if(!BotAI.NoticeConfig) return;
 
 	local settings = [
@@ -2147,7 +2203,7 @@ function BotAI::doNoticeText() {
         { key = "menu_carry", value = "", enabled = ::BotAI.BackPack, isValue = false }
     ];
 
-	::BotAI.EasyPrint("botai_current_settings", 15);
+	::BotAI.EasyPrint("botai_current_settings", 0.1);
 
 	local output = "";
 
@@ -2172,8 +2228,8 @@ function BotAI::doNoticeText() {
 
     //output += "\n\x01" + I18n.getTranslationKey("botai_use_command_notice");
 
-    ::BotAI.EasyPrint(output, 15.2);
-	::BotAI.EasyPrint("botai_use_command_notice", 15.4);
+    ::BotAI.EasyPrint(output, 0.3);
+	::BotAI.EasyPrint("botai_use_command_notice", 0.5);
 }
 
 function BotAI::preAITask() {
@@ -2284,7 +2340,6 @@ function resetAllBots() {
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("DebugFunction", 0.1, true, BotAI.DebugFunction));
 	BotAI.ResetBotFireRate();
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("locateUseTarget", 0.1, true, BotAI.locateUseTarget));
-	//printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("NoticeText", 30, false, BotAI.doNoticeText));
 
 	printl("[Bot AI] Timers loaded.");
 }

@@ -162,7 +162,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				local hitFactor = 420;
 				local tongueRange = BotAI.tongueRange;
 
-				if(distance - tongueLength <= hitFactor){
+				if(distance - tongueLength <= hitFactor) {
 					BotAI.setSmokerTarget(player, target);
 					BotAI.setBotTarget(player, null);
 					shotDis = tongueRange + 100;
