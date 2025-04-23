@@ -2341,38 +2341,15 @@ function resetAllBots() {
 	Convars.SetValue( "sb_toughness_buffer", 25 );
 	Convars.SetValue( "sb_temp_health_consider_factor", 0.85 );
 
-	Convars.SetValue( "sb_friend_immobilized_reaction_time_normal", 0.5 );
-	Convars.SetValue( "sb_friend_immobilized_reaction_time_hard", 0.2 );
-	Convars.SetValue( "sb_friend_immobilized_reaction_time_expert", 0.001 );
-	Convars.SetValue( "sb_friend_immobilized_reaction_time_vs", 0.2 );
-	//Convars.SetValue( "survivor_calm_damage_delay", 0 );
-	//Convars.SetValue( "survivor_calm_deploy_delay", 0 );
-	//Convars.SetValue( "survivor_calm_no_flashlight", 0 );
-	//Convars.SetValue( "survivor_calm_recent_enemy_delay", 0 );
-	//Convars.SetValue( "survivor_calm_weapon_delay", 0 );
-
-	//Convars.SetValue( "sb_transition", 0 );
 	Convars.SetValue( "sb_enforce_proximity_lookat_timeout", 1 );
-	Convars.SetValue( "sb_enforce_proximity_range", 300 );
+	Convars.SetValue( "sb_enforce_proximity_range", 1000 );
 	Convars.SetValue( "sb_battlestation_human_hold_time", 0.1 );
 	Convars.SetValue( "sb_sidestep_for_horde", 1 );
 	Convars.SetValue( "sb_close_checkpoint_door_interval", 0.15 );
 	Convars.SetValue( "sb_max_battlestation_range_from_human", 150 );
-
-	//Convars.SetValue( "sb_threat_very_close_range", 75 );
-	//Convars.SetValue( "sb_close_threat_range", 120 );
-	//Convars.SetValue( "sb_threat_exposure_stop", 0 );
-	//Convars.SetValue( "sb_threat_exposure_walk", 220000 );
-	//Convars.SetValue( "sb_threat_close_range", 120 );
-	//Convars.SetValue( "sb_threat_medium_range", 600 );
-	//Convars.SetValue( "sb_threat_far_range", 1200 );
-	//Convars.SetValue( "sb_threat_very_far_range", 2200 );
-	//Convars.SetValue( "sb_neighbor_range", 120 );
 	Convars.SetValue( "sb_follow_stress_factor", 0 );
 	Convars.SetValue( "sb_locomotion_wait_threshold", 0.1 );
 	Convars.SetValue( "sb_path_lookahead_range", 2500 );
-	Convars.SetValue( "sb_near_hearing_range", 2500 );
-	Convars.SetValue( "sb_far_hearing_range", 4000 );
 
 	Convars.SetValue( "sb_use_button_range", 1000 );
 	Convars.SetValue( "sb_vomit_blind_time", 0 );
