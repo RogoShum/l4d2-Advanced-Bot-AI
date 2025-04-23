@@ -120,6 +120,23 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							DebugDrawCircle(player.GetCenter(), Vector(255, 25, 25), 0, innerCircle, true, 0.5);
 						}
 
+						local function canHitTank(point) {
+							local playerPos = player.GetCenter();
+							local tankPos = danger.GetCenter();
+							local tankRadius = 50;
+							local direction = BotAI.normalize(point - player.GetOrigin());
+
+							local playerToTank = tankPos - playerPos;
+							local projection = playerToTank.Dot(direction);
+
+							if (projection < 0) {
+								return false;
+							}
+
+							local distanceSq = playerToTank.LengthSqr() - projection * projection;
+							return distanceSq <= (tankRadius * tankRadius);
+						}
+
 						if (nexDis < innerCircle) {
 							local navigator = BotAI.getNavigator(player);
 							navigator.clearPath("followPlayer");
@@ -127,9 +144,9 @@ class::AITaskAvoidDanger extends AITaskSingle {
 
 							local targetSpot = null;
 							for (local count = 0; count < 5; ++count) {
-								local randomSpot = player.TryGetPathableLocationWithin(500);
+								local randomSpot = player.TryGetPathableLocationWithin(270);
 
-								if (targetSpot == null && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 170 && BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) > 300) {
+								if (targetSpot == null && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 170 && !canHitTank(randomSpot)) {
 									targetSpot = randomSpot - player.GetOrigin();
 								}
 							}
@@ -166,7 +183,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 										return false;
 									}
 									BotAI.botRunPos(player, closest, "followPlayer", 4, changeOrDieOrRun);
-								} else {
+								} else if (!hasRock) {
 									//vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
 									local randomSpot = player.TryGetPathableLocationWithin(300);
 
@@ -176,7 +193,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 										vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
 									}
 								}
-							} else {
+							} else if (!hasRock) {
 								local navigator = BotAI.getNavigator(player);
 								navigator.clearPath("followPlayer");
 								//vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 15, 35, 35, 35);

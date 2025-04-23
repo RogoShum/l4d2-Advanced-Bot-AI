@@ -1826,6 +1826,7 @@ function BotAI::CanHitOtherEntity(molotov, tank, _mask = null) {
 
 	if (m_trace.enthit == tank)
 		return true;
+
 	return false;
 }
 
