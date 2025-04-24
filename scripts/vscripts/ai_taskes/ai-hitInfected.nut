@@ -18,7 +18,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 	danger = {};
 
 	function singleUpdateChecker(player) {
-		this.tick = 14 - BotAI.BotCombatSkill * 3;
+		this.tick = 8 - BotAI.BotCombatSkill * 4;
 		if (this.tick < 2) {
 			this.tick = 2;
 		}
@@ -78,7 +78,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 		}
 
 		local selected = null;
-		if(player in BotAI.dangerInfected && playerFallingDown == null) {
+		if(player in BotAI.dangerInfected) {// && playerFallingDown == null
 			selected = BotAI.dangerInfected[player];
 		}
 
@@ -195,7 +195,8 @@ class ::AITaskHitInfected extends AITaskSingle {
 	function playerUpdate(player) {
 		if(player in infectedList && infectedList[player] != null) {
 			local val = infectedList[player];
-			if(BotAI.IsAlive(val) && BotAI.CanShotOtherEntityInSight(player, val)) {
+			if(BotAI.IsAlive(val)) {// && BotAI.CanShotOtherEntityInSight(player, val)
+
 				if(danger[player]) {
 					BotAI.setBotShoveTarget(player, val);
 				}

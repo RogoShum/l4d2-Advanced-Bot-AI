@@ -1806,6 +1806,10 @@ function BotAI::CanShotOtherEntityInSight(player, otherEntity, angle = -1, _mask
 		eyevec = otherEntity.GetBoneOrigin(14);
 	}
 
+	if (BotAI.VectorDotProduct(BotAI.normalize(eyevec - player.EyePosition()), player.EyeAngles().Forward()) < angle) {
+		return false;
+	}
+
 	local mpHit = true;
 
 	local mp_trace = { start = player.EyePosition(), end = eyevec, ignore = player, mask = _mask};

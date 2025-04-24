@@ -116,6 +116,8 @@ function BotAI::taskTimer::hitinfected() {
 			}
 		}
 	}
+
+	return 0.01;
 }
 
 function BotAI::taskTimer::updateFireState() {
@@ -136,6 +138,8 @@ function BotAI::taskTimer::updateFireState() {
 			}
 		}
 	}
+
+	return 0.01;
 }
 
 function BotAI::taskTimer::shoveInfected() {
@@ -156,6 +160,8 @@ function BotAI::taskTimer::shoveInfected() {
 			}
 		}
 	}
+
+	return 0.01;
 }
 
 function BotAI::taskTimer::avoidDanger() {
@@ -176,6 +182,8 @@ function BotAI::taskTimer::avoidDanger() {
 			}
 		}
 	}
+
+	return 0.01;
 }
 
 function BotAI::resetTaskTimers() {
@@ -314,7 +322,7 @@ function BotAI::createProjectileTargetTimer(projectile) {
 
 			local function avoidProjectile(danger) {
 				foreach(bot in BotAI.SurvivorBotList) {
-					if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp() || BotAI.distanceof(bot.GetOrigin(), danger.GetOrigin() > 400))
+					if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp() || BotAI.distanceof(bot.GetOrigin(), danger.GetOrigin()) > 400)
 						continue;
 
 					if(BotAI.xyDotProduct(BotAI.normalize(danger.GetVelocity()), BotAI.normalize(bot.GetOrigin() - danger.GetOrigin())) > 0.5) {
@@ -370,10 +378,9 @@ function BotAI::createPlayerTargetTimer(player) {
                 infoTarget.Kill();
         }
 
-
 		local selected = null;
 		local closestCom = null;
-		local selectedDis = 60 + BotAI.BotCombatSkill * 20;
+		local selectedDis = 75 + BotAI.BotCombatSkill * 20;
 		local closestDis = 150 + BotAI.BotCombatSkill * 20;
 		local awareAngle = 0.75 - (BotAI.BotCombatSkill * 0.5);
 		local dangerAwareAngle = 0.5 - (BotAI.BotCombatSkill * 0.5);
@@ -404,12 +411,23 @@ function BotAI::createPlayerTargetTimer(player) {
 			}
 		}
 
-		if(selected != null)
-        	BotAI.dangerInfected[player] <- selected;
-		else if(closestCom != null)
+		if(selected != null) {
+			if(BotAI.BotDebugMode) {
+				local headPos = BotAI.getEntityHeadPos(selected);
+				DebugDrawBox(headPos, Vector(-5, -5, -5), Vector(5, 5, 5), 0, 255, 200, 0.2, 0.2);
+			}
+
+			BotAI.dangerInfected[player] <- selected;
+		} else if(closestCom != null) {
+			if(BotAI.BotDebugMode) {
+				local headPos = BotAI.getEntityHeadPos(closestCom);
+				DebugDrawBox(headPos, Vector(-5, -5, -5), Vector(5, 5, 5), 0, 255, 200, 0.2, 0.2);
+			}
+
 			BotAI.dangerInfected[player] <- closestCom;
-		else
+		} else {
 			BotAI.dangerInfected[player] <- null;
+		}
 
 		return 0.2;
     }

@@ -767,14 +767,16 @@ function BotAI::addTask(name, task) {
 function BotAI::updateAITasks() {
 	BotAI.taskThinkTimerTick++;
 	if(!BotAI.doTaskUpdate)
-		return;
+		return 0.0331;
 
 	if(BotAI.taskThinkTimerTick % 2 == 0) {
-		return;
+		return 0.0331;
 	} else {
 		BotAI.tickExisted++;
 		BotAI.AdjustBotsUpdateRate(1);
 	}
+
+	return 0.0331;
 }
 
 function BotAI::updateSingleAITasks() {
