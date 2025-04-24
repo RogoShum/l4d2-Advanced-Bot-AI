@@ -27,6 +27,7 @@ if (!("VSLib" in getroottable())) {
 		taskTimer = {}
 		usingMenu = {}
 		usingPing = {}
+		damageList = []
 
 		callCache = {}
 		areaCache = {}
@@ -755,8 +756,7 @@ function BotAI::addTask(name, task) {
 
 		if(!(task.getOrder() in BotAI.TaskOrderListSingle))
 			BotAI.TaskOrderListSingle[BotAI.TaskOrderListSingle.len()] <- task.getOrder();
-	}
-	else {
+	} else {
 		BotAI.AITaskList.groupTasks[name] <- task;
 
 		if(!(task.getOrder() in BotAI.TaskOrderListGroup))
@@ -1456,14 +1456,14 @@ function BotAI::locateUseTarget(args)
 		if (BotAI.BotDebugMode) {
 			printl(str);
 		}
-		ClientPrint(null, 5, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(s) + args);
+		ClientPrint(null, 3, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(s) + args);
 	}
 
 	::BotAI.Timers.AddTimer(time, false, cPrint, str);
 }
 
 ::BotAI.SendPlayer <- function (player, str) {
-	ClientPrint(player, 5, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(str));
+	ClientPrint(player, 3, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(str));
 }
 
 function BotAI::registerMenu() {
@@ -1894,26 +1894,12 @@ function BotAI::DebugFunction( args ) {
 
 			if(BotAI.BotDebugMode) {
 				local target = BotAI.CanSeeOtherEntityPrintName(player, 9999, 1, g_MapScript.TRACE_MASK_ALL);
+
 				/*
-				local function kill(mob) {
+								local function kill(mob) {
 					local wep = player.GetActiveWeapon();
 					local ename = " ";
 					local dama = 300;
-					if (BotAI.BotCombatSkill == 1) {
-						dama = mob.GetHealth();
-					}
-
-					if (BotAI.BotCombatSkill == 2) {
-						dama = 20;
-					}
-
-					if (BotAI.BotCombatSkill == 3) {
-						dama = 50;
-					}
-
-					if (BotAI.BotCombatSkill == 4) {
-						dama = 100;
-					}
 
 					if(BotAI.IsEntityValid(wep)) {
 						ename = wep.GetClassname();
@@ -1927,8 +1913,8 @@ function BotAI::DebugFunction( args ) {
 						local damagePos = BotAI.getEntityHeadPos(player);
 						damagePos = Vector(damagePos.x, damagePos.y, player.EyePosition().z);
 						BotAI.applyDamage(player, mob, dama, DMG_HEADSHOT, damagePos);
-						BotAI.spawnParticle("blood_impact_infected_01", mob.GetOrigin() + Vector(0, 0, 50), mob);
-						BotAI.spawnParticle("blood_melee_slash_TP_swing", mob.GetOrigin() + Vector(0, 0, 50), mob);
+						//BotAI.spawnParticle("blood_impact_infected_01", mob.GetOrigin() + Vector(0, 0, 50), mob);
+						//BotAI.spawnParticle("blood_melee_slash_TP_swing", mob.GetOrigin() + Vector(0, 0, 50), mob);
 					}
 				}
 				local infected = null;

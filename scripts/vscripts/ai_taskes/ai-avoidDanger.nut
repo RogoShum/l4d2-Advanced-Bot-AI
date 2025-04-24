@@ -181,39 +181,26 @@ class::AITaskAvoidDanger extends AITaskSingle {
 								}
 							}
 
-							if (!isTarget) {
-								local closest = null;
-								foreach(humanPlayer in BotAI.SurvivorHumanList) {
-									if (humanPlayer.IsIncapacitated() || humanPlayer.IsHangingFromLedge()) continue;
-									if (closest == null || BotAI.distanceof(player.GetOrigin(), closest.GetOrigin()) > BotAI.distanceof(player.GetOrigin(), humanPlayer.GetOrigin()))
-										closest = humanPlayer;
-								}
+							local closest = null;
+							foreach(humanPlayer in BotAI.SurvivorHumanList) {
+								if (humanPlayer.IsIncapacitated() || humanPlayer.IsHangingFromLedge()) continue;
+								if (closest == null || BotAI.distanceof(player.GetOrigin(), closest.GetOrigin()) > BotAI.distanceof(player.GetOrigin(), humanPlayer.GetOrigin()))
+									closest = humanPlayer;
+							}
 
-								if (BotAI.IsEntityValid(closest)) {
-									local function changeOrDieOrRun() {
-										if (!BotAI.IsEntityValid(danger) || !BotAI.IsAlive(danger)) return true;
-										local navigator = BotAI.getNavigator(player);
-										if (!navigator.isMoving("followPlayer"))
-											return true;
-										return false;
-									}
-									BotAI.botRunPos(player, closest, "followPlayer", 4, changeOrDieOrRun);
-								} else if (!hasRock) {
-									//vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
-									local randomSpot = player.TryGetPathableLocationWithin(300);
-
-									if (BotAI.distanceof(danger.GetOrigin(), randomSpot) > 500
-									&& !canHitTank(randomSpot)
-									&& !isTankBetweenHeights(randomSpot)) {
-										vecList[vecList.len()] <- randomSpot - player.GetOrigin();
-									} else {
-										vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
-									}
+							if (BotAI.IsEntityValid(closest)) {
+								local function changeOrDieOrRun() {
+									if (!BotAI.IsEntityValid(danger) || !BotAI.IsAlive(danger)) return true;
+									local navigator = BotAI.getNavigator(player);
+									if (!navigator.isMoving("followPlayer"))
+										return true;
+									return false;
 								}
+								BotAI.botRunPos(player, closest, "followPlayer", 4, changeOrDieOrRun);
 							} else if (!hasRock) {
 								local navigator = BotAI.getNavigator(player);
 								navigator.clearPath("followPlayer");
-								//vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 15, 35, 35, 35);
+								//vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
 								local randomSpot = player.TryGetPathableLocationWithin(300);
 
 								if (BotAI.distanceof(danger.GetOrigin(), randomSpot) > 500

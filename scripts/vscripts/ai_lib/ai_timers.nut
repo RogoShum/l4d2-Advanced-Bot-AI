@@ -12,6 +12,28 @@ function BotAI::bestAim() {
 	return 0.01;
 }
 
+function BotAI::damageTimer() {
+    local listLen = BotAI.damageList.len();
+    if (listLen == 0) return 0.005;
+
+    local executeCount = 1 + (listLen / 30).tointeger();
+
+	if (executeCount > listLen) {
+		executeCount = listLen;
+	}
+
+    for (local i = 0; i < executeCount; ++i) {
+        local damageFunc = BotAI.damageList.remove(0);
+        try {
+            damageFunc();
+        } catch (e) {
+            print("[ERROR] Damage func failed: " + e);
+        }
+    }
+
+    return 0.005;
+}
+
 function BotAI::moveFunc() {
 	foreach(player in BotAI.SurvivorBotList) {
 		if(player in BotAI.botMoveMap) {
@@ -292,7 +314,7 @@ function BotAI::createProjectileTargetTimer(projectile) {
 
 			local function avoidProjectile(danger) {
 				foreach(bot in BotAI.SurvivorBotList) {
-					if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp())
+					if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp() || BotAI.distanceof(bot.GetOrigin(), danger.GetOrigin() > 400))
 						continue;
 
 					if(BotAI.xyDotProduct(BotAI.normalize(danger.GetVelocity()), BotAI.normalize(bot.GetOrigin() - danger.GetOrigin())) > 0.5) {
@@ -700,6 +722,15 @@ function BotAI::loadTimers() {
 		_aimTimer.ValidateScriptScope();
 		local scrScope = _aimTimer.GetScriptScope();
 		scrScope["ThinkTimer"] <- BotAI.bestAim;
+		AddThinkToEnt(_aimTimer, "ThinkTimer");
+	}
+
+
+	_aimTimer = SpawnEntityFromTable("info_target", { targetname = "botai_damage_timer" });
+	if (_aimTimer != null) {
+		_aimTimer.ValidateScriptScope();
+		local scrScope = _aimTimer.GetScriptScope();
+		scrScope["ThinkTimer"] <- BotAI.damageTimer;
 		AddThinkToEnt(_aimTimer, "ThinkTimer");
 	}
 

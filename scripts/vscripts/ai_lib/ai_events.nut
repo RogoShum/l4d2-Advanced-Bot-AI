@@ -147,8 +147,6 @@
 	local p = GetPlayerFromUserID(event.userid);
 	local victim = BotAI.getBotLookAt(p);
 
-	NetProps.SetPropInt(p, "m_hObserverTarget", -1);
-
 	if("weapon" in event && event.weapon.find("claw") != null && !p.IsSurvivor()) {
 		foreach(bot in BotAI.SurvivorBotList) {
 			if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp())

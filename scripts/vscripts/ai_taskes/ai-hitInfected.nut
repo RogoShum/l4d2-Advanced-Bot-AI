@@ -65,7 +65,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 						playerNeedSave = savePlayer;
 					}
 
-				} else if (!BotAI.HasTank && (savePlayer.IsIncapacitated() || savePlayer.IsHangingFromLedge()) && !savePlayer.IsGettingUp() && dis) {
+				} else if (!BotAI.HasTank && (savePlayer.IsIncapacitated() || savePlayer.IsHangingFromLedge()) && !savePlayer.IsDominatedBySpecialInfected() && !savePlayer.IsGettingUp() && dis) {
 					playerFallingDown = savePlayer;
 				}
 			}

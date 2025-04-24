@@ -206,10 +206,13 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			}
 
 			if(target != player && targetName == "player" && target.IsSurvivor()) {
-				if(target.IsIncapacitated())
+				if(target.IsIncapacitated() && !target.IsDominatedBySpecialInfected()) {
 					HasPlayer = true;
-				if(BotAI.IsSurvivorTrapped(target))
+				}
+
+				if(target.IsDominatedBySpecialInfected()) {
 					Shot = true;
+				}
 			}
 
 			if(BotAI.IsPlayerReviving(player))

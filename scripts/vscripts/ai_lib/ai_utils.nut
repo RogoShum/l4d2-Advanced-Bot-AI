@@ -1426,10 +1426,27 @@ function BotAI::applyDamage(owner, target, amount, damageType, damagepos = null)
 		damagepos = BotAI.getEntityHeadPos(target);
 	}
 
-	if (BotAI.IsAlive(target)) {
-		target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), Vector(0, 0, 0)
-					, damagepos, amount, damageType);
+	local function damage() {
+		if (BotAI.IsAlive(target)) {
+			printl("kill alive: " + target)
+			target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), Vector(0, 0, 0),
+				damagepos, amount, damageType);
+		}
 	}
+
+	BotAI.damageList.append(damage);
+
+	/*
+	if (BotAI.BotCombatSkill == 0) {
+		if (BotAI.IsAlive(target)) {
+			printl("kill alive: " + target)
+			target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), Vector(0, 0, 0),
+				damagepos, amount, damageType);
+		}
+	} else {
+
+	}
+	*/
 }
 
 function BotAI::IsInCombat(player, lowCheck = false) {
