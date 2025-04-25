@@ -18,7 +18,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 	danger = {};
 
 	function singleUpdateChecker(player) {
-		this.tick = 8 - BotAI.BotCombatSkill * 4;
+		this.tick = 8 - BotAI.BotCombatSkill * 3;
 		if (this.tick < 2) {
 			this.tick = 2;
 		}
@@ -85,7 +85,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 		local dist = 450 + BotAI.BotCombatSkill * 50;
 		local entS = null;
 		local highestPriority = -1;
-		local awareAngle = 0.3 - (BotAI.BotCombatSkill * 0.33);
+		local awareAngle = 0.67 - (BotAI.BotCombatSkill * 0.38);
 		foreach(infected in BotAI.SpecialList) {
 			if (BotAI.IsAlive(infected) && !infected.IsGhost() && !BotAI.IsEntitySI(BotAI.GetTarget(infected)) && (infected.GetZombieType() != 8 || entS == null) && (BotAI.CanShotOtherEntityInSight(player, infected, awareAngle) || BotAI.IsEntityValid(BotAI.getSiVictim(infected)))) {
 				if (infected.GetZombieType() == 1) {

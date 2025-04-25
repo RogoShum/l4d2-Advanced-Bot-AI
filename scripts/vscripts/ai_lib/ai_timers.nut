@@ -12,28 +12,6 @@ function BotAI::bestAim() {
 	return 0.01;
 }
 
-function BotAI::damageTimer() {
-    local listLen = BotAI.damageList.len();
-    if (listLen == 0) return 0.005;
-
-    local executeCount = 1 + (listLen / 30).tointeger();
-
-	if (executeCount > listLen) {
-		executeCount = listLen;
-	}
-
-    for (local i = 0; i < executeCount; ++i) {
-        local damageFunc = BotAI.damageList.remove(0);
-        try {
-            damageFunc();
-        } catch (e) {
-            print("[ERROR] Damage func failed: " + e);
-        }
-    }
-
-    return 0.005;
-}
-
 function BotAI::moveFunc() {
 	foreach(player in BotAI.SurvivorBotList) {
 		if(player in BotAI.botMoveMap) {
@@ -181,6 +159,7 @@ function BotAI::taskTimer::avoidDanger() {
 				task.taskUpdate(player);
 			}
 		}
+		
 	}
 
 	return 0.01;
@@ -380,10 +359,10 @@ function BotAI::createPlayerTargetTimer(player) {
 
 		local selected = null;
 		local closestCom = null;
-		local selectedDis = 75 + BotAI.BotCombatSkill * 20;
-		local closestDis = 150 + BotAI.BotCombatSkill * 20;
-		local awareAngle = 0.75 - (BotAI.BotCombatSkill * 0.5);
-		local dangerAwareAngle = 0.5 - (BotAI.BotCombatSkill * 0.5);
+		local selectedDis = 75 + BotAI.BotCombatSkill * 15;
+		local closestDis = 150 + BotAI.BotCombatSkill * 15;
+		local awareAngle = 0.75 - (BotAI.BotCombatSkill * 0.39);
+		local dangerAwareAngle = 0.7 - (BotAI.BotCombatSkill * 0.39);
 
 		local isShove = BotAI.IsPressingShove(player);
 		local isHealing = BotAI.IsBotHealing(player);
@@ -740,15 +719,6 @@ function BotAI::loadTimers() {
 		_aimTimer.ValidateScriptScope();
 		local scrScope = _aimTimer.GetScriptScope();
 		scrScope["ThinkTimer"] <- BotAI.bestAim;
-		AddThinkToEnt(_aimTimer, "ThinkTimer");
-	}
-
-
-	_aimTimer = SpawnEntityFromTable("info_target", { targetname = "botai_damage_timer" });
-	if (_aimTimer != null) {
-		_aimTimer.ValidateScriptScope();
-		local scrScope = _aimTimer.GetScriptScope();
-		scrScope["ThinkTimer"] <- BotAI.damageTimer;
 		AddThinkToEnt(_aimTimer, "ThinkTimer");
 	}
 

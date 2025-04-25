@@ -328,15 +328,20 @@
 
 	if(p != null && p.IsSurvivor() && IsPlayerABot(p)) {
 		weapon <- p.GetActiveWeapon();
+		local maxClip = weapon.GetMaxClip1();
+		local clip = NetProps.GetPropInt(weapon, "m_iClip1") + 1;
+		if (clip > maxClip) {
+			clip = maxClip;
+		}
 
 		if (BotAI.BotCombatSkill > 2 || weapon.GetClassname() == "weapon_pistol" || weapon.GetClassname() == "weapon_pistol_magnum") {
-			NetProps.SetPropInt(weapon, "m_iClip1", NetProps.GetPropInt(weapon, "m_iClip1") + 1);
+			NetProps.SetPropInt(weapon, "m_iClip1", clip);
 		} else if (victim != null
 			&& ((victim.GetClassname() == "player" && !victim.IsSurvivor())
 			|| victim.GetClassname() == "witch")) {
-			NetProps.SetPropInt(weapon, "m_iClip1", NetProps.GetPropInt(weapon, "m_iClip1") + 1);
+			NetProps.SetPropInt(weapon, "m_iClip1", clip);
 		} else if (RandomInt(0, 2) == 0) {
-			NetProps.SetPropInt(weapon, "m_iClip1", NetProps.GetPropInt(weapon, "m_iClip1") + 1);
+			NetProps.SetPropInt(weapon, "m_iClip1", clip);
 		}
 	}
 }
@@ -832,7 +837,7 @@
 	BotAI.FinaleStart = true;
 }
 
-::BotAI.Events.OnGameEvent_player_connect_full <- function(event) {
+::BotAI.Events.OnGameEvent_round_freeze_end <- function(event) {
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("NoticeText", 15, false, BotAI.doNoticeText));
 }
 
