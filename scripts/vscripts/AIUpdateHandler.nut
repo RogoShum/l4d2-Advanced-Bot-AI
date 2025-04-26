@@ -163,7 +163,7 @@ if (!("VSLib" in getroottable())) {
 		MainMenu = {}
 
 		BotDebugMode = false
-		BotCombatSkill = 2
+		BotCombatSkill = 1
 		NeedGasFinding = true
 		NeedThrowGrenade = true
 		Immunity = false
@@ -173,6 +173,7 @@ if (!("VSLib" in getroottable())) {
 		Defibrillator = true
 		BackPack = true
 		ServerMode = false
+		ServerLanguage = "english"
 		ABA_Admins = {}
 		NoticeConfig = true
 		NeedBotAlive = true
@@ -394,39 +395,59 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 }
 
 ::BotAI.SaveSetting <- function() {
-	local settingList =
-	"BotCombatSkill = " + BotAI.BotCombatSkill.tostring() +
-	"\nBotDebugMode = " + BotAI.BotDebugMode.tostring() +
-	"\nNeedGasFinding = " + BotAI.NeedGasFinding.tostring() +
-	"\nNeedThrowGrenade = " + BotAI.NeedThrowGrenade.tostring() +
-	"\nImmunity = " + BotAI.Immunity.tostring() +
-	"\nPathFinding = " + BotAI.PathFinding.tostring() +
-	"\nUnstick = " + BotAI.Unstick.tostring() +
-	"\nDefibrillator = " + BotAI.Defibrillator.tostring() +
-	"\nServerMode = " + BotAI.ServerMode.tostring() +
-	"\nMelee = " + BotAI.Melee.tostring() +
-	"\nNoticeConfig = " + BotAI.NoticeConfig.tostring() +
-	"\nNeedBotAlive = " + BotAI.NeedBotAlive.tostring() +
-	"\nBackPack = " + BotAI.BackPack.tostring();
 
-	printl("[Bot AI] Save settings...");
-	StringToFile("advanced bot ai/settings.txt", settingList);
+    local settingList =
+        "BotCombatSkill = " + BotAI.BotCombatSkill.tostring() +
+        "\nBotDebugMode = " + BotAI.BotDebugMode.tostring() +
+        "\nNeedGasFinding = " + BotAI.NeedGasFinding.tostring() +
+        "\nNeedThrowGrenade = " + BotAI.NeedThrowGrenade.tostring() +
+        "\nImmunity = " + BotAI.Immunity.tostring() +
+        "\nPathFinding = " + BotAI.PathFinding.tostring() +
+        "\nUnstick = " + BotAI.Unstick.tostring() +
+        "\nDefibrillator = " + BotAI.Defibrillator.tostring() +
+        "\nServerMode = " + BotAI.ServerMode.tostring() +
+		"\nServerLanguage = \"" + BotAI.ServerLanguage.tostring() + "\"" +
+        "\nMelee = " + BotAI.Melee.tostring() +
+        "\nNoticeConfig = " + BotAI.NoticeConfig.tostring() +
+        "\nNeedBotAlive = " + BotAI.NeedBotAlive.tostring() +
+        "\nBackPack = " + BotAI.BackPack.tostring();
+
+    printl("[Bot AI] Save settings...");
+    StringToFile("advanced bot ai/settings.txt", settingList);
 }
 
-::BotAI.LoadSettings <- function ()
-{
+function BotAI::removeNullString(array) {
+	if (array.len() > 0) {
+        local lastIndex = array.len() - 1;
+        local lastElement = array[lastIndex];
+
+        if (lastElement.len() >= 2 && lastElement.slice(lastElement.len() - 2) == "00") {
+            array[lastIndex] = lastElement.slice(0, lastElement.len() - 3);
+        }
+    }
+}
+
+::BotAI.LoadSettings <- function () {
 	local fileContents = FileToString("advanced bot ai/settings.txt");
 	local settings = split(fileContents, "\r\n");
+	BotAI.removeNullString(settings);
 
-	foreach (setting in settings)
-	{
-		if ( setting.find("//") != null )
-		{
+	if (settings.len() > 0) {
+        local lastIndex = settings.len() - 1;
+        local lastElement = settings[lastIndex];
+
+        if (lastElement.len() >= 2 && lastElement.slice(lastElement.len() - 2) == "00") {
+            settings[lastIndex] = lastElement.slice(0, lastElement.len() - 3);
+        }
+    }
+
+	foreach (setting in settings) {
+		if ( setting.find("//") != null ) {
 			setting = BotAI.StringReplace(setting, "//" + ".*", "");
 			setting = rstrip(setting);
 		}
-		if ( setting != "" )
-		{
+
+		if ( setting != "" ) {
 			setting = BotAI.StringReplace(setting, "=", "<-");
 			local compiledscript = compilestring("BotAI." + setting);
 			compiledscript();
@@ -435,11 +456,10 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 
 	local admins_fileContents = FileToString("advanced bot ai/admins.txt");
 	local admins = split(admins_fileContents, "\r\n");
+	BotAI.removeNullString(admins);
 
-	foreach (admin in admins)
-	{
-		if ( admin.find("//") != null )
-		{
+	foreach (admin in admins) {
+		if ( admin.find("//") != null ) {
 			admin = BotAI.StringReplace(admin, "//" + ".*", "");
 			admin = rstrip(admin);
 		}
@@ -459,6 +479,7 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 	if(fileContents != null)
 	{
 		local usetargets = split(fileContents, "\r\n");
+		BotAI.removeNullString(usetargets);
 
 		foreach (usetarget in usetargets)
 		{
@@ -480,48 +501,48 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 
 
 	fileContents = FileToString("advanced bot ai/usetarget/UseTargetOriList.txt");
-	if(fileContents != null)
-	{
+	if(fileContents != null) {
 		local usetargetsOri = split(fileContents, "\r\n");
+		BotAI.removeNullString(usetargetsOri);
 
-	foreach (usetarget in usetargetsOri)
-	{
-		if ( usetarget.find("//") != null )
-		{
-			usetarget = BotAI.StringReplace(usetarget, "//" + ".*", "");
-			usetarget = rstrip(usetarget);
-		}
+		foreach (usetarget in usetargetsOri) {
+			if ( usetarget.find("//") != null )
+			{
+				usetarget = BotAI.StringReplace(usetarget, "//" + ".*", "");
+				usetarget = rstrip(usetarget);
+			}
 
-		if ( usetarget != "" && usetarget.find("=") != null)
-		{
-			local index = usetarget.find("=");
-			local newString = "BotAI.UseTargetOriList[\"" + usetarget.slice(0, index) + "\"] <- " + usetarget.slice(index + 1);
-			local compiledscript = compilestring(newString);
-			compiledscript();
+			if ( usetarget != "" && usetarget.find("=") != null)
+			{
+				local index = usetarget.find("=");
+				local newString = "BotAI.UseTargetOriList[\"" + usetarget.slice(0, index) + "\"] <- " + usetarget.slice(index + 1);
+				local compiledscript = compilestring(newString);
+				compiledscript();
+			}
 		}
 	}
-	}
+
 	fileContents = FileToString("advanced bot ai/usetarget/UseTargetVecList.txt");
-	if(fileContents != null)
-	{
-	local usetargetsVec = split(fileContents, "\r\n");
+	if(fileContents != null) {
+		local usetargetsVec = split(fileContents, "\r\n");
+		BotAI.removeNullString(usetargetsVec);
 
-	foreach (usetarget in usetargetsVec)
-	{
-		if ( usetarget.find("//") != null )
+		foreach (usetarget in usetargetsVec)
 		{
-			usetarget = BotAI.StringReplace(usetarget, "//" + ".*", "");
-			usetarget = rstrip(usetarget);
-		}
+			if ( usetarget.find("//") != null )
+			{
+				usetarget = BotAI.StringReplace(usetarget, "//" + ".*", "");
+				usetarget = rstrip(usetarget);
+			}
 
-		if ( usetarget != "" && usetarget.find("=") != null)
-		{
-			local index = usetarget.find("=");
-			local newString = "BotAI.UseTargetVecList[\"" + usetarget.slice(0, index) + "\"] <- " + usetarget.slice(index + 1);
-			local compiledscript = compilestring(newString);
-			compiledscript();
+			if ( usetarget != "" && usetarget.find("=") != null)
+			{
+				local index = usetarget.find("=");
+				local newString = "BotAI.UseTargetVecList[\"" + usetarget.slice(0, index) + "\"] <- " + usetarget.slice(index + 1);
+				local compiledscript = compilestring(newString);
+				compiledscript();
+			}
 		}
-	}
 	}
 }
 
@@ -529,15 +550,22 @@ getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 	if (typeof player == "VSLIB_PLAYER")
 		player = player.GetBaseEntity();
 
-	if (Director.IsSinglePlayerGame() || GetListenServerHost() == player || !BotAI.ServerMode)
+	if (IsDedicatedServer()) {
+		printl("IsDedicatedServer")
+	} else if (Director.IsSinglePlayerGame() || GetListenServerHost() == player || !BotAI.ServerMode) {
+		printl("IsSinglePlayerGame")
 		return true;
+	}
 
 	local steamid = player.GetNetworkIDString();
 
-	if (!steamid) return false;
+	if (!steamid) {
+		BotAI.SendPlayer(player, "botai_admin_only");
+		return false;
+	}
 
 	if ( !(steamid in BotAI.ABA_Admins) ) {
-		BotAI.EasyPrint("botai_admin_only");
+		BotAI.SendPlayer(player, "botai_admin_only");
 		return false;
 	}
 
@@ -1456,16 +1484,24 @@ function BotAI::locateUseTarget(args)
 ::BotAI.EasyPrint <- function (str, time = 0.2, args = "") {
 	local function cPrint(s) {
 		if (BotAI.BotDebugMode) {
-			printl(str);
+			printl(s);
 		}
-		ClientPrint(null, 3, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(s) + args);
+		ClientPrint(null, 5, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(s) + args);
 	}
 
 	::BotAI.Timers.AddTimer(time, false, cPrint, str);
 }
 
 ::BotAI.SendPlayer <- function (player, str) {
-	ClientPrint(player, 3, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(str));
+
+	local function cPrint(s) {
+		if (BotAI.BotDebugMode) {
+			printl(str);
+		}
+		ClientPrint(player, 5, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(str));
+	}
+
+	::BotAI.Timers.AddTimer(0.2, false, cPrint, str);
 }
 
 function BotAI::registerMenu() {
@@ -2371,7 +2407,7 @@ function resetAllBots() {
 	BotAI.splatRange <- Convars.GetFloat("z_exploding_splat_radius") + 10;
 	BotAI.tongueSpeed <- Convars.GetFloat("tongue_fly_speed");
 	BotAI.tongueRange <- Convars.GetFloat("tongue_range");
-	BotAI.language <- Convars.GetStr("cl_language");
+	BotAI.language <- BotAI.getSeverLanguage();
 	Convars.SetValue( "sv_consistency", 0 );
 	Convars.SetValue( "sb_melee_approach_victim", 0 );
 	Convars.SetValue( "sb_allow_shoot_through_survivors", 0 );

@@ -1413,6 +1413,14 @@ function BotAI::isEntityInfected(entity)
 	return _ent.GetClassname() == "infected" || _ent.GetClassname() == "witch" || _ent.GetClassname() == "player";
 }
 
+function BotAI::getSeverLanguage() {
+	if (!IsDedicatedServer() && !BotAI.ServerMode) {
+		return Convars.GetStr("cl_language").tostring();
+	} else {
+		return BotAI.ServerLanguage.tostring();
+	}
+}
+
 function BotAI::CanHumanSeePlace(posIn) {
 	foreach(sur in BotAI.SurvivorHumanList) {
 		if(BotAI.IsAlive(sur) && BotAI.VectorDotProduct(BotAI.normalize(sur.EyeAngles().Forward()), BotAI.normalize(posIn - sur.GetOrigin())) > 0)

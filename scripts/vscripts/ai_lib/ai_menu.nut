@@ -139,9 +139,10 @@ class ::HoloMenu.Menu {
     }
 
     function show(player) {
-        if(!Director.IsSinglePlayerGame() && GetListenServerHost() != player) {
+        if(IsDedicatedServer()) {
             BotAI.SendPlayer(player, "botai_no_holomenu");
         }
+
         display[player] <- true;
         local _icons = [];
         local forward = player.EyeAngles().Forward();

@@ -41,7 +41,7 @@ function I18n::getTranslationKeyByLang(language, transKey) {
 }
 
 function I18n::getTranslationKey(transKey) {
-	local language = Convars.GetStr("cl_language").tostring();
+	local language = BotAI.getSeverLanguage();
 	if(containLanguage(language) && transKey in getLanguage(language))
 		return getLanguage(language)[transKey];
 	if(existTranslationKey(transKey))

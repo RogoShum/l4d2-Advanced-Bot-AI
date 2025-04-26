@@ -159,7 +159,7 @@ function BotAI::taskTimer::avoidDanger() {
 				task.taskUpdate(player);
 			}
 		}
-		
+
 	}
 
 	return 0.01;
@@ -552,7 +552,7 @@ function BotAI::pingSystem() {
 		foreach(human in BotAI.SurvivorHumanList) {
 			if(human in BotAI.pingPoint) {
 				local bot = BotAI.pingPoint[human];
-				if(BotAI.IsEntityValid(bot)) {
+				if(BotAI.IsEntityValid(bot) && !IsDedicatedServer()) {
 					DebugDrawText(bot.EyePosition() + Vector(0, 0, 20), "♦", false, 0.1);
 					DebugDrawCircle(bot.GetOrigin(), Vector(255, 0, 255), 0.15, 17, false, 0.1);
 					DebugDrawCircle(bot.GetOrigin(), Vector(255, 0, 255), 0.2, 12.5, false, 0.1);
