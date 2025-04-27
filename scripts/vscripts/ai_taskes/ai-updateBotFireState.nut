@@ -102,7 +102,7 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			local meleeRange = Convars.GetFloat("melee_range") + skillFactor;
 
 			if(targetName == "player" && target.IsSurvivor() && target != player) {
-				if((target.IsIncapacitated() || target.IsHangingFromLedge()) && !target.IsGettingUp() && !target.IsDominatedBySpecialInfected() && distance < 150 && !BotAI.HasTank) {
+				if((target.IsIncapacitated() || target.IsHangingFromLedge()) && !BotAI.isPlayerBeingRevived(target) && !target.IsDominatedBySpecialInfected() && distance < 150 && !BotAI.HasTank) {
 					DoEntFire("!self", "Use", "", 0, player, target);
 					BotAI.ForceButton(player, 32 , 5);
 				}

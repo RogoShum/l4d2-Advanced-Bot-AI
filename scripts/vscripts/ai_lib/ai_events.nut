@@ -132,7 +132,7 @@
 				r = 0;
 				g = 255;
 			} else {
-				BotAI.applyDamage(bot, target, BotAI.getDamage(bot.GetActiveWeapon()) * 0.1 * BotAI.BotCombatSkill, DMG_HEADSHOT);
+				BotAI.applyDamage(bot, target, BotAI.getDamage(bot.GetActiveWeapon()) * 0.1 * BotAI.BotCombatSkill, BotAI.headshotDmg);
 			}
 			if(BotAI.BotDebugMode) {
 				DebugDrawBox(target.GetCenter(), Vector(-1, -1, -1), Vector(1, 1, 1), 0, 0, 255, 0.2, 1);
@@ -147,13 +147,15 @@
 	local p = GetPlayerFromUserID(event.userid);
 	local victim = BotAI.getBotLookAt(p);
 
+	/*
 	if("weapon" in event && event.weapon.find("claw") != null && !p.IsSurvivor()) {
 		foreach(bot in BotAI.SurvivorBotList) {
-			if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp())
+			if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || BotAI.isPlayerBeingRevived(bot))
 				continue;
 		}
 		return;
 	}
+	*/
 
 	if(BotAI.IsEntitySurvivor(p)) {
 		if(BotAI.BotDebugMode) {
@@ -177,7 +179,7 @@
 			if(BotAI.IsEntitySurvivor(target) && target.IsDominatedBySpecialInfected()) {
 				local realTarget = target.GetSpecialInfectedDominatingMe();
 				if(realTarget.GetZombieType() == 5) {
-					realTarget.TakeDamage(BotAI.getDamage(ename)*0.7, DMG_BULLET, p);
+					realTarget.TakeDamage(BotAI.getDamage(ename)*0.7, BotAI.headshotDmg, p);
 					pass = true;
 				} else if(realTarget.GetZombieType() == 1 && RandomInt(0, 1) == 0) {
 					BotAI.breakTongue(realTarget);
@@ -189,7 +191,7 @@
 			}
 
 			if(BotAI.IsEntityValid(target) && target.GetClassname() == "tank_rock") {
-				target.TakeDamage(300, DMG_BULLET, p);
+				target.TakeDamage(300, BotAI.headshotDmg, p);
 				pass = true;
 			}
 		}
@@ -199,7 +201,7 @@
 			counterSpecial(BotAI.botAim[p], false);
 		}
 
-		local isSniper = ename == "weapon_sniper_awp" || ename == "weapon_sniper_scout" || ename == "weapon_pumpshotgun" || ename == "weapon_shotgun_chrome";
+		local isSniper = ename == "weapon_sniper_awp" || ename == "weapon_sniper_scout" || ename == "weapon_pumpshotgun" || ename == "weapon_shotgun_chrome" || ename == "weapon_shotgun_chrome" || ename == "weapon_pistol" || ename == "weapon_pistol_magnum";
 
 		if(ename == "weapon_melee" || ename == "weapon_chainsaw") {
 			local target = null;
@@ -217,7 +219,7 @@
 			while(target = Entities.FindByClassnameWithin(target, "infected", p.GetOrigin(), range)) {
 				if(BotAI.IsEntityValid(target) && BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (0.5 - additionAngle)) {
 					damaged = true;
-					BotAI.applyDamage(p, target, target.GetHealth(), -2145386492, damagePos);
+					BotAI.applyDamage(p, target, target.GetHealth(), BotAI.meleeDmg, damagePos);
 					BotAI.spawnParticle("blood_impact_infected_01", target.GetOrigin() + Vector(0, 0, 50), target);
 					BotAI.spawnParticle("blood_melee_slash_TP_swing", target.GetOrigin() + Vector(0, 0, 50), target);
 				}
@@ -228,7 +230,7 @@
 				if (BotAI.IsEntitySI(target) && BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range - skillFactor
 				&& BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (0.7 - additionAngle)) {
 					damaged = true;
-					BotAI.applyDamage(p, target, TD, -2145386492, damagePos);
+					BotAI.applyDamage(p, target, TD, BotAI.meleeDmg, damagePos);
 					BotAI.spawnParticle("blood_impact_infected_01", target.GetOrigin() + Vector(0, 0, 50), target);
 					BotAI.spawnParticle("blood_melee_slash_TP_swing", target.GetOrigin() + Vector(0, 0, 50), target);
 				}
@@ -239,7 +241,7 @@
 				if (BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range - skillFactor
 				&& BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (0.7 - additionAngle)) {
 					damaged = true;
-					BotAI.applyDamage(p, target, target.GetHealth() * 0.15, -2145386492, damagePos);
+					BotAI.applyDamage(p, target, target.GetHealth() * 0.15, BotAI.meleeDmg, damagePos);
 					BotAI.spawnParticle("blood_impact_infected_01", target.GetOrigin() + Vector(0, 0, 50), target);
 					BotAI.spawnParticle("blood_melee_slash_TP_swing", target.GetOrigin() + Vector(0, 0, 50), target);
 				}
@@ -255,6 +257,11 @@
 			if(isSniper) {
 				mult = 0.3;
 			}
+
+			if(BotAI.BotCombatSkill > 3) {
+				mult = 0.3;
+			}
+
 			local endTime = NetProps.GetPropFloat(wep, "m_flNextPrimaryAttack");
 			local nowTime = Time();
 			local duration = (endTime - nowTime) * mult;
@@ -293,7 +300,7 @@
 		mult = mult * BotAI.BotCombatSkill;
 
 		local function hit(health) {
-			BotAI.applyDamage(p, victim, health, DMG_HEADSHOT);
+			BotAI.applyDamage(p, victim, health, BotAI.headshotDmg);
 		}
 
 		if(victim.GetClassname() == "witch") {
@@ -338,9 +345,11 @@
 		return;
 
 	reviving <- GetPlayerFromUserID(event.userid);
+	revived <- GetPlayerFromUserID(event.subject);
 
 	BotAI.SetPlayerRevived(reviving, null);
 	BotAI.SetPlayerReviving(reviving, false);
+	BotAI.setPlayerBeingRevived(revived, false);
 }
 
 
@@ -388,6 +397,7 @@
 
 	BotAI.SetPlayerRevived(reviving, revived);
 	BotAI.SetPlayerReviving(reviving, true);
+	BotAI.setPlayerBeingRevived(revived, true);
 	BotAI.setBotHealingTime(reviving, Time());
 }
 
@@ -402,6 +412,7 @@
 			revived.ReviveFromIncap();
 	}
 
+	BotAI.setPlayerBeingRevived(revived, false);
 	BotAI.SetPlayerRevived(reviving, null);
 	BotAI.SetPlayerReviving(reviving, false);
 }
@@ -434,7 +445,7 @@
 
 	if(victim != null && BotAI.IsPlayerEntityValid(attacker) && IsPlayerABot(attacker) && attacker.IsSurvivor()) {
 		if(mp_gamemode == "realism") {
-			BotAI.applyDamage(attacker, victim, 75, DMG_BULLET);
+			BotAI.applyDamage(attacker, victim, 75, BotAI.headshotDmg);
 		}
 	}
 }
@@ -871,7 +882,7 @@
 		return;
 
 	if(BotAI.IsPlayerEntityValid(attacker) && attacker.IsSurvivor() && !attacker.IsDead() && IsPlayerABot(attacker)) {
-		BotAI.applyDamage(attacker, victim, 15, DMG_HEADSHOT);
+		BotAI.applyDamage(attacker, victim, 15, BotAI.headshotDmg);
 
 		if(BotAI.IsAlive(victim)) {
 			BotAI.applyPushVelocity(attacker, victim);

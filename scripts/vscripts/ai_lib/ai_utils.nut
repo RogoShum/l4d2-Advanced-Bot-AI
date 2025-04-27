@@ -1437,24 +1437,16 @@ function BotAI::applyDamage(owner, target, amount, damageType, damagepos = null)
 	}
 
 	if (BotAI.IsAlive(target)) {
-		if (BotAI.BotDebugMode) {
-			printl("kill alive: " + target)
+		local inflictor = owner;
+		local weaponType = owner.GetActiveWeapon().GetClassname();
+
+		if(weaponType == "weapon_chainsaw" || weaponType == "weapon_melee") {
+			inflictor = owner.GetActiveWeapon();
 		}
-		target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), Vector(0, 0, 0),
+
+		target.TakeDamageEx(inflictor, owner, owner.GetActiveWeapon(), Vector(0, 0, 0),
 			damagepos, amount, damageType);
 	}
-
-	/*
-	if (BotAI.BotCombatSkill == 0) {
-		if (BotAI.IsAlive(target)) {
-			printl("kill alive: " + target)
-			target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), Vector(0, 0, 0),
-				damagepos, amount, damageType);
-		}
-	} else {
-
-	}
-	*/
 }
 
 function BotAI::IsInCombat(player, lowCheck = false) {
@@ -2599,8 +2591,7 @@ function BotAI::setLastStrike(player) {
 	player.SetReviveCount(maxIncap);
 }
 
-function BotAI::getIsMelee(player)
-{
+function BotAI::getIsMelee(player) {
 	weaponN <- player.GetActiveWeapon();
 
 	if(weaponN == null || !weaponN.IsValid())
@@ -2610,6 +2601,7 @@ function BotAI::getIsMelee(player)
 
 	if(wname == "weapon_chainsaw" || wname == "weapon_melee")
 		return true;
+
 	return false;
 }
 
@@ -2974,16 +2966,23 @@ function BotAI::getPlayerTotalHealth(player) {
 	return player.GetEntityIndex() in BotAI.NeedRevive && BotAI.NeedRevive[player.GetEntityIndex()];
 }
 
-::BotAI.SetPlayerRevived <- function(player, another)
-{
+::BotAI.SetPlayerRevived <- function(player, another) {
 	BotAI.RevivedPlayer[player.GetEntityIndex()] <- another;
 }
 
-::BotAI.getPlayerRevived <- function (player)
-{
+::BotAI.getPlayerRevived <- function (player) {
 	if(player.GetEntityIndex() in BotAI.RevivedPlayer)
 		return BotAI.RevivedPlayer[player.GetEntityIndex()];
 	return null;
+}
+
+function BotAI::setPlayerBeingRevived(player, bol) {
+	BotAI.BeingRevivedPlayer[player.GetEntityIndex()] <- bol;
+}
+
+function BotAI::isPlayerBeingRevived(player) {
+	if(!BotAI.IsEntityValid(player)) return false;
+	return player.GetEntityIndex() in BotAI.BeingRevivedPlayer && BotAI.BeingRevivedPlayer[player.GetEntityIndex()];
 }
 
 function BotAI::SetPlayerTarget(player, target)

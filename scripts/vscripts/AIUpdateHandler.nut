@@ -159,6 +159,7 @@ if (!("VSLib" in getroottable())) {
 
 		NeedRevive = {}
 		RevivedPlayer = {}
+		BeingRevivedPlayer = {}
 
 		MainMenu = {}
 
@@ -342,6 +343,9 @@ getconsttable()["DMG_DROWN"] <- (1 << 14);
 getconsttable()["BOT_CANT_SEE"] <- (1 << 0);
 
 getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
+
+BotAI.headshotDmg <- DMG_BULLET | DMG_HEADSHOT | (1 << 31);
+BotAI.meleeDmg <- DMG_MELEE | DMG_HEADSHOT | (1 << 31);
 
 ::BotAI.SaveUseTarget <- function()
 {
@@ -1903,7 +1907,7 @@ function BotAI::ResetBotFireRate() {
 
 ::NavigatorPause.fall <- function(player) {
 	if(!BotAI.IsEntityValid(player)) return true;
-	if(player.IsDominatedBySpecialInfected() || player.IsGettingUp() || player.IsStaggering() || player.IsIncapacitated() || player.IsHangingFromLedge()) {
+	if(player.IsDominatedBySpecialInfected() || BotAI.isPlayerBeingRevived(player) || player.IsStaggering() || player.IsIncapacitated() || player.IsHangingFromLedge()) {
 		return true;
 	}
 
@@ -1978,11 +1982,9 @@ function BotAI::DebugFunction( args ) {
 			printl("player observer: " + NetProps.GetPropEntity(player, "m_hObserverTarget"));
 			*/
 
-			if(BotAI.BotDebugMode) {
-				local target = BotAI.CanSeeOtherEntityPrintName(player, 9999, 1, g_MapScript.TRACE_MASK_ALL);
-
-				/*
-								local function kill(mob) {
+			/*
+			if(BotAI.BotDebugMode && BotAI.IsPressingJump(player)) {
+					local function kill(mob) {
 					local wep = player.GetActiveWeapon();
 					local ename = " ";
 					local dama = 300;
@@ -1994,11 +1996,11 @@ function BotAI::DebugFunction( args ) {
 					local isMelee = ename == "weapon_melee" || ename == "weapon_chainsaw";
 
 					if (!isMelee) {
-						BotAI.applyDamage(player, mob, dama, DMG_HEADSHOT);
+						BotAI.applyDamage(player, mob, dama, BotAI.headshotDmg);
 					} else {
 						local damagePos = BotAI.getEntityHeadPos(player);
 						damagePos = Vector(damagePos.x, damagePos.y, player.EyePosition().z);
-						BotAI.applyDamage(player, mob, dama, DMG_HEADSHOT, damagePos);
+						BotAI.applyDamage(player, mob, dama, BotAI.meleeDmg, damagePos);
 						//BotAI.spawnParticle("blood_impact_infected_01", mob.GetOrigin() + Vector(0, 0, 50), mob);
 						//BotAI.spawnParticle("blood_melee_slash_TP_swing", mob.GetOrigin() + Vector(0, 0, 50), mob);
 					}
@@ -2019,8 +2021,9 @@ function BotAI::DebugFunction( args ) {
 				while(witch = Entities.FindByClassnameWithin(witch, "witch", player.GetCenter(), 300)) {
 					kill(witch);
 				}
-				*/
+
 			}
+			*/
 		} else if (leader == null || GetFlowDistanceForPosition(player.GetOrigin()) > GetFlowDistanceForPosition(leader.GetOrigin())) {
 			leader = player;
 		}

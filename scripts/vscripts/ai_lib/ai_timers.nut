@@ -15,7 +15,7 @@ function BotAI::bestAim() {
 function BotAI::moveFunc() {
 	foreach(player in BotAI.SurvivorBotList) {
 		if(player in BotAI.botMoveMap) {
-			if(player.IsIncapacitated() || player.IsDominatedBySpecialInfected() || player.IsGettingUp() || BotAI.IsPlayerReviving(player)) {
+			if(player.IsIncapacitated() || player.IsDominatedBySpecialInfected() || BotAI.isPlayerBeingRevived(player) || BotAI.IsPlayerReviving(player)) {
 				BotAI.botMoveMap[player] = Vector(0, 0, 0);
 				continue;
 			}
@@ -217,7 +217,7 @@ function BotAI::createRockTargetTimer() {
 			isDanger = true;
 			local function avoidProjectile(rock) {
 				foreach(bot in BotAI.SurvivorBotList) {
-					if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp())
+					if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || BotAI.isPlayerBeingRevived(bot))
 						continue;
 
 					if(BotAI.xyDotProduct(BotAI.normalize(rock.GetVelocity()), BotAI.normalize(bot.GetOrigin() - rock.GetOrigin())) > 0.5) {
@@ -281,7 +281,7 @@ function BotAI::createProjectileTargetTimer(projectile) {
 
 			local function avoidProjectile(danger) {
 				foreach(bot in BotAI.SurvivorBotList) {
-					if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp() || BotAI.distanceof(bot.GetOrigin(), danger.GetOrigin()) > 400)
+					if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || BotAI.isPlayerBeingRevived(bot) || BotAI.distanceof(bot.GetOrigin(), danger.GetOrigin()) > 400)
 						continue;
 
 					if(BotAI.xyDotProduct(BotAI.normalize(danger.GetVelocity()), BotAI.normalize(bot.GetOrigin() - danger.GetOrigin())) > 0.5) {
@@ -341,8 +341,20 @@ function BotAI::createPlayerTargetTimer(player) {
 		local closestCom = null;
 		local selectedDis = 75 + BotAI.BotCombatSkill * 15;
 		local closestDis = 150 + BotAI.BotCombatSkill * 15;
-		local awareAngle = 0.85 - (BotAI.BotCombatSkill * 0.5);
-		local dangerAwareAngle = 0.85 - (BotAI.BotCombatSkill * 0.5);
+
+		local awareAngle = 0.996;
+		local dangerAwareAngle = 0.707;
+
+		if (BotAI.BotCombatSkill == 1) {
+			awareAngle = 0.707;
+			dangerAwareAngle = 0.26;
+		} else if (BotAI.BotCombatSkill == 2) {
+			awareAngle = 0.0;
+			dangerAwareAngle = -0.26;
+		} else if (BotAI.BotCombatSkill >= 3) {
+			awareAngle = -2.0;
+			dangerAwareAngle = -2.0;
+		}
 
 		local isShove = BotAI.IsPressingShove(player);
 		local isHealing = BotAI.IsBotHealing(player);

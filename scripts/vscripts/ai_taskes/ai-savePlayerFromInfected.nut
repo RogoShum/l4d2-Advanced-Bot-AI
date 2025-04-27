@@ -119,7 +119,7 @@ class ::AITaskSavePlayer extends AITaskGroup
 			BotAI.botRunPos(player, smoker, "savePlayer", 5, needSave);
 		} else {
 			local function needSave() {
-				if(!BotAI.IsAlive(victim) || victim.IsGettingUp()) return true;
+				if(!BotAI.IsAlive(victim) || BotAI.isPlayerBeingRevived(victim)) return true;
 
 				return !victim.IsDominatedBySpecialInfected() && !victim.IsIncapacitated() && !victim.IsHangingFromLedge();
 			}

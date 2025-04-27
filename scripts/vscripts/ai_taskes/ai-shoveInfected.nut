@@ -69,26 +69,21 @@ class ::AITaskShoveInfected extends AITaskSingle {
 			if(needShove) {
 				BotAI.SetTarget(player, target);
 
-				local chance = 0;
+				local chance = 2;
 				local function reassess() {
-					if(BotAI.getPlayerTotalHealth(player) <= 60 && chance > 0)
-						chance -= 1;
-					if(BotAI.getPlayerTotalHealth(player) <= 40 && chance > 0)
-						chance -= 1;
-					if(BotAI.getPlayerTotalHealth(player) <= 30 && chance > 0)
-						chance -= 1;
-					if(BotAI.getPlayerTotalHealth(player) <= 20 && chance > 0)
-						chance -= 1;
+					if(BotAI.getPlayerTotalHealth(player) <= 60)
+						chance += 1;
+					if(BotAI.getPlayerTotalHealth(player) <= 30)
+						chance += 1;
+				}
+
+				chance -= BotAI.BotCombatSkill;
+
+				if (BotAI.BotCombatSkill > 2) {
+					chance = 0;
 				}
 
 				if(target.GetClassname() == "player" && !target.IsSurvivor() && (target.GetZombieType() == 1 || target.GetZombieType() == 3 || target.GetZombieType() == 5)) {
-					if(BotAI.BotCombatSkill < 2)
-						chance += 2;
-
-					if (BotAI.BotCombatSkill > 2) {
-						chance = 0;
-					}
-
 					reassess();
 
 					if(RandomInt(0, chance) == 0) {
@@ -112,8 +107,9 @@ class ::AITaskShoveInfected extends AITaskSingle {
 
 					reassess();
 
-					if (RandomInt(0, chance) == 0)
+					if (RandomInt(0, chance) == 0) {
 						BotAI.shoveCommon(target);
+					}
 				}
 
 				NetProps.SetPropInt(player, "m_iShovePenalty", 0);
@@ -124,7 +120,7 @@ class ::AITaskShoveInfected extends AITaskSingle {
 				BotAI.ForceButton(player, 2048 , 0.1);
 				local playerIn = player;
 				local function breakTongue() {
-					if(BotAI.IsEntitySurvivor(target) && BotAI.CanSeeLocation(playerIn, target.GetOrigin(), 75)&& target.IsDominatedBySpecialInfected()
+					if(BotAI.IsEntitySurvivor(target) && BotAI.CanSeeLocation(playerIn, target.GetOrigin(), 75) && target.IsDominatedBySpecialInfected()
 					&& target.GetSpecialInfectedDominatingMe().GetZombieType() == 1) {
 						BotAI.breakTongue(target.GetSpecialInfectedDominatingMe());
 					}

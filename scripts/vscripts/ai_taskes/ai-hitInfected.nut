@@ -65,7 +65,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 						playerNeedSave = savePlayer;
 					}
 
-				} else if (!BotAI.HasTank && (savePlayer.IsIncapacitated() || savePlayer.IsHangingFromLedge()) && !savePlayer.IsDominatedBySpecialInfected() && !savePlayer.IsGettingUp() && dis) {
+				} else if (!BotAI.HasTank && (savePlayer.IsIncapacitated() || savePlayer.IsHangingFromLedge()) && !savePlayer.IsDominatedBySpecialInfected() && !BotAI.isPlayerBeingRevived(savePlayer) && dis) {
 					playerFallingDown = savePlayer;
 				}
 			}
@@ -82,10 +82,19 @@ class ::AITaskHitInfected extends AITaskSingle {
 			selected = BotAI.dangerInfected[player];
 		}
 
-		local dist = 450 + BotAI.BotCombatSkill * 50;
+		local dist = 300 + BotAI.BotCombatSkill * 120;
 		local entS = null;
 		local highestPriority = -1;
-		local awareAngle = 0.67 - (BotAI.BotCombatSkill * 0.38);
+		local awareAngle = 0.9397;
+
+		if (BotAI.BotCombatSkill == 1) {
+			awareAngle = 0.707;
+		} else if (BotAI.BotCombatSkill == 2) {
+			awareAngle = 0.0;
+		} else if (BotAI.BotCombatSkill >= 3) {
+			awareAngle = -2.0;
+		}
+
 		foreach(infected in BotAI.SpecialList) {
 			if (BotAI.IsAlive(infected) && !infected.IsGhost() && !BotAI.IsEntitySI(BotAI.GetTarget(infected)) && (infected.GetZombieType() != 8 || entS == null) && (BotAI.CanShotOtherEntityInSight(player, infected, awareAngle) || BotAI.IsEntityValid(BotAI.getSiVictim(infected)))) {
 				if (infected.GetZombieType() == 1) {
@@ -93,7 +102,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 				} else if (infected.GetZombieType() == 8) {
 					dist = 800;
 				} else {
-					dist = 450 + BotAI.BotCombatSkill * 50;
+					dist = 300 + BotAI.BotCombatSkill * 120;
 				}
 
 				local currentPriority = 0;
