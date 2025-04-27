@@ -1119,8 +1119,11 @@ function BotAI::AdjustBotsUpdateRate(args) {
 						area.MarkAsBlocked(2);
 						BotAI.dangerPlace[area.GetID()] <- area;
 					}
+
+					Convars.SetValue( "sb_revive_friend_distance", 20 );
 				} else if(area.GetID() in BotAI.dangerPlace) {
 					area.UnblockArea();
+					Convars.SetValue( "sb_revive_friend_distance", BotAI.reviveDistance );
 				}
 			}
 		}
@@ -1129,6 +1132,8 @@ function BotAI::AdjustBotsUpdateRate(args) {
 			area.UnblockArea();
 		}
 		BotAI.dangerPlace = {};
+
+		Convars.SetValue( "sb_revive_friend_distance", BotAI.reviveDistance );
 	}
 }
 
@@ -1326,6 +1331,7 @@ function BotAI::locateUseTarget(args)
 		}
 	}
 
+	BotExitMenuCmd(speaker, args, args1);
 	BotAI.SaveSetting();
 }
 
@@ -1785,7 +1791,7 @@ function BotAI::fromParams(params, lang) {
 function BotAI::displayOptionMenu(player, args, args1) {
 	local lang = BotAI.language;
 	local function top(menu) {
-		menu.AddOption(BotAI.fromParams(BotAI.NeedGasFinding, lang)+I18n.getTranslationKeyByLang(lang, "menu_find_gas"), BotGascanFindCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_bot_skill") + ": " + (1 + BotAI.BotCombatSkill).tostring(), BotAI.displayOptionMenuBotCombat);
 		menu.AddOption(BotAI.fromParams(BotAI.NeedThrowGrenade, lang)+I18n.getTranslationKeyByLang(lang, "menu_throw"), BotThrowGrenadeCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Melee, lang)+I18n.getTranslationKeyByLang(lang, "menu_take_melee"), BotMeleeCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Immunity, lang)+I18n.getTranslationKeyByLang(lang, "menu_immunity"), BotImmunityCmd);
@@ -1808,7 +1814,49 @@ function BotAI::displayOptionMenuNext(player, args, args1) {
 	local function top(menu) {
 		menu.AddOption(BotAI.fromParams(BotAI.NeedBotAlive, lang)+I18n.getTranslationKeyByLang(lang, "menu_alive"), BotAliveCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Defibrillator, lang)+I18n.getTranslationKeyByLang(lang, "menu_defibrillator"), BotDefibrillatorCmd);
+		menu.AddOption(BotAI.fromParams(BotAI.NeedGasFinding, lang)+I18n.getTranslationKeyByLang(lang, "menu_find_gas"), BotGascanFindCmd);
+	}
+
+	local function bot(menu) {
+		menu.AddOption("emp_=", BotEmptyCmd);
 		menu.AddOption("emp_", BotEmptyCmd);
+		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
+	}
+
+	BotAI.buildMenu(player, top, bot);
+}
+
+function BotAI::displayOptionMenuBotCombat(player, args, args1) {
+	local lang = BotAI.language;
+	local function combatSkill(value) {
+		local ability = [];
+		ability.append(value.tostring());
+		BotAISkillCmd(player, ability, "");
+	}
+	local function normal(player, args, args1) {
+		combatSkill(1);
+	}
+	local function high(player, args, args1) {
+		combatSkill(2);
+	}
+	local function ultra(player, args, args1) {
+		combatSkill(3);
+	}
+	local function extreme(player, args, args1) {
+		combatSkill(4);
+	}
+	local function pro(player, args, args1) {
+		combatSkill(5);
+	}
+
+	local function top(menu) {
+		menu.AddOption("1", normal);
+		menu.AddOption("2", high);
+		menu.AddOption("3", ultra);
+		menu.AddOption("4", extreme);
+		menu.AddOption("5", pro);
 	}
 
 	local function bot(menu) {
@@ -2408,6 +2456,8 @@ function resetAllBots() {
 	BotAI.tongueSpeed <- Convars.GetFloat("tongue_fly_speed");
 	BotAI.tongueRange <- Convars.GetFloat("tongue_range");
 	BotAI.language <- BotAI.getSeverLanguage();
+	BotAI.reviveDistance <- Convars.GetFloat("sb_revive_friend_distance");
+
 	Convars.SetValue( "sv_consistency", 0 );
 	Convars.SetValue( "sb_melee_approach_victim", 0 );
 	Convars.SetValue( "sb_allow_shoot_through_survivors", 0 );

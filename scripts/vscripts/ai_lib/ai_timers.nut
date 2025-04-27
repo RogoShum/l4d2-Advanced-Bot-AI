@@ -15,34 +15,14 @@ function BotAI::bestAim() {
 function BotAI::moveFunc() {
 	foreach(player in BotAI.SurvivorBotList) {
 		if(player in BotAI.botMoveMap) {
-			if(BotAI.hasContext(player, "BOTAI_KNOCK") || player.IsIncapacitated() || player.IsDominatedBySpecialInfected() || player.IsGettingUp() || BotAI.IsPlayerReviving(player)) {
+			if(player.IsIncapacitated() || player.IsDominatedBySpecialInfected() || player.IsGettingUp() || BotAI.IsPlayerReviving(player)) {
 				BotAI.botMoveMap[player] = Vector(0, 0, 0);
 				continue;
 			}
 			BotAI.DisableButton(player, BUTTON_WALK, 1.0);
-			local vec = Vector(0, 0, 0);
-			local inAir = BotAI.hasContext(player, "BOTAI_JUMP");
-			if(inAir && (player.GetVelocity().x > BOT_JUMP_SPEED_LIMIT || player.GetVelocity().y > BOT_JUMP_SPEED_LIMIT)) {
-				local z = player.GetVelocity().z;
-				local newVec = Vector(player.GetVelocity().x, player.GetVelocity().y, 0);
-				newVec = BotAI.normalize(newVec).Scale(BOT_JUMP_SPEED_LIMIT);
-				player.SetVelocity(Vector(newVec.x, newVec.y, z));
-			}
 
-			inAir = inAir || !BotAI.IsOnGround(player) || BotAI.HasForcedButton(player, 2) || BotAI.IsPressingJump(player);
-
-			vec = BotAI.botMoveMap[player];
+			local vec = BotAI.botMoveMap[player];
 			if(vec.Length() >= 5) {
-				local dot = BotAI.xyDotProduct(BotAI.normalize(player.GetVelocity()), BotAI.normalize(vec));
-				dot = (dot*-1+1)*0.25*(player.GetVelocity().Length()/220)+1;
-				vec *= dot;
-
-				if(inAir) {
-					if(vec.Length() > BOT_JUMP_SPEED_LIMIT) {
-						vec = BotAI.normalize(vec).Scale(BOT_JUMP_SPEED_LIMIT);
-					}
-				}
-
 				if(vec.Length() > 300) {
 					vec = BotAI.normalize(vec).Scale(300);
 				}
@@ -361,8 +341,8 @@ function BotAI::createPlayerTargetTimer(player) {
 		local closestCom = null;
 		local selectedDis = 75 + BotAI.BotCombatSkill * 15;
 		local closestDis = 150 + BotAI.BotCombatSkill * 15;
-		local awareAngle = 0.75 - (BotAI.BotCombatSkill * 0.39);
-		local dangerAwareAngle = 0.7 - (BotAI.BotCombatSkill * 0.39);
+		local awareAngle = 0.85 - (BotAI.BotCombatSkill * 0.5);
+		local dangerAwareAngle = 0.85 - (BotAI.BotCombatSkill * 0.5);
 
 		local isShove = BotAI.IsPressingShove(player);
 		local isHealing = BotAI.IsBotHealing(player);

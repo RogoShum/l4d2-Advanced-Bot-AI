@@ -979,7 +979,9 @@ function BotAI::printArray(arri, valFunc) {
 
 function BotAI::hookViewEntity(ent_self, ent_b) {
 	if(BotAI.IsEntityValid(ent_b)) {
-		printl("player " + BotAI.getPlayerBaseName(ent_self) + " hook: " + ent_b);
+		if (BotAI.BotDebugMode) {
+			printl("player " + BotAI.getPlayerBaseName(ent_self) + " hook: " + ent_b);
+		}
 
 		//NetProps.SetPropEntity(ent_self, "m_viewtarget", ent_b);
 	} else {
@@ -1435,7 +1437,9 @@ function BotAI::applyDamage(owner, target, amount, damageType, damagepos = null)
 	}
 
 	if (BotAI.IsAlive(target)) {
-		printl("kill alive: " + target)
+		if (BotAI.BotDebugMode) {
+			printl("kill alive: " + target)
+		}
 		target.TakeDamageEx(owner, owner, owner.GetActiveWeapon(), Vector(0, 0, 0),
 			damagepos, amount, damageType);
 	}

@@ -151,16 +151,6 @@
 		foreach(bot in BotAI.SurvivorBotList) {
 			if(BotAI.IsPlayerClimb(bot) || bot.IsIncapacitated() || bot.IsDominatedBySpecialInfected() || bot.IsGettingUp())
 				continue;
-
-			local nexDis = BotAI.nextTickDistance(bot, p);
-			if(nexDis < 100) {
-				local velocity = BotAI.getDodgeVec(bot, p, 330, 300, 330, 100);
-				if(p.GetZombieType() != 8) {
-					velocity = velocity.Scale(0.5);
-				}
-				BotAI.botMove(bot, velocity);
-				BotAI.setBotDedgeVector(bot, velocity);
-			}
 		}
 		return;
 	}
@@ -272,9 +262,8 @@
 		}
 	}
 
-	if(BotAI.BotCombatSkill < 3)
+	if(BotAI.BotCombatSkill < 2)
 		return;
-
 
 	if(BotAI.IsEntityValid(victim)
 		&& (victim.GetClassname() == "witch" || victim.GetClassname() == "infected" || (victim.GetClassname() == "player" && !victim.IsSurvivor()))
@@ -282,9 +271,11 @@
 		&& p.IsSurvivor()) {
 		local weapon = p.GetActiveWeapon();
 		local count = 1;
-		local mult = 0.5;
-		if(weapon && weapon.GetClassname().find("shotgun") != null)
-			mult = 0.15;
+		local mult = 0.35;
+		if(weapon && weapon.GetClassname().find("shotgun") != null) {
+			mult = 0.1;
+		}
+
 		if("count" in event)
 			count = event.count;
 
@@ -292,37 +283,33 @@
 			count = 1;
 
 		if(BotAI.BotCombatSkill > 2) {
-			if(weapon && weapon.GetClassname().find("shotgun") != null)
-				mult = 0.15;
-			else
-				mult = 1.0;
 			local distance = BotAI.distanceof(p.GetOrigin(), victim.GetOrigin());
 			if(distance < 150)
-				mult = 1.5;
+				mult *= 1.5;
 			if(distance < 100)
 				mult *= 2.0;
 		}
 
-		local mp_gamemode = Convars.GetStr("mp_gamemode");
+		mult = mult * BotAI.BotCombatSkill;
+
 		local function hit(health) {
 			BotAI.applyDamage(p, victim, health, DMG_HEADSHOT);
 		}
 
 		if(victim.GetClassname() == "witch") {
 			if(BotAI.witchKilling(victim) || BotAI.witchRunning(victim) || BotAI.witchRetreat(victim)) {
-				if(mp_gamemode == "realism")
-				 	hit(BotAI.getDamage(weapon.GetClassname()) * count * mult);
-				else
-					hit(BotAI.getDamage(weapon.GetClassname()) * count * mult * 2.75);
+				hit(BotAI.getDamage(weapon.GetClassname()) * count * mult);
 			}
 		}
 
-		if(victim.GetClassname() == "infected")
+		if(victim.GetClassname() == "infected") {
 			hit(BotAI.getDamage(weapon.GetClassname()) * count * mult);
+		}
 
 		if(victim.GetClassname() == "player") {
-			if(victim.GetZombieType() != 8)
+			if(victim.GetZombieType() != 8) {
 				hit(BotAI.getDamage(weapon.GetClassname()) * count * mult * 0.9);
+			}
 		}
 	}
 
@@ -346,8 +333,7 @@
 	}
 }
 
-::BotAI.Events.OnGameEvent_revive_success <- function(event)
-{
+::BotAI.Events.OnGameEvent_revive_success <- function(event) {
 	if(!("subject" in event) || event.subject == null || !("userid" in event) || event.userid == null )
 		return;
 
@@ -925,17 +911,11 @@ function EasyLogic::OnUserCommand::BotAICommands( player, args, text ) {
 	}
 }
 
-function ChatTriggers::botmove( player, args, text ) {
-
-}
-
-function ChatTriggers::morebot( player, args, text )
-{
+function ChatTriggers::morebot( player, args, text ) {
 	MoreBotCmd( player, args, text );
 }
 
-function ChatTriggers::botstop( player, args, text )
-{
+function ChatTriggers::botstop( player, args, text ) {
 	BotStopCmd( player, args, text );
 }
 
@@ -943,38 +923,31 @@ function ChatTriggers::botskill( player, args, text ) {
 	BotAISkillCmd( player, args, text );
 }
 
-function ChatTriggers::botfindgas( player, args, text )
-{
+function ChatTriggers::botfindgas( player, args, text ) {
 	BotGascanFindCmd( player, args, text );
 }
 
-function ChatTriggers::botthrow( player, args, text )
-{
+function ChatTriggers::botthrow( player, args, text ) {
 	BotThrowGrenadeCmd( player, args, text );
 }
 
-function ChatTriggers::botimmunity( player, args, text )
-{
+function ChatTriggers::botimmunity( player, args, text ) {
 	BotImmunityCmd( player, args, text );
 }
 
-function ChatTriggers::botpathfinding( player, args, text )
-{
+function ChatTriggers::botpathfinding( player, args, text ) {
 	BotPathFindingCmd( player, args, text );
 }
 
-function ChatTriggers::botunstick( player, args, text )
-{
+function ChatTriggers::botunstick( player, args, text ) {
 	BotUnstickCmd( player, args, text );
 }
 
-function ChatTriggers::botmelee( player, args, text )
-{
+function ChatTriggers::botmelee( player, args, text ) {
 	BotMeleeCmd( player, args, text );
 }
 
-function ChatTriggers::botmenu( player, args, text )
-{
+function ChatTriggers::botmenu( player, args, text ) {
 	BotMenuCmd( player, args, text );
 }
 
@@ -984,12 +957,8 @@ function ChatTriggers::botdebug( player, args, text ) {
 	} else {
 		BotAI.BotDebugMode = true;
 	}
-	BotAI.SaveSetting();
-}
 
-function ChatTriggers::FractureRay( player, args, text )
-{
-	BotFractureRayCmd( player, args, text );
+	BotAI.SaveSetting();
 }
 
 function ChatTriggers::imbot( player, args, text ) {
@@ -1057,16 +1026,7 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 			BotAI.ListAvoidCar[victim.GetEntityIndex()] <- CarAvoid(victim);
 			return true;
 		}
-
-		if(BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim)) {
-			BotAI.setContext(victim, "BOTAI_KNOCK", 1.5);
-		}
 	}
-
-	//test break tongue
-	//if(BotAI.IsEntitySI(attacker) && BotAI.IsEntitySurvivor(victim) && victim.IsDominatedBySpecialInfected()) {
-	//	BotAI.breakTongue(attacker);
-	//}
 
 	if(victim != null && BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim) && !victim.IsDominatedBySpecialInfected()) {
 		if(BotAI.isPlayerNearLadder(victim)) {
