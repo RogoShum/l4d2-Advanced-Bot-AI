@@ -835,7 +835,7 @@
 }
 
 ::BotAI.Events.OnGameEvent_round_freeze_end <- function(event) {
-	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("NoticeText", 15, false, BotAI.doNoticeText));
+	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("NoticeText", 12, false, BotAI.doNoticeText));
 }
 
 ::BotAI.Events.OnGameEvent_round_end <- function(event)
@@ -893,6 +893,7 @@
 function EasyLogic::OnUserCommand::BotAICommands( player, args, text ) {
 	if (typeof player == "VSLIB_PLAYER")
 		player = player.GetBaseEntity();
+
 	if(text.find("slot") != null) {
 		foreach(menu in BotAI.MainMenu) {
 			if(menu._player.GetBaseEntity() != player)

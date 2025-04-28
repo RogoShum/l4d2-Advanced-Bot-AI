@@ -1912,7 +1912,9 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 			printl("[Bot AI DEBUG] SI Victim: " + BotAI.getSiVictim(m_trace.enthit));
 		}
 
-		printl("[Bot AI DEBUG] Flags: " + NetProps.GetPropInt(m_trace.enthit, "m_spawnflags"));
+		printl("[Bot AI DEBUG] spawn flags: " + NetProps.GetPropInt(m_trace.enthit, "m_spawnflags"));
+		printl("[Bot AI DEBUG] flags: " + NetProps.GetPropInt(m_trace.enthit, "m_fFlags"));
+		printl("[Bot AI DEBUG] entity flags: " + NetProps.GetPropInt(m_trace.enthit, "m_iEFlags"));
 		if("GetSequenceName" in m_trace.enthit) {
 			local sequenceName = m_trace.enthit.GetSequenceName(m_trace.enthit.GetSequence()).tolower();
 			printl("[Bot AI DEBUG] ActionState: " + m_trace.enthit.GetSequence() + " " + sequenceName);
@@ -2301,9 +2303,10 @@ function BotAI::botDeath(bot, pos = null) {
 		delete BotAI.playerNavigator[bot];
 	if(bot in BotAI.BotLinkGasCan) {
 		DoEntFire("!self", "ClearParent", "", 0, null, BotAI.BotLinkGasCan[bot]);
-		if(BotAI.validVector(pos))
+		printl("clear gascan parent");
+		if(BotAI.validVector(pos)) {
 			BotAI.BotLinkGasCan[bot].SetOrigin(pos);
-		else if("GetOrigin" in pos) {
+		} else if("GetOrigin" in pos) {
 			local function setPos(args) {
 				if(BotAI.IsEntityValid(args.entity) && BotAI.IsEntityValid(args.player)) {
 					args.entity.SetOrigin(args.player.GetOrigin());
@@ -2312,15 +2315,10 @@ function BotAI::botDeath(bot, pos = null) {
 			}
 			local gas = BotAI.BotLinkGasCan[bot];
 			::BotAI.Timers.AddTimerByName("setEntityPos" + BotAI.BotLinkGasCan[bot].GetEntityIndex(), 0.5, false, setPos, {entity = gas, player = pos});
-		} else  {
+		} else {
 			local gas = BotAI.BotLinkGasCan[bot];
-			BotAI.RemoveFlag(gas, 1);
-			BotAI.RemoveFlag(gas, 8);
-			BotAI.RemoveFlag(gas, 512);
-			BotAI.AddFlag(gas, 256);
 
-			DoEntFire("!self", "DisableMotion", "", 0.1, null, gas);
-			DoEntFire("!self", "EnableMotion", "", 0.5, null, gas);
+			NetProps.SetPropInt(gas, "m_iEFlags", 46137344);
 			BotAI.somethingBad[gas] <- gas;
 		}
 

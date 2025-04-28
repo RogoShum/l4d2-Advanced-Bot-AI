@@ -564,12 +564,10 @@ function BotAI::removeNullString(array) {
 	local steamid = player.GetNetworkIDString();
 
 	if (!steamid) {
-		BotAI.SendPlayer(player, "botai_admin_only");
 		return false;
 	}
 
 	if ( !(steamid in BotAI.ABA_Admins) ) {
-		BotAI.SendPlayer(player, "botai_admin_only");
 		return false;
 	}
 
@@ -1079,9 +1077,9 @@ function BotAI::AdjustBotsUpdateRate(args) {
 	}
 
 	foreach(idx, thing in BotAI.somethingBad) {
-		if(!BotAI.IsEntityValid(thing))
+		if(!BotAI.IsEntityValid(thing)) {
 			delete BotAI.somethingBad[idx];
-		else if(thing.GetOwnerEntity() != null) {
+		} else if(thing.GetOwnerEntity() != null) {
 			delete BotAI.somethingBad[idx];
 		}
 	}
@@ -1173,8 +1171,7 @@ function BotAI::TriggerHandler(args)
 	BotAI.TriggerList = usableTrigger;
 }
 
-function BotAI::locateUseTarget(args)
-{
+function BotAI::locateUseTarget(args) {
 	if(!BotAI.NeedGasFinding)
 		return;
 
@@ -1308,7 +1305,11 @@ function BotAI::locateUseTarget(args)
 }
 
 ::BotAISkillCmd <- function ( speaker, args , args1) {
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
 	if(!ABA_IsAdmin(speaker)) {
+		BotAI.SendPlayer(player, "botai_admin_only");
 		return;
 	}
 
@@ -1324,14 +1325,14 @@ function BotAI::locateUseTarget(args)
 		}
 
 		BotAI.BotCombatSkill = arg - 1;
-		BotAI.EasyPrint("botai_bot_combat_skill", 0.2, arg);
+		BotAI.SendPlayer(player, "botai_bot_combat_skill", 0.2, arg);
 	} else {
 		if(BotAI.BotCombatSkill > 0) {
 			BotAI.BotCombatSkill = 0;
-			BotAI.EasyPrint("botai_bot_combat_skill", 0.2, 0);
+			BotAI.SendPlayer(player, "botai_bot_combat_skill", 0.2, 0);
 		} else {
 			BotAI.BotCombatSkill = 2;
-			BotAI.EasyPrint("botai_bot_combat_skill", 0.2, 2);
+			BotAI.SendPlayer(player, "botai_bot_combat_skill", 0.2, 2);
 		}
 	}
 
@@ -1340,100 +1341,115 @@ function BotAI::locateUseTarget(args)
 }
 
 ::BotGascanFindCmd <- function ( speaker, args  , args1) {
-	if(BotAI.NeedGasFinding)
-	{
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
+
+	if(BotAI.NeedGasFinding) {
 		BotAI.NeedGasFinding = false;
-		BotAI.EasyPrint("botai_gascan_finding_off");
-	}
-	else
-	{
+		BotAI.SendPlayer(player, "botai_gascan_finding_off");
+	} else {
 		BotAI.NeedGasFinding = true;
-		BotAI.EasyPrint("botai_gascan_finding_on");
+		BotAI.SendPlayer(player, "botai_gascan_finding_on");
 	}
 	BotAI.SaveSetting();
 	BotExitMenuCmd(speaker, args, args1);
 }
 
-::BotThrowGrenadeCmd <- function ( speaker, args  , args1) {
-	if(BotAI.NeedThrowGrenade)
-	{
+::BotThrowGrenadeCmd <- function ( speaker, args , args1) {
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
+
+	if(BotAI.NeedThrowGrenade) {
 		BotAI.NeedThrowGrenade = false;
-		BotAI.EasyPrint("botai_throw_grenade_off");
-	}
-	else
-	{
+		BotAI.SendPlayer(player, "botai_throw_grenade_off");
+	} else {
 		BotAI.NeedThrowGrenade = true;
-		BotAI.EasyPrint("botai_throw_grenade_on");
+		BotAI.SendPlayer(player, "botai_throw_grenade_on");
 	}
+
 	BotAI.SaveSetting();
 	BotExitMenuCmd(speaker, args, args1);
 }
 
-::BotImmunityCmd <- function ( speaker, args  , args1)
-{
+::BotImmunityCmd <- function ( speaker, args  , args1) {
 	BotExitMenuCmd(speaker, args, args1);
-	if(!ABA_IsAdmin(speaker))
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
+	if(!ABA_IsAdmin(speaker)) {
+		BotAI.SendPlayer(player, "botai_admin_only");
 		return;
-
-	if(BotAI.Immunity)
-	{
-		BotAI.Immunity = false;
-		BotAI.EasyPrint("botai_immunity_off");
 	}
-	else
-	{
+
+	if(BotAI.Immunity) {
+		BotAI.Immunity = false;
+		BotAI.SendPlayer(player, "botai_immunity_off");
+	} else {
 		BotAI.Immunity = true;
-		BotAI.EasyPrint("botai_immunity_on");
+		BotAI.SendPlayer(player, "botai_immunity_on");
 	}
 	BotAI.SaveSetting();
 }
 
 ::BotDefibrillatorCmd <- function ( speaker, args, args1) {
 	BotExitMenuCmd(speaker, args, args1);
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
 
 	if(BotAI.Defibrillator) {
 		BotAI.Defibrillator = false;
-		BotAI.EasyPrint("botai_defibrillator_off");
+		BotAI.SendPlayer(player, "botai_defibrillator_off");
 	} else {
 		BotAI.Defibrillator = true;
-		BotAI.EasyPrint("botai_defibrillator_on");
+		BotAI.SendPlayer(player, "botai_defibrillator_on");
 	}
 	BotAI.SaveSetting();
 }
 
 ::BotBackPackCmd <- function ( speaker, args  , args1) {
 	BotExitMenuCmd(speaker, args, args1);
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
 	if(BotAI.BackPack) {
 		BotAI.BackPack = false;
-		BotAI.EasyPrint("botai_bot_carry_off");
-	}
-	else {
+		BotAI.SendPlayer(player, "botai_bot_carry_off");
+	} else {
 		BotAI.BackPack = true;
-		BotAI.EasyPrint("botai_bot_carry_on");
+		BotAI.SendPlayer(player, "botai_bot_carry_on");
 	}
 	BotAI.SaveSetting();
 }
 
 ::BotAliveCmd <- function ( speaker, args  , args1) {
 	BotExitMenuCmd(speaker, args, args1);
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
+
 	if(BotAI.NeedBotAlive) {
 		BotAI.NeedBotAlive = false;
 		Convars.SetValue( "sb_all_bot_game", 0);
 		Convars.SetValue( "allow_all_bot_survivor_team", 0 );
 		BotStopCmd(speaker, args, args1);
-		BotAI.EasyPrint("botai_bot_alive_off");
+		BotAI.SendPlayer(player, "botai_bot_alive_off");
 	} else {
 		BotAI.NeedBotAlive = true;
 		Convars.SetValue( "sb_all_bot_game", 1);
 		Convars.SetValue( "allow_all_bot_survivor_team", 1 );
-		BotAI.EasyPrint("botai_bot_alive_on");
+		BotAI.SendPlayer(player, "botai_bot_alive_on");
 	}
 	BotAI.SaveSetting();
 }
 
-::BotPathFindingCmd <- function ( speaker, args , args1)
-{
+::BotPathFindingCmd <- function ( speaker, args , args1) {
 	BotExitMenuCmd(speaker, args, args1);
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
 
 	if(BotAI.PathFinding) {
 		BotAI.PathFinding = false;
@@ -1443,7 +1459,7 @@ function BotAI::locateUseTarget(args)
 		Convars.SetValue( "sb_allow_leading", 0 );
 		Convars.SetValue( "sb_neighbor_range", 120 );
 		//Convars.SetValue( "sb_escort", 1 );
-		BotAI.EasyPrint("botai_path_finding_off");
+		BotAI.SendPlayer(player, "botai_path_finding_off");
 	} else {
 		BotAI.PathFinding = true;
 		Convars.SetValue( "sb_allow_leading", 1 );
@@ -1452,9 +1468,9 @@ function BotAI::locateUseTarget(args)
 		Convars.SetValue( "sb_separation_danger_max_range", 2000 );
 		Convars.SetValue( "sb_neighbor_range", 1000 );
 		//Convars.SetValue( "sb_escort", 0 );
-		BotAI.EasyPrint("botai_path_finding_on");
+		BotAI.SendPlayer(player, "botai_path_finding_on");
 		if(BotAI.PathFinding) {
-			BotAI.EasyPrint("botai_unstick_pathfinding");
+			BotAI.SendPlayer(player, "botai_unstick_pathfinding");
 		}
 	}
 	BotAI.SaveSetting();
@@ -1462,30 +1478,38 @@ function BotAI::locateUseTarget(args)
 
 ::BotUnstickCmd <- function ( speaker, args , args1) {
 	BotExitMenuCmd(speaker, args, args1);
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
+
 	if(BotAI.Unstick) {
 		BotAI.Unstick = false;
 		Convars.SetValue( "sb_unstick", 0 );
-		BotAI.EasyPrint("botai_unstick_off");
+		BotAI.SendPlayer(player, "botai_unstick_off");
 	} else {
 		BotAI.Unstick = true;
 		Convars.SetValue( "sb_unstick", 1 );
-		BotAI.EasyPrint("botai_unstick_on");
+		BotAI.SendPlayer(player, "botai_unstick_on");
 		if(BotAI.PathFinding) {
-			BotAI.EasyPrint("botai_unstick_pathfinding");
+			BotAI.SendPlayer(player, "botai_unstick_pathfinding");
 		}
 	}
 	BotAI.SaveSetting();
 }
 
 ::BotMeleeCmd <- function ( speaker, args , args1) {
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
+
 	if(BotAI.Melee) {
 		BotAI.Melee = false;
 		Convars.SetValue( "sb_max_team_melee_weapons", 0 );
-		BotAI.EasyPrint("botai_melee_off");
+		BotAI.SendPlayer(player, "botai_melee_off");
 	} else {
 		BotAI.Melee = true;
 		BotAI.resetBotMeleeAction();
-		BotAI.EasyPrint("botai_melee_on");
+		BotAI.SendPlayer(player, "botai_melee_on");
 	}
 	BotAI.SaveSetting();
 	BotExitMenuCmd(speaker, args, args1);
@@ -1502,13 +1526,13 @@ function BotAI::locateUseTarget(args)
 	::BotAI.Timers.AddTimer(time, false, cPrint, str);
 }
 
-::BotAI.SendPlayer <- function (player, str) {
+::BotAI.SendPlayer <- function (player, str, time = 0.2, args = "") {
 
 	local function cPrint(s) {
 		if (BotAI.BotDebugMode) {
 			printl(str);
 		}
-		ClientPrint(player, 5, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(str));
+		ClientPrint(player, 5, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(str) + args);
 	}
 
 	::BotAI.Timers.AddTimer(0.2, false, cPrint, str);
@@ -1982,8 +2006,10 @@ function BotAI::DebugFunction( args ) {
 			printl("player observer: " + NetProps.GetPropEntity(player, "m_hObserverTarget"));
 			*/
 
+
+			if(BotAI.BotDebugMode) {
+				local target = BotAI.CanSeeOtherEntityPrintName(player, 9999, 1, g_MapScript.TRACE_MASK_ALL);
 			/*
-			if(BotAI.BotDebugMode && BotAI.IsPressingJump(player)) {
 					local function kill(mob) {
 					local wep = player.GetActiveWeapon();
 					local ename = " ";
@@ -2021,9 +2047,8 @@ function BotAI::DebugFunction( args ) {
 				while(witch = Entities.FindByClassnameWithin(witch, "witch", player.GetCenter(), 300)) {
 					kill(witch);
 				}
-
+*/
 			}
-			*/
 		} else if (leader == null || GetFlowDistanceForPosition(player.GetOrigin()) > GetFlowDistanceForPosition(leader.GetOrigin())) {
 			leader = player;
 		}
@@ -2234,6 +2259,7 @@ function BotAI::AdjustBotState(args) {
 			}
 
 			if (stuck) {
+				bot.SetOrigin(bot.GetOrigin() + Vector(0, 0, 20));
 				BotAI.BotReset(bot);
 			}
 		}
@@ -2265,46 +2291,49 @@ function BotAI::AdjustBotState(args) {
 
 function BotAI::doNoticeText(args) {
 	if(!BotAI.NoticeConfig) return;
+	foreach(player in BotAI.SurvivorHumanList) {
+		if(BotAI.IsPlayerEntityValid(player) && ABA_IsAdmin(player)) {
+			local settings = [
+				{ key = "menu_bot_skill", value = ::BotAI.BotCombatSkill + 1, enabled = true, isValue = true },
+				{ key = "menu_find_gas", value = "", enabled = ::BotAI.NeedGasFinding, isValue = false },
+				{ key = "menu_throw", value = "", enabled = ::BotAI.NeedThrowGrenade, isValue = false },
+				{ key = "menu_immunity", value = "", enabled = ::BotAI.Immunity, isValue = false },
+				{ key = "menu_pathfinding", value = "", enabled = ::BotAI.PathFinding, isValue = false },
+				{ key = "menu_unstick", value = "", enabled = ::BotAI.Unstick, isValue = false },
+				{ key = "menu_take_melee", value = "", enabled = ::BotAI.Melee, isValue = false },
+				{ key = "menu_defibrillator", value = "", enabled = ::BotAI.Defibrillator, isValue = false },
+				{ key = "menu_carry", value = "", enabled = ::BotAI.BackPack, isValue = false }
+			];
 
-	local settings = [
-        { key = "menu_bot_skill", value = ::BotAI.BotCombatSkill + 1, enabled = true, isValue = true },
-        { key = "menu_find_gas", value = "", enabled = ::BotAI.NeedGasFinding, isValue = false },
-        { key = "menu_throw", value = "", enabled = ::BotAI.NeedThrowGrenade, isValue = false },
-        { key = "menu_immunity", value = "", enabled = ::BotAI.Immunity, isValue = false },
-        { key = "menu_pathfinding", value = "", enabled = ::BotAI.PathFinding, isValue = false },
-        { key = "menu_unstick", value = "", enabled = ::BotAI.Unstick, isValue = false },
-        { key = "menu_take_melee", value = "", enabled = ::BotAI.Melee, isValue = false },
-        { key = "menu_defibrillator", value = "", enabled = ::BotAI.Defibrillator, isValue = false },
-        { key = "menu_carry", value = "", enabled = ::BotAI.BackPack, isValue = false }
-    ];
+			::BotAI.SendPlayer(player, "botai_current_settings", 0.1);
 
-	::BotAI.EasyPrint("botai_current_settings", 0.1);
+			local output = "";
 
-	local output = "";
+			foreach (setting in settings) {
+				local settingName = I18n.getTranslationKey(setting.key);
 
-    foreach (setting in settings) {
-        local settingName = I18n.getTranslationKey(setting.key);
+				output += "\x04[";
 
-        output += "\x04[";
+				if (setting.isValue) {
+					output += format("\x01%s: \x05%d", settingName, setting.value);
+				} else {
+					if (setting.enabled) {
+						output += "\x05" + I18n.getTranslationKey("menu_enable");
+					} else {
+						output += "\x01" + I18n.getTranslationKey("menu_disable");
+					}
+					output += "\x01" + settingName;
+				}
 
-        if (setting.isValue) {
-            output += format("\x01%s: \x05%d", settingName, setting.value);
-        } else {
-            if (setting.enabled) {
-                output += "\x05" + I18n.getTranslationKey("menu_enable");
-            } else {
-                output += "\x01" + I18n.getTranslationKey("menu_disable");
-            }
-            output += "\x01" + settingName;
-        }
+				output += "\x04] ";
+			}
 
-        output += "\x04] ";
-    }
+			//output += "\n\x01" + I18n.getTranslationKey("botai_use_command_notice");
 
-    //output += "\n\x01" + I18n.getTranslationKey("botai_use_command_notice");
-
-    ::BotAI.EasyPrint(output, 0.3);
-	::BotAI.EasyPrint("botai_use_command_notice", 0.5);
+			::BotAI.SendPlayer(player, output, 0.3);
+			::BotAI.SendPlayer(player, "botai_use_command_notice", 0.5);
+		}
+	}
 }
 
 function BotAI::preAITask() {
