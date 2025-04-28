@@ -356,6 +356,11 @@ function BotAI::createPlayerTargetTimer(player) {
 			dangerAwareAngle = -2.0;
 		}
 
+		local navigator = BotAI.getNavigator(player);
+		if (navigator.hasPath("searchGascan+")) {
+			awareAngle = -2.0;
+		}
+
 		local isShove = BotAI.IsPressingShove(player);
 		local isHealing = BotAI.IsBotHealing(player);
 

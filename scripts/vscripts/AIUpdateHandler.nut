@@ -344,11 +344,10 @@ getconsttable()["BOT_CANT_SEE"] <- (1 << 0);
 
 getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
 
-BotAI.headshotDmg <- DMG_BULLET | DMG_HEADSHOT | (1 << 31);
-BotAI.meleeDmg <- DMG_MELEE | DMG_HEADSHOT | (1 << 31);
+BotAI.headshotDmg <- DMG_BULLET | DMG_HEADSHOT;
+BotAI.meleeDmg <- DMG_MELEE | DMG_HEADSHOT;
 
-::BotAI.SaveUseTarget <- function()
-{
+::BotAI.SaveUseTarget <- function() {
 	local UseTargetList = "";
 	foreach (idx, val in BotAI.UseTargetList)
 	{
@@ -2161,9 +2160,11 @@ function BotAI::AdjustBotState(args) {
 			continue;
 		addDoor(door);
 	}
+
 	if(!("validArea" in BotAI)) {
 		BotAI.validArea <- {};
 	}
+
 	local searchBody = false;
 	foreach(player in BotAI.SurvivorBotList) {
 		if(!BotAI.IsPlayerEntityValid(player)) continue;
@@ -2179,41 +2180,6 @@ function BotAI::AdjustBotState(args) {
 		Convars.SetValue( "sb_allow_leading", 1 );
 	}
 
-	local maxFlowPlayer = null;
-	local minFlowHuman = null;
-	local maxFlow = 0;
-	local minFlow = 0;
-
-	foreach(player in BotAI.SurvivorHumanList) {
-		if(BotAI.IsPlayerEntityValid(player)) {
-			local lastArea = player.GetLastKnownArea();
-			if(lastArea != null && !lastArea.IsValidForWanderingPopulation())
-				BotAI.validArea[lastArea] <- lastArea;
-			local elevator = Entities.FindByClassnameNearest("func_elevator", player.GetOrigin(), 300);
-			if(BotAI.IsEntityValid(elevator)) {
-				local flow = GetCurrentFlowDistanceForPlayer(player);
-				foreach(bot in BotAI.SurvivorBotList) {
-					local botFlow = GetCurrentFlowDistanceForPlayer(bot);
-					if(BotAI.distanceof(bot.GetOrigin(), player.GetOrigin()) > 100 && (botFlow > flow || BotAI.getNavigator(bot).moving())) {
-						bot.SetOrigin(player.GetOrigin());
-					}
-				}
-			}
-		}
-
-		if(BotAI.IsPlayerEntityValid(player)) {
-			local flow = GetCurrentFlowDistanceForPlayer(player);
-			if(flow > maxFlow) {
-				maxFlow = flow;
-				maxFlowPlayer = player;
-			}
-			if(minFlowHuman == null || flow < minFlow) {
-				minFlow = flow;
-				minFlowHuman = player;
-			}
-		}
-	}
-
 	local needRecall = true;
 	local display = null;
 	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
@@ -2223,12 +2189,6 @@ function BotAI::AdjustBotState(args) {
 
 	if(BotAI.UseTarget != null && BotAI.NeedGasFinding)
 		needRecall = false;
-
-	if(minFlowHuman == null) {
-		minFlowHuman = BotAI.LeaderSurvivorBot;
-		if(BotAI.LeaderSurvivorBot != null)
-			minFlow = GetCurrentFlowDistanceForPlayer(BotAI.LeaderSurvivorBot);
-	}
 
 	if(needRecall) {
 		foreach(bot in BotAI.SurvivorBotList) {
@@ -2261,6 +2221,7 @@ function BotAI::AdjustBotState(args) {
 			if (stuck) {
 				bot.SetOrigin(bot.GetOrigin() + Vector(0, 0, 20));
 				BotAI.BotReset(bot);
+				BotAI.BotStuckCount[bot] <- 0;
 			}
 		}
 	}

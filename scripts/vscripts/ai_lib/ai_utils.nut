@@ -2801,6 +2801,12 @@ function BotAI::getMoveType(player) {
 	return NetProps.GetPropInt(player, "movetype");
 }
 
+function BotAI::getBotCombatSkill(player) {
+	if(!BotAI.IsEntityValid(player)) return 0;
+
+	return BotAI.BotCombatSkill;
+}
+
 function BotAI::areaAdjacent(area, i) {
 	local adjacentAreas = {};
 	area.GetAdjacentAreas(i, adjacentAreas);

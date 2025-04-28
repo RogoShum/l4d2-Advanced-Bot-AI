@@ -297,15 +297,17 @@
 				mult *= 2.0;
 		}
 
-		mult = mult * BotAI.BotCombatSkill;
+		mult = mult * BotAI.BotCombatSkill * 0.7;
 
 		local function hit(health) {
 			BotAI.applyDamage(p, victim, health, BotAI.headshotDmg);
 		}
 
 		if(victim.GetClassname() == "witch") {
-			if(BotAI.witchKilling(victim) || BotAI.witchRunning(victim) || BotAI.witchRetreat(victim)) {
-				hit(BotAI.getDamage(weapon.GetClassname()) * count * mult);
+			if(BotAI.witchRunning(victim) || BotAI.witchRetreat(victim)) {
+				hit(BotAI.getDamage(weapon.GetClassname()) * count * mult * 0.5);
+			} else if (BotAI.witchKilling(victim)) {
+				hit(BotAI.getDamage(weapon.GetClassname()) * count * mult * 1.4);
 			}
 		}
 
@@ -319,6 +321,9 @@
 			}
 		}
 	}
+
+	if(BotAI.BotCombatSkill < 3)
+		return;
 
 	if(p != null && p.IsSurvivor() && IsPlayerABot(p)) {
 		weapon <- p.GetActiveWeapon();
@@ -646,8 +651,7 @@
 	}
 }
 
-::BotAI.Events.OnGameEvent_player_no_longer_it <- function(event)
-{
+::BotAI.Events.OnGameEvent_player_no_longer_it <- function(event) {
 	if(!("userid" in event) || event.userid == null)
 		return;
 
@@ -656,8 +660,7 @@
 		BotAI.VomitList[victim.GetEntityIndex()] = false;
 }
 
-::BotAI.Events.OnGameEvent_player_hurt <- function(event)
-{
+::BotAI.Events.OnGameEvent_player_hurt <- function(event) {
 	if(!("userid" in event) || event.userid == null)
 		return;
 
@@ -665,8 +668,9 @@
 	local attacker = GetPlayerFromUserID(event.attacker);
 
 	if(IsPlayerABot(player) && BotAI.UseTarget != null) {
-		if("GetClassname" in attacker && (attacker.GetClassname() == "infected" || (attacker.GetClassname() == "player" && attacker.GetZombieType() != 9)))
+		if("GetClassname" in attacker && (attacker.GetClassname() == "infected" || (attacker.GetClassname() == "player" && attacker.GetZombieType() != 9))) {
 			BotAI.BotAttack(player, attacker);
+		}
 	}
 }
 

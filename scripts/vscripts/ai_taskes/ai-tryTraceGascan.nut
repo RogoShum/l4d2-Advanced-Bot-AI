@@ -44,8 +44,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 		return true;
 	}
 
-	function GroupUpdateChecker(player)
-	{
+	function GroupUpdateChecker(player) {
 		if(BotAI.HasItem(player, BotAI.BotsNeedToFind)) {
 			if(player.GetEntityIndex() in cabal_oil)
 				delete cabal_oil[player.GetEntityIndex()];
@@ -96,8 +95,10 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 					BotAI.setBotLockTheard(player, -1);
 					updating = false;
 				} else {
-					if(BotAI.BotDebugMode)
+					if(BotAI.BotDebugMode) {
 						printl("[Bot AI] Try Retake gas can " + gas_can);
+					}
+
 					local gas = gas_can;
 					local function needGasCan() {
 						foreach(link in BotAI.BotLinkGasCan) {
@@ -106,13 +107,14 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 						}
 						return !BotAI.IsEntityValid(gas) || gas.GetOwnerEntity() != null;
 					}
-					BotAI.botRunPos(player, gas_can, "searchGascan", 2, needGasCan);
+					BotAI.botRunPos(player, gas_can, "searchGascan+", 2, needGasCan);
 				}
-			}
-			else
+			} else {
 				updating = false;
-		} else
+			}
+		} else {
 			updating = false;
+		}
 	}
 
 	function taskReset(player = null) {

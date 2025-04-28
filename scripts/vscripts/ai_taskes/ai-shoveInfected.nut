@@ -71,9 +71,9 @@ class ::AITaskShoveInfected extends AITaskSingle {
 
 				local chance = 2;
 				local function reassess() {
-					if(BotAI.getPlayerTotalHealth(player) <= 60)
-						chance += 1;
 					if(BotAI.getPlayerTotalHealth(player) <= 30)
+						chance += 1;
+					if(BotAI.getPlayerTotalHealth(player) <= 15)
 						chance += 1;
 				}
 

@@ -97,8 +97,10 @@ class::AITaskAvoidDanger extends AITaskSingle {
 									safeArea = area;
 								}
 							}
-							if (safeArea != null)
+
+							if (safeArea != null) {
 								BotAI.botRunPos(player, safeArea.GetCenter(), "avoidDanger#%", 5, feelSafe);
+							}
 						}
 					}
 				}
@@ -115,7 +117,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 
 						local nexDis = BotAI.nextTickDistance(player, danger);
 						local cansee = BotAI.VectorDotProduct(BotAI.normalize(danger.EyeAngles().Forward()), BotAI.normalize(player.GetOrigin() - danger.GetOrigin())) > 0.6
-						local innerCircle = 300;
+						local innerCircle = 400;
 						if (BotAI.BotDebugMode) {
 							DebugDrawCircle(player.GetCenter(), Vector(255, 25, 25), 0, innerCircle, true, 0.5);
 						}

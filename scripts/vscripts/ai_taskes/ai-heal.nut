@@ -9,21 +9,20 @@ class ::AITaskHeal extends AITaskSingle
 	updating = {};
 	playerTick = {};
 
-	function singleUpdateChecker(player)
-	{
+	function singleUpdateChecker(player) {
 		if(BotAI.playerDominated > 0) return false;
 		local needHealing = BotAI.getPlayerTotalHealth(player) <= 35 || player.IsOnThirdStrike();
 		local hasTreatmentItems = BotAI.HasItem(player, "weapon_first_aid_kit");
 		local safeCheck = !BotAI.IsInCombat(player) && !BotAI.validVector(BotAI.getBotDedgeVector(player)) && !BotAI.IsPlayerClimb(player);
 
-		if(needHealing && safeCheck && hasTreatmentItems)
+		if(needHealing && safeCheck && hasTreatmentItems) {
 			return true;
+		}
 
 		return false;
 	}
 
-	function playerUpdate(player)
-	{
+	function playerUpdate(player) {
 		BotAI.AddFlag(player, FL_FROZEN );
 		local duration = Convars.GetFloat("first_aid_kit_use_duration") + 0.1;
 		local function RemoveFlag(ent_) {

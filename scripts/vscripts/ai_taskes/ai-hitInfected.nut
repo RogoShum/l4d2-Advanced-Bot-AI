@@ -95,6 +95,11 @@ class ::AITaskHitInfected extends AITaskSingle {
 			awareAngle = -2.0;
 		}
 
+		local navigator = BotAI.getNavigator(player);
+		if (navigator.hasPath("searchGascan+")) {
+			awareAngle -= 0.3;
+		}
+
 		foreach(infected in BotAI.SpecialList) {
 			if (BotAI.IsAlive(infected) && !infected.IsGhost() && !BotAI.IsEntitySI(BotAI.GetTarget(infected)) && (infected.GetZombieType() != 8 || entS == null) && (BotAI.CanShotOtherEntityInSight(player, infected, awareAngle) || BotAI.IsEntityValid(BotAI.getSiVictim(infected)))) {
 				if (infected.GetZombieType() == 1) {
