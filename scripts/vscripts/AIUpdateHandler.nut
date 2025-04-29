@@ -164,7 +164,7 @@ if (!("VSLib" in getroottable())) {
 		MainMenu = {}
 
 		BotDebugMode = false
-		BotCombatSkill = 1
+		BotCombatSkill = 0
 		NeedGasFinding = true
 		NeedThrowGrenade = true
 		Immunity = false
@@ -1121,7 +1121,7 @@ function BotAI::AdjustBotsUpdateRate(args) {
 						BotAI.dangerPlace[area.GetID()] <- area;
 					}
 
-					Convars.SetValue( "sb_revive_friend_distance", 20 );
+					Convars.SetValue( "sb_revive_friend_distance", 50 );
 				} else if(area.GetID() in BotAI.dangerPlace) {
 					area.UnblockArea();
 					Convars.SetValue( "sb_revive_friend_distance", BotAI.reviveDistance );
