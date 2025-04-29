@@ -1010,6 +1010,14 @@ function ChatTriggers::botcrash( player, args, text ) {
 	BotAI.Timers.AddTimerByName("makeCrash-" + UniqueString(), 0.5, true, makeCrash, player);
 }
 
+function ChatTriggers::botreset( player, args, text ) {
+	foreach(bot in BotAI.SurvivorBotList) {
+		BotAI.BotReset(bot);
+		BotAI.BotAttack(bot, bot);
+		BotAI.setBotLockTheard(bot, -1);
+	}
+}
+
 function ChatTriggers::bottask( player, args, text ) {
 	if(args) {
 		if(args[0] in BotAI.disabledTask)

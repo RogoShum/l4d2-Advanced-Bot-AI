@@ -1336,8 +1336,7 @@ function BotAI::IsEntitySurvivorBot(entity)
 	return false;
 }
 
-function BotAI::HasItem(player, str)
-{
+function BotAI::HasItem(player, str) {
 	if(player in BotAI.BotLinkGasCan) {
 		local gas = BotLinkGasCan[player];
 		if(BotAI.IsEntityValid(gas) && gas.GetOwnerEntity() == null && gas.GetClassname() == str)
@@ -1345,10 +1344,8 @@ function BotAI::HasItem(player, str)
 	}
 	local t = BotAI.GetHeldItems(player);
 
-	if (t)
-	{
-		foreach (item in t)
-		{
+	if (t) {
+		foreach (item in t) {
 			if ( item.GetClassname() == str || item.GetClassname() == "weapon_" + str )
 				return true;
 		}
@@ -2617,7 +2614,7 @@ function BotAI::SetTarget(_ent, _target) {
 	if(_ent.GetClassname() == "player" && !IsPlayerABot(_ent))
 		return;
 
-	BotAI.hookViewEntity(_ent, _target);
+	//BotAI.hookViewEntity(_ent, _target);
 	if(BotAI.BotDebugMode) {
 		printl("[Attack] " + BotAI.getPlayerBaseName(_ent));
 	}
@@ -2627,11 +2624,12 @@ function BotAI::SetTarget(_ent, _target) {
 	BotAI.lookAtEntity(_ent, _target);
 }
 
-function BotAI::IsTarget(_ent, target)
-{
+function BotAI::IsTarget(_ent, target) {
 	if(!BotAI.IsEntityValid(_ent)) return;
-	if(BotAI.GetTarget(target) != null && BotAI.GetTarget(target).GetEntityIndex() == _ent.GetEntityIndex())
+	if(BotAI.GetTarget(target) != null && BotAI.GetTarget(target).GetEntityIndex() == _ent.GetEntityIndex()) {
 		return true;
+	}
+
 	return false;
 }
 
