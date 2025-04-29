@@ -117,7 +117,7 @@ class ::AITaskSavePlayer extends AITaskGroup
 				return false;
 			}
 			BotAI.botRunPos(player, smoker, "savePlayer", 5, needSave);
-		} else {
+		} else if (BotAI.distanceof(player.GetOrigin(), victim.GetOrigin()) > 125) {
 			local function needSave() {
 				if(!BotAI.IsAlive(victim) || BotAI.isPlayerBeingRevived(victim)) return true;
 

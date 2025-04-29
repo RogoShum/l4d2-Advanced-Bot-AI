@@ -65,6 +65,7 @@ if (!("VSLib" in getroottable())) {
 		obstacles = {}
 
 		searchedEntity = {}
+		humanSearchedEntity = {}
 		targetLocked = {}
 		somethingBad = {}
 		waitingToPick = {}
@@ -2459,7 +2460,7 @@ function resetAllBots() {
 	Convars.SetValue( "sb_temp_health_consider_factor", 0.85 );
 
 	Convars.SetValue( "sb_enforce_proximity_lookat_timeout", 1 );
-	Convars.SetValue( "sb_enforce_proximity_range", 1000 );
+	//Convars.SetValue( "sb_enforce_proximity_range", 1000 );
 	Convars.SetValue( "sb_battlestation_human_hold_time", 0.1 );
 	Convars.SetValue( "sb_sidestep_for_horde", 1 );
 	Convars.SetValue( "sb_close_checkpoint_door_interval", 0.15 );

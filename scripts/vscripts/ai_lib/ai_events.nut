@@ -30,8 +30,11 @@
 
 ::BotAI.Events.OnGameEvent_player_spawn <- function(event) {
 	local player = GetPlayerFromUserID(event.userid);
-	if(BotAI.IsEntitySurvivorBot(player))
+	if(BotAI.IsEntitySurvivorBot(player)) {
 		BotAI.createPlayerTargetTimer(player);
+		BotAI.createSeacherTimer(player);
+	}
+
 	if(!BotAI.IsEntityValid(player)) return;
 
 	local team = NetProps.GetPropInt(player, "m_iTeamNum");
@@ -259,7 +262,7 @@
 			}
 
 			if(BotAI.BotCombatSkill > 3) {
-				mult = 0.3;
+				mult = 0.15;
 			}
 
 			local endTime = NetProps.GetPropFloat(wep, "m_flNextPrimaryAttack");

@@ -439,6 +439,30 @@ function BotAI::createNavigatorTimer(player) {
 	}
 }
 
+function BotAI::createSeacherTimer(player) {
+    local index = player.GetEntityIndex();
+    local _targetTimer = SpawnEntityFromTable("info_target", { targetname = "botai_item_seacher_timer_" + index});
+    local function seacher() {
+        if(!BotAI.IsAlive(player)) {
+            local infoTarget = null;
+            while(infoTarget = Entities.FindByName(infoTarget, "botai_item_seacher_timer_" + index))
+                infoTarget.Kill();
+
+			return;
+        }
+
+		BotAI.updateSearchedEntity(player);
+		return 1.5;
+    }
+
+	if (_targetTimer != null) {
+		_targetTimer.ValidateScriptScope();
+		local scrScope = _targetTimer.GetScriptScope();
+		scrScope["ThinkTimer"] <- seacher;
+		AddThinkToEnt(_targetTimer, "ThinkTimer");
+	}
+}
+
 function BotAI::conditionTimer(func, delay) {
     local _targetTimer = SpawnEntityFromTable("info_target", { targetname = "botai_condition_timer_" + UniqueString()});
     local function doFunction() {
@@ -615,56 +639,84 @@ function BotAI::pingSystem() {
 		return 1;
 	}
 
-	function BotAI::updateSearchedEntity() {
-		local enumUpgradePack = {};
-		local enumWeaponSpawn = {};
-		local enumPills = {};
-		local enumBombSpawn = {};
-		local enumDefibrillator = {};
-		enumUpgradePack["weapon_upgradepack_incendiary_spawn"] <- 1;
-		enumUpgradePack["weapon_upgradepack_explosive_spawn"] <- 1;
-		enumUpgradePack["weapon_upgradepack_incendiary"] <- 1;
-		enumUpgradePack["weapon_upgradepack_explosive"] <- 1;
+	function BotAI::createNavigatorTimer(player) {
+		local index = player.GetEntityIndex();
+		local _targetTimer = SpawnEntityFromTable("info_target", { targetname = "botai_navigator_timer_" + index});
+		local function navigator() {
+			if(!BotAI.IsAlive(player)) {
+				local infoTarget = null;
+				while(infoTarget = Entities.FindByName(infoTarget, "botai_navigator_timer_" + index))
+					infoTarget.Kill();
+				delete BotAI.playerNavigator[player];
+			}
+			local navigator = BotAI.getNavigator(player);
+			navigator.onUpdate();
+			return 0.2;
+		}
 
-		enumWeaponSpawn["weapon_pistol_magnum_spawn"] <- 1;
-		enumWeaponSpawn["weapon_pistol_magnum"] <- 1;
+		if (_targetTimer != null) {
+			_targetTimer.ValidateScriptScope();
+			local scrScope = _targetTimer.GetScriptScope();
+			scrScope["ThinkTimer"] <- navigator;
+			AddThinkToEnt(_targetTimer, "ThinkTimer");
+		}
+	}
 
-		enumPills["weapon_pain_pills_spawn"] <- 1;
-		enumPills["weapon_adrenaline_spawn"] <- 1;
-		enumPills["weapon_pain_pills"] <- 1;
-		enumPills["weapon_adrenaline"] <- 1;
+	::BotAI.enumResource <- {
+		weapon_upgradepack_incendiary_spawn = 1
+		weapon_upgradepack_explosive_spawn = 1
+		weapon_upgradepack_incendiary = 1
+		weapon_upgradepack_explosive = 1
 
-		enumBombSpawn["weapon_pipe_bomb_spawn"] <- 1;
-		enumBombSpawn["weapon_molotov_spawn"] <- 1;
-		enumBombSpawn["weapon_vomitjar_spawn"] <- 1;
-		enumBombSpawn["weapon_pipe_bomb"] <- 1;
-		enumBombSpawn["weapon_molotov"] <- 1;
-		enumBombSpawn["weapon_vomitjar"] <- 1;
+		weapon_pistol_magnum_spawn = 1
+		weapon_pistol_magnum = 1
 
-		enumDefibrillator["weapon_defibrillator_spawn"] <- 1;
-		enumDefibrillator["weapon_defibrillator"] <- 1;
+		weapon_pain_pills_spawn = 1
+		weapon_adrenaline_spawn = 1
+		weapon_pain_pills = 1
+		weapon_adrenaline = 1
 
-		local map = ChunkMap(75);
-		local function search(enumTable) {
-			foreach(bot in BotAI.SurvivorBotList) {
-				foreach(idx, val in enumTable) {
-					local item = Entities.FindByClassnameNearest(idx, bot.GetCenter(), 200);
-					if(BotAI.IsEntityValid(item) && item.GetOwnerEntity() == null && NetProps.GetPropEntity(item, "m_hOwnerEntity") == null) {
-						if(BotAI.BotDebugMode)
-							DebugDrawBox(Vector(item.GetOrigin().x, item.GetOrigin().y, item.GetOrigin().z), Vector(-5, -5, -5), Vector(5, 5, 5), 100, 255, 0, 0.2, 1.5);
-						map.put(item);
+		weapon_pipe_bomb_spawn = 1
+		weapon_molotov_spawn = 1
+		weapon_vomitjar_spawn = 1
+		weapon_pipe_bomb = 1
+		weapon_molotov = 1
+		weapon_vomitjar = 1
+
+		weapon_defibrillator_spawn = 1
+		weapon_defibrillator = 1
+	}
+
+	function BotAI::updateSearchedEntity(bot) {
+		local map = {};
+		local item = null;
+		while(item = Entities.FindInSphere(item, bot.GetCenter(), 200)) {
+			if(BotAI.IsEntityValid(item) && item.GetClassname() in BotAI.enumResource && item.GetOwnerEntity() == null && NetProps.GetPropEntity(item, "m_hOwnerEntity") == null) {
+				if(BotAI.BotDebugMode) {
+					DebugDrawBox(Vector(item.GetOrigin().x, item.GetOrigin().y, item.GetOrigin().z), Vector(-5, -5, -5), Vector(5, 5, 5), 100, 255, 0, 0.2, 1.5);
+				}
+				map[item] <- item;
+			}
+		}
+
+		BotAI.searchedEntity[bot.GetEntityIndex()] <- map;
+	}
+
+	function BotAI::updateHumanSearchedEntity() {
+		local map = {};
+		foreach(player in BotAI.SurvivorHumanList) {
+			local item = null;
+			while(item = Entities.FindInSphere(item, player.GetCenter(), 150)) {
+				if(BotAI.IsEntityValid(item) && item.GetClassname() in BotAI.enumResource && item.GetOwnerEntity() == null && NetProps.GetPropEntity(item, "m_hOwnerEntity") == null) {
+					if(BotAI.BotDebugMode) {
+						DebugDrawBox(Vector(item.GetOrigin().x, item.GetOrigin().y, item.GetOrigin().z), Vector(-5, -5, -5), Vector(5, 5, 5), 100, 255, 0, 0.2, 1.5);
 					}
+					map[item] <- item;
 				}
 			}
 		}
-		search(enumWeaponSpawn);
-		search(enumBombSpawn);
-		search(enumUpgradePack);
-		search(enumPills);
-		search(enumDefibrillator);
 
-		BotAI.searchedEntity = map;
-		return 1.5;
+		BotAI.humanSearchedEntity = map;
 	}
 
 	function BotAI::pickCoolDown() {
@@ -764,7 +816,7 @@ function BotAI::loadTimers() {
 	if (takeThinker != null) {
 		takeThinker.ValidateScriptScope();
 		local scrScope = takeThinker.GetScriptScope();
-		scrScope["ThinkTimer"] <- BotAI.updateSearchedEntity;
+		scrScope["ThinkTimer"] <- BotAI.updateHumanSearchedEntity;
 		AddThinkToEnt(takeThinker, "ThinkTimer");
 	}
 }

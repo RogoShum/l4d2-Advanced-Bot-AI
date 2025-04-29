@@ -44,8 +44,43 @@ class ::AITaskSearchEntity extends AITaskSingle
 		if(player.IsDominatedBySpecialInfected() || player.IsStaggering() || player.IsIncapacitated() || player.IsHangingFromLedge()) return;
 		local invPlayer = BotAI.GetHeldItems(player);
 
-		if("get" in BotAI.searchedEntity)
-		foreach(entity in BotAI.searchedEntity.get(player, 1)) {
+		if(player.GetEntityIndex() in BotAI.searchedEntity) {
+			foreach(entity in BotAI.searchedEntity[player.GetEntityIndex()]) {
+				if(!BotAI.IsEntityValid(entity) || entity.GetOwnerEntity() != null) continue;
+				local name = entity.GetClassname();
+				if(name in enumBombSpawn && !("slot2" in invPlayer)) {
+					items[player] <- entity;
+					searched.append(entity);
+					return true;
+				}
+
+				if(name in enumUpgradePack && !("slot3" in invPlayer)) {
+					items[player] <- entity;
+					searched.append(entity);
+					return true;
+				}
+
+				if(name in enumPills && !("slot4" in invPlayer)) {
+					items[player] <- entity;
+					searched.append(entity);
+					return true;
+				}
+
+				if(!BotAI.HasItem(player, "first_aid_kit") && name in enumDefibrillator) {
+					items[player] <- entity;
+					searched.append(entity);
+					return true;
+				}
+
+				if(!BotAI.HasItem(player, "weapon_melee") && !BotAI.HasItem(player, "weapon_pistol_magnum") && name in enumWeaponSpawn) {
+					items[player] <- entity;
+					searched.append(entity);
+					return true;
+				}
+			}
+		}
+
+		foreach(entity in BotAI.humanSearchedEntity) {
 			if(!BotAI.IsEntityValid(entity) || entity.GetOwnerEntity() != null) continue;
 			local name = entity.GetClassname();
 			if(name in enumBombSpawn && !("slot2" in invPlayer)) {
@@ -86,33 +121,48 @@ class ::AITaskSearchEntity extends AITaskSingle
 	function playerUpdate(player) {
 		local entity = items[player];
 		if(!BotAI.IsEntityValid(entity) || entity.GetOwnerEntity() != null || NetProps.GetPropEntity(entity, "m_hOwnerEntity") != null) return;
+		local distance = BotAI.distanceof(player.EyePosition(), entity.GetOrigin());
 
-		if(entity.GetClassname() in enumBombSpawn && entity.GetClassname().find("spawn") != null) {
-			if(NetProps.GetPropInt(entity, "m_spawnflags") >= 8) {
-				DoEntFire("!self", "Use", "", 0, player, entity);
-			} else if(BotAI.distanceof(player.EyePosition(), entity.GetOrigin()) < 100) {
-				BotAI.SetTarget(player, entity);
-				BotAI.lookAtEntity(player, entity, true, 3);
-				BotAI.ForceButton(player, 32 , 0.5);
-				local function setOwner() {
-					local invPlayer = BotAI.GetHeldItems(player);
-					if("slot2" in invPlayer) {
-						NetProps.SetPropEntity(entity, "m_hOwnerEntity", player);
-					}
-				}
-				BotAI.delayTimer(setOwner, 0.5);
-
-				local function forceTake() {
-					local invPlayer = BotAI.GetHeldItems(player);
-					if(!("slot2" in invPlayer)) {
-						DoEntFire("!self", "Use", "", 0, player, entity);
-						NetProps.SetPropEntity(entity, "m_hOwnerEntity", player);
-					}
-				}
-				BotAI.delayTimer(forceTake, 4.0);
+		local function changeAndUse() {
+			if(!BotAI.IsAlive(player)) return true;
+			if(!BotAI.IsEntityValid(entity)) return true;
+			if(BotAI.distanceof(entity.GetOrigin(), player.GetOrigin()) <= 130) {
+				return true;
 			}
-		} else
-			DoEntFire("!self", "Use", "", 0, player, entity);
+			return false;
+		}
+
+		if (distance > 150 && distance < 400) {
+			BotAI.botRunPos(player, entity, "findResource", 0, changeAndUse)
+		} else if (distance < 150) {
+			if(entity.GetClassname() in enumBombSpawn && entity.GetClassname().find("spawn") != null) {
+				if(NetProps.GetPropInt(entity, "m_spawnflags") >= 8) {
+					DoEntFire("!self", "Use", "", 0, player, entity);
+				} else if(distance < 100) {
+					BotAI.SetTarget(player, entity);
+					BotAI.lookAtEntity(player, entity, true, 3);
+					BotAI.ForceButton(player, 32 , 0.5);
+					local function setOwner() {
+						local invPlayer = BotAI.GetHeldItems(player);
+						if("slot2" in invPlayer) {
+							NetProps.SetPropEntity(entity, "m_hOwnerEntity", player);
+						}
+					}
+					BotAI.delayTimer(setOwner, 0.5);
+
+					local function forceTake() {
+						local invPlayer = BotAI.GetHeldItems(player);
+						if(!("slot2" in invPlayer)) {
+							DoEntFire("!self", "Use", "", 0, player, entity);
+							NetProps.SetPropEntity(entity, "m_hOwnerEntity", player);
+						}
+					}
+					BotAI.delayTimer(forceTake, 4.0);
+				}
+			} else {
+				DoEntFire("!self", "Use", "", 0, player, entity);
+			}
+		}
 
 		updating[player] <- false;
 	}

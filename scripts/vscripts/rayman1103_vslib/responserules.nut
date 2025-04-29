@@ -1,21 +1,21 @@
-/*  
+/*
  * Copyright (c) 2013 Rayman1103 and Rectus
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  * and associated documentation files (the "Software"), to deal in the Software without
  * restriction, including without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or
  * substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
  * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  */
 
 
@@ -25,7 +25,7 @@
 ::VSLib.ResponseRules <-
 {
 	// Hacked to get followups working (sorta) by Rectus
-	
+
 	// Bindings between expresser names and their targetnames.
 	ExpTargetName =
 	{
@@ -33,7 +33,7 @@
 		Gambler 	= "!nick",
 		Mechanic 	= "!ellis",
 		Producer	= "!rochelle",
-		
+
 		NamVet		= "!bill",
 		TeenGirl	= "!zoey",
 		Manager		= "!louis",
@@ -53,11 +53,11 @@
 	IsSharingSubject = [ "AwardName", "SharingSubject" ]
 	IsAwardMedic = [ "AwardName", "Medic" ]
 	IsAwardProtector = [ "AwardName", "Protector" ]
-	
+
 	// Faults
 	IsFaultFriendlyFire = [ "FaultName", "FriendlyFire" ]
 	IsFaultBoomerBlunder = [ "FaultName", "BoomerBlunder" ]
-	
+
 	// Modes
 	IsCoop = [ "GameMode", "coop" ]
 	IsVersus = [ "GameMode", "versus" ]
@@ -67,7 +67,7 @@
 	IsHoldout = [ "GameMode", "holdout" ]
 	IsDash = [ "GameMode", "dash" ]
 	IsShootzones = [ "GameMode", "shootzones" ]
-	
+
 	// Vocalization
 	IsSpeaking = [ "Speaking", 1 ]
 	IsNotSpeaking = [ "Speaking", 0 ]
@@ -75,7 +75,7 @@
 	IsNotCoughing = [ "Coughing", 0 ]
 	IsSmartLookAuto = [ "SmartLookType", "auto" ]
 	IsNotSmartLookAuto = [ "SmartLookType", "manual" ]
-	
+
 	// Misc
 	IsIncapacitated = [ "Incapacitated", 1 ]
 	IsNotIncapacitated = [ "Incapacitated", 0 ]
@@ -96,7 +96,7 @@
 	IsEveryoneNotAlive = [ "NumberOfTeamAlive", 0, 3 ]
 	IsEveryoneAlive = [ "NumberOfTeamAlive", 4 ]
 	IsOnThirdStrike = [ "OnThirdStrike", 1 ]
-	
+
 	// Locational
 	IsInCheckpoint = [ "InCheckpoint", 1 ]
 	IsNotInCheckpoint = [ "InCheckpoint", 0 ]
@@ -108,14 +108,14 @@
 	IsInStartArea = [ "InStartArea", 1 ]
 	IsNotInStartArea = [ "InStartArea", 0 ]
 	SomeoneOutsideSafeSpot = [ "NumberOutsideSafeSpot", 1, 4 ]
-	
+
 	// Orator
 	IsWhitaker = [ "Name", "orator" ]
 	IsVirgil = [ "Name", "orator" ]
 	IsSoldier1 = [ "Name", "orator" ]
 	IsSoldier2 = [ "Name", "orator" ]
 	IsArenHeli = [ "Name", "orator" ]
-	
+
 	// Survivor criteria
 	IsCoach = [ "Who", "Coach" ]
 	IsGambler = [ "Who", "Gambler" ]
@@ -126,7 +126,7 @@
 	IsNamVet = [ "Who", "NamVet" ]
 	IsTeenGirl = [ "Who", "TeenGirl" ]
 	IsUnknown = [ "Who", "Unknown" ]
-	
+
 	IsDeadCoach = [ "DeadCharacter", "Coach" ]
 	IsDeadGambler = [ "DeadCharacter", "Gambler" ]
 	IsDeadMechanic = [ "DeadCharacter", "Mechanic" ]
@@ -136,7 +136,7 @@
 	IsDeadNamVet = [ "DeadCharacter", "NamVet" ]
 	IsDeadTeenGirl = [ "DeadCharacter", "TeenGirl" ]
 	IsDeadUnknown = [ "DeadCharacter", "Unknown" ]
-	
+
 	IsCoachAlive = [ "IsCoachAlive", 1 ]
 	IsGamblerAlive = [ "IsGamblerAlive", 1 ]
 	IsMechanicAlive = [ "IsMechanicAlive", 1 ]
@@ -145,7 +145,7 @@
 	IsManagerAlive = [ "IsManagerAlive", 1 ]
 	IsNamVetAlive = [ "IsNamVetAlive", 1 ]
 	IsTeenGirlAlive = [ "IsTeenGirlAlive", 1 ]
-	
+
 	IsCoachNotAlive = [ "IsCoachAlive", 0 ]
 	IsGamblerNotAlive = [ "IsGamblerAlive", 0 ]
 	IsMechanicNotAlive = [ "IsMechanicAlive", 0 ]
@@ -154,7 +154,7 @@
 	IsManagerNotAlive = [ "IsManagerAlive", 0 ]
 	IsNamVetNotAlive = [ "IsNamVetAlive", 0 ]
 	IsTeenGirlNotAlive = [ "IsTeenGirlAlive", 0 ]
-	
+
 	FromIsCoach = [ "From", "Coach" ]
 	FromIsGambler = [ "From", "Gambler" ]
 	FromIsMechanic = [ "From", "Mechanic" ]
@@ -164,7 +164,7 @@
 	FromIsNamVet = [ "From", "NamVet" ]
 	FromIsTeenGirl = [ "From", "TeenGirl" ]
 	FromIsUnknown = [ "From", "Unknown" ]
-	
+
 	SubjectIsCoach = [ "Subject", "Coach" ]
 	SubjectIsGambler = [ "Subject", "Gambler" ]
 	SubjectIsMechanic = [ "Subject", "Mechanic" ]
@@ -174,7 +174,7 @@
 	SubjectIsNamVet = [ "Subject", "NamVet" ]
 	SubjectIsTeenGirl = [ "Subject", "TeenGirl" ]
 	SubjectIsUnknown = [ "Subject", "Unknown" ]
-	
+
 	IsGamblerNear200 = [ "DistToGambler", 0, 199 ]
 	IsGamblerNear400 = [ "DistToGambler", 0, 399 ]
 	IsGamblerNear800 = [ "DistToGambler", 0, 799 ]
@@ -195,7 +195,7 @@
 	IsMechanicNear800 = [ "DistToMechanic", 0, 799 ]
 	IsMechanicFar400 = [ "DistToMechanic", 400, 999999 ]
 	IsMechanicFar1000 = [ "DistToMechanic", 601, 999999 ]
-	
+
 	IsNamVetNear200 = [ "DistToNamVet", 0, 199 ]
 	IsNamVetNear400 = [ "DistToNamVet", 0, 399 ]
 	IsNamVetNear800 = [ "DistToNamVet", 0, 799 ]
@@ -216,7 +216,7 @@
 	IsManagerNear800 = [ "DistToManager", 0, 799 ]
 	IsManagerFar400 = [ "DistToManager", 400, 999999 ]
 	IsManagerFar1000 = [ "DistToManager", 601, 999999 ]
-	
+
 	PanicEventCoach = [ "WhoDidIt", "Coach" ]
 	PanicEventGambler = [ "WhoDidIt", "Gambler" ]
 	PanicEventMechanic = [ "WhoDidIt", "Mechanic" ]
@@ -225,7 +225,7 @@
 	PanicEventManager = [ "WhoDidIt", "Manager" ]
 	PanicEventNamVet = [ "WhoDidIt", "NamVet" ]
 	PanicEventTeenGirl = [ "WhoDidIt", "TeenGirl" ]
-	
+
 	WhoPutColaCoach = [ "worldWhoPutCola", "Coach" ]
 	WhoPutColaGambler = [ "worldWhoPutCola", "Gambler" ]
 	WhoPutColaMechanic = [ "worldWhoPutCola", "Mechanic" ]
@@ -234,7 +234,7 @@
 	WhoPutColaManager = [ "worldWhoPutCola", "Manager" ]
 	WhoPutColaNamVet = [ "worldWhoPutCola", "NamVet" ]
 	WhoPutColaTeenGirl = [ "worldWhoPutCola", "TeenGirl" ]
-	
+
 	Iswitch_aggro_onCoach = [ "witch_aggro_on", "Coach" ]
 	Iswitch_aggro_onGambler = [ "witch_aggro_on", "Gambler" ]
 	Iswitch_aggro_onMechanic = [ "witch_aggro_on", "Mechanic" ]
@@ -243,12 +243,12 @@
 	Iswitch_aggro_onManager = [ "witch_aggro_on", "Manager" ]
 	Iswitch_aggro_onNamVet = [ "witch_aggro_on", "NamVet" ]
 	Iswitch_aggro_onTeenGirl = [ "witch_aggro_on", "TeenGirl" ]
-	
+
 	// Teams
 	IsSurvivor = [ "Team", "Survivor" ]
 	IsL4D1Survivor = [ "Team", "L4D1_Survivor" ]
 	IsInfected = [ "Team", "Infected" ]
-	
+
 	// Infected types
 	IsCommon = [ "Who", "Common" ]
 	IsSmoker = [ "Who", "Smoker" ]
@@ -260,7 +260,7 @@
 	IsWitch = [ "Who", "Witch" ]
 	IsHunter = [ "Who", "Hunter" ]
 	IsTank = [ "Who", "Tank" ]
-	
+
 	// Special types
 	IsSpecialTypeSmoker = [ "SpecialType", "Smoker" ]
 	IsSpecialTypeBoomer = [ "SpecialType", "Boomer" ]
@@ -277,7 +277,7 @@
 	IsSpecialTypeRoadcrew = [ "SpecialType", "Undistractable" ]
 	IsSpecialTypeJimmy = [ "SpecialType", "Jimmy" ]
 	IsSpecialTypeFallen = [ "SpecialType", "Fallen" ]
-	
+
 	// Infected classes
 	IsSmokerClass = [ "ZombieClass", "Smoker" ]
 	IsSpitterClass = [ "ZombieClass", "Spitter" ]
@@ -287,7 +287,7 @@
 	IsHunterClass = [ "ZombieClass", "Hunter" ]
 	IsTankClass = [ "ZombieClass", "Tank" ]
 	IsChargerClass = [ "ZombieClass", "Charger" ]
-	
+
 	// dist_from_subject nears (use these for everything that isn't an info_remarkable
 	IsSubjectDistNear50 = [ "dist_from_subject", 0, 49 ]
 	IsSubjectDistNear100 = [ "dist_from_subject", 0, 99 ]
@@ -304,7 +304,7 @@
 	IsSubjectDistNear900 = [ "dist_from_subject", 0, 899 ]
 	IsSubjectDistNear1000 = [ "dist_from_subject", 0, 999 ]
 	IsSubjectDistNear1500 = [ "dist_from_subject", 0, 1499 ]
-	
+
 	IsSubjectDistFar100 = [ "dist_from_subject", 101, 999999 ]
 	IsSubjectDistFar200 = [ "dist_from_subject", 201, 999999 ]
 	IsSubjectDistFar300 = [ "dist_from_subject", 301, 999999 ]
@@ -315,12 +315,12 @@
 	IsSubjectDistFar800 = [ "dist_from_subject", 801, 999999 ]
 	IsSubjectDistFar900 = [ "dist_from_subject", 901, 999999 ]
 	IsSubjectDistFar1000 = [ "dist_from_subject", 1001, 999999 ]
-	
+
 	IssuerCloseEnough = [ "dist_from_issuer", 0, 799 ]
 	IssuerClose = [ "dist_from_issuer", 0, 399 ]
 	IssuerReallyClose = [ "dist_from_issuer", 0, 199 ]
 	IssuerMediumClose = [ "dist_from_issuer", 0, 299 ]
-	
+
 	// Used for new nears
 	IsSubjectNear50 = [ "distance", 0, 49 ]
 	IsSubjectNear75 = [ "distance", 0, 74 ]
@@ -339,7 +339,7 @@
 	IsSubjectNear900 = [ "distance", 0, 899 ]
 	IsSubjectNear1000 = [ "distance", 0, 999 ]
 	IsSubjectNear1500 = [ "distance", 0, 1499 ]
-	
+
 	IsSubjectFar100 = [ "distance", 101, 999999 ]
 	IsSubjectFar200 = [ "distance", 201, 999999 ]
 	IsSubjectFar300 = [ "distance", 301, 999999 ]
@@ -350,7 +350,7 @@
 	IsSubjectFar800 = [ "distance", 801, 999999 ]
 	IsSubjectFar900 = [ "distance", 901, 999999 ]
 	IsSubjectFar1000 = [ "distance", 1001, 999999 ]
-	
+
 	// Used for random weighting for rules
 	ChanceToFire1Percent = [ "randomnum", 1 ]
 	ChanceToFire2Percent = [ "randomnum", 0, 2 ]
@@ -367,7 +367,7 @@
 	ChanceToFire80Percent = [ "randomnum", 0, 80 ]
 	ChanceToFire90Percent = [ "randomnum", 0, 90 ]
 	ChanceToFire100Percent = [ "randomnum", 0, 100 ]
-	
+
 	// Map criteria
 	Isc1m1_hotel = [ "Map", "c1m1_hotel" ]
 	Isc1m2_streets = [ "Map", "c1m2_streets" ]
@@ -429,8 +429,8 @@
 
 // Each Rule consists of the following fields in a table
 // * name		: an arbitrary rule name, for your convenience in debugging.
-// * criteria	: an array of criteria that must be met for the rule to be considered a match. 
-//		Criteria may be static string/numeric comparisons, or functions. 
+// * criteria	: an array of criteria that must be met for the rule to be considered a match.
+//		Criteria may be static string/numeric comparisons, or functions.
 // * responses	: an array of individual Response objects, emulating their counterparts in RR1.
 
 // --- CRITERIA
@@ -438,14 +438,14 @@
 // * STATIC criteria compare a fact (as a number) to a range on a number line, or strings to each other.
 //	  So, 'foo > 4', 'foo > 0 and foo < 10', 'foo = 6', ' foo = "bar" ' are all static criteria. These are very fast to match.
 // * FUNCTION criteria are arbitrary Squirrel functions returning TRUE or FALSE. They may do any work you like, but
-//   incur a 3 microsecond overhead to call, in addition to the work the function itself does. 
+//   incur a 3 microsecond overhead to call, in addition to the work the function itself does.
 // A rule must match all of its static criteria before the function criteria are even tested, so the more narrowly
 // constrained your rule, the less of an impact the functions will have.
 // Static criteria follow the form:
-//   [ name, a, b ] compares the value of key 'name' to see if it is >= a and <= b. 
-//   a and b may be null, in which case they represent negative and positive infinity. 
+//   [ name, a, b ] compares the value of key 'name' to see if it is >= a and <= b.
+//   a and b may be null, in which case they represent negative and positive infinity.
 //   See below for examples.
-// A function criterion takes one parameter: 'query' and should return a boolean 
+// A function criterion takes one parameter: 'query' and should return a boolean
 // so you could define one ahead of time like
 // function FooCriterion(query) {  return query.foo > g_rr.whatever.foo }
 // Here's example of different kinds of criteria
@@ -459,14 +459,14 @@
 //		@(query) query.blarg % 3 == 0	// anonymous function declared inline -- is fact "blarg" divisible by 3?
 //	]
 
-// --- RESPONSES 
+// --- RESPONSES
 
 // Emulates a single Response object from RR1, which is eg an individual 'speak' or 'sentence' etc
 // A response consists of a table with these fields:
-// target	: a string like "foo.vcd", 
-// func		: which is a script function to call before performing Target (optional)	
+// target	: a string like "foo.vcd",
+// func		: which is a script function to call before performing Target (optional)
 //			  this function may be specified by name, or as an anonymous @ function.
-// and a Params object which is a table consisting of the optional parameters below. 
+// and a Params object which is a table consisting of the optional parameters below.
 //	( Omitting an entry in Params assumes a reasonable default. )
 // Optional parameters:
 //   nodelay = an additional delay of 0 after speaking
@@ -485,7 +485,7 @@
 // see the "DemonstrateScriptFollowup" concept below for details
 
 
-// all of this is experimental code not relevant to the running game. 
+// all of this is experimental code not relevant to the running game.
 
 
 function VSLib::ResponseRules::CharacterSpeak( speaker, query )
@@ -504,7 +504,7 @@ function VSLib::ResponseRules::DemoScriptFollowupFunction( speaker, query )
 	// if ( response )							 // <- if a response was found,
 	//	rr_CommitAIResponse( speaker, response ) // <- have this entity speak it.
 }
- 
+
 // and then include it into the criteria lists as per the examples below. The "g_rr." part
 // is a bit of temporary cruft that will go away once we resolve some questions about scope resolution
 // in map .nut files.
@@ -579,10 +579,10 @@ enum ResponseKind
 
 
 // Emulates a single Response object from RR1, which is eg an individual 'speak' or 'sentence' etc
-// A response consists of a Kind (see ResponseKind above), 
-// a Target which is a string like "foo.vcd", 
+// A response consists of a Kind (see ResponseKind above),
+// a Target which is a string like "foo.vcd",
 // a Func (option), which is a script function to call before performing Target
-// and a Params object which is a table consisting of the optional parameters below. 
+// and a Params object which is a table consisting of the optional parameters below.
 //	( Omitting an entry in Params assumes a reasonable default. )
 // Optional parameters:
 //   nodelay = an additional delay of 0 after speaking
@@ -607,7 +607,7 @@ class ::VSLib.ResponseRules.ResponseSingle
 		rule = _rule
 		params = _params
 		func = _func
-		
+
 		// assert valid types
 		assert( typeof( kind ) == "integer" )
 		assert( typeof( params ) == "table" )
@@ -626,9 +626,9 @@ class ::VSLib.ResponseRules.ResponseSingle
 	func = null;
 	params = null; // will be a table
 	rule = null; // reference back to the rule to which I belong
-	
+
 	cpp_visitor = null; // a field for the C++ code to store whatever opaque info it needs in this object.
-	
+
 	function _tostring()
 	{
 		return "ResponseSingle: " + target
@@ -663,7 +663,7 @@ class ::VSLib.ResponseRules.GroupParams
 	sequential = false;
 	norepeat = false;
 	matchonce = false;
-}	
+}
 
 
 // A followup event like the old response Then.
@@ -685,7 +685,7 @@ class ::VSLib.ResponseRules.Then
 		target = _target
 		assert( typeof(_concept) == "string" )
 		delay = _delay.tofloat()
-		
+
 		// in rr2 "concept" is just another fact in the query
 		if ( _contexts == null )
 		{
@@ -696,11 +696,11 @@ class ::VSLib.ResponseRules.Then
 			throw("Then() error: _contexts parameter isn't a table or null")
 		}
 		addcontexts = clone _contexts
-		
+
 		addcontexts.concept <- _concept
 		func = execute.bindenv(this)
 	}
-	
+
 	function execute( speaker, query )
 	{
 		if ( target.tolower() == "namvet" )
@@ -712,13 +712,13 @@ class ::VSLib.ResponseRules.Then
 			local firstletter = target.slice(0,1)
 			target = firstletter.toupper() + target.slice(1)
 		}
-		
+
 		// debug prints...
 		if ( Convars.GetFloat( "rr_debugresponses" ) > 0 )
 		{
 			print( "Then followup called:\n\ttarget: " )
 			printl(target)
-		
+
 			if ( Convars.GetFloat( "rr_debugresponses" ) >= 2 )
 			{
 				print( "\taddcontexts: {")
@@ -734,13 +734,13 @@ class ::VSLib.ResponseRules.Then
 			}
 			print( "\t(end followup)\n")
 		}
-		
+
 		// merge addcontexts into query
 		foreach (k,v in addcontexts)
 		{
 			query[k] <- v
 		}
-		
+
 		if ( target.tolower() == "all" )
 		{
 			local expressers = ::rr_GetResponseTargets()
@@ -787,7 +787,7 @@ class ::VSLib.ResponseRules.Then
 				// find the highest-scoring entry and play that
 				local idx = 1
 				local best = 0
-				while ( idx < results.len() ) 
+				while ( idx < results.len() )
 				{
 					if ( results[idx][1].params.weight > results[best][1].params.weight )
 					{
@@ -853,7 +853,7 @@ class ::VSLib.ResponseRules.Then
 	addcontexts = null; // a table of {k1:v1, k2:v2} additional facts that will be added to the following query. concept is always present here, from the constructor.
 	delay = null; // delay as passed to the code followup class
 	func = null; // what gets called when the followup triggers
-	
+
 	function _tostring()
 	{
 		return "Then: " + target
@@ -936,7 +936,7 @@ function VSLib::ResponseRules::ThenDelay( speaker, query, target, concept, conte
 		local firstletter = target.slice(0,1)
 		target = firstletter.toupper() + target.slice(1)
 	}
-	
+
 	if ( target.tolower() == "all" )
 	{
 		local expressers = ::rr_GetResponseTargets()
@@ -1073,7 +1073,7 @@ function VSLib::ResponseRules::ProcessResponse( resp )
 	local then = null
 	local applycontext = null
 	local applycontexttoworld = false
-	
+
 	if ( "delay" in resp )
 	{
 		delay = resp.delay
@@ -1093,7 +1093,7 @@ function VSLib::ResponseRules::ProcessResponse( resp )
 	if ( "func" in resp )
 	{
 		func = resp.func
-		
+
 		// we still need to store the 'resp' table as a strong reference in the ResponseSingle object
 		// so that it doesn't get garbage-collected. .bindenv only stores weak references to objects
 		// so you can't count on it to actually hang onto the closure table.
@@ -1106,7 +1106,7 @@ function VSLib::ResponseRules::ProcessResponse( resp )
 		else
 		{
 			scene = resp.scenename
-			
+
 			if ( applycontext )
 				func = @( speaker, query ) ::VSLib.ResponseRules.ApplyContext( speaker, query, applycontext, applycontexttoworld, Func )
 		}
@@ -1124,14 +1124,14 @@ function VSLib::ResponseRules::ProcessResponse( resp )
 		local volume = 10
 		if ( "volume" in resp )
 			volume = resp.volume
-		
+
 		local Func = func
 		if ( delay > 0.0 )
 			func = @( speaker, query ) ::VSLib.Timers.AddTimer(delay, false, ::VSLib.ResponseRules.PlaySoundFile, { speaker = speaker, query = query, soundfile = resp.soundfile, applycontext = applycontext, applycontexttoworld = applycontexttoworld, volume = volume, func = Func, then = then })
 		else
 			func = @( speaker, query ) ::VSLib.ResponseRules.PlaySoundFile( { speaker = speaker, query = query, soundfile = resp.soundfile, applycontext = applycontext, applycontexttoworld = applycontexttoworld, volume = volume, func = Func, then = then })
 	}
-	
+
 	local kind = ResponseKind.none
 	if ( scene )
 	{
@@ -1147,7 +1147,7 @@ function VSLib::ResponseRules::ProcessResponse( resp )
 		resp.Describe()
 		return null
 	}
-	
+
 	return ::VSLib.ResponseRules.ResponseSingle( kind, scene, null, func, resp )
 }
 
@@ -1159,7 +1159,7 @@ function VSLib::ResponseRules::ProcessRules( rulesarray )
 		// need to bind the rr_ProcessCriterion function in a closure containing this environment,
 		// otherwise for whatever reason it won't be able to find the Criterion and CriterionFunctor
 		// classes in its scope.
-		local coderule = ::VSLib.ResponseRules.Rule( rule.name, 
+		local coderule = ::VSLib.ResponseRules.Rule( rule.name,
 			rule.criteria.map( ::VSLib.ResponseRules.ProcessCriterion.bindenv( this ) ),
 			rule.responses.map( ::VSLib.ResponseRules.ProcessResponse.bindenv( this ) ),
 			rule.group_params )
@@ -1185,7 +1185,7 @@ function VSLib::ResponseRules::ProcessRules( rulesarray )
 }
 
 // Each individual rule has:
-// a name 
+// a name
 // criteria
 // responses
 //	if the response has a 'func' parameter, it is interpreted to be a script function that gets called with the following two parameters:
@@ -1196,7 +1196,7 @@ function VSLib::ResponseRules::ProcessRules( rulesarray )
 //	it is an RGroupParams object, see above.
 // if a response is a function, it gets called with parameters (speaker, query)
 
-// fake rule table to test my parsing 
+// fake rule table to test my parsing
 // g_ignoredecisionrules <- [
 // {
 // 	name = "CoachSeeSmoker",
@@ -1212,7 +1212,7 @@ function VSLib::ResponseRules::ProcessRules( rulesarray )
 // 		  soundlevel = 80,
 // 		  onFinish = @(query, speaker) speaker.smokersSeen += 1 // expected to be a function
 // 		} , {
-// 		  func = ZombieFreakout // if a 'func' key is present, this is expected to be a 'do function' response 
+// 		  func = ZombieFreakout // if a 'func' key is present, this is expected to be a 'do function' response
 // 		} , {
 // 		  func = @(query,speaker) speaker.PointAt( query.enemy ) // anonymous functions are ok too
 // 		} , {
@@ -1224,7 +1224,7 @@ function VSLib::ResponseRules::ProcessRules( rulesarray )
 // 	group_params = RGroupParams({ permitrepeats = false, sequential = true, norepeat = false })
 // },
 // { // another rule to test that I don't inadvertently write state shared between rules
-// 	name = "Dummy", 
+// 	name = "Dummy",
 // 	criteria = [
 // 		[ "concept", "dummy" ], // arrays of two entries are considered to be fact = value
 // 		[ "speaker", "zombie" ]
@@ -1233,9 +1233,9 @@ function VSLib::ResponseRules::ProcessRules( rulesarray )
 // 		{ scenename = "zombie.vcd", // if a 'scenename' key is present, this is expected to be a 'scene' response
 // 		  sndlevel = 80,
 // 		  onFinish = @(speaker, query) speaker.smokersSeen += 1 // expected to be a function
-// 		} 
+// 		}
 // 	],
-// 	group_params = RGroupParams( ) // default 
+// 	group_params = RGroupParams( ) // default
 // }
 // ]
 
@@ -1264,13 +1264,13 @@ class ::VSLib.ResponseRules.Criterion
 		bottom = b
 		top = t
 	}
-	
+
 	//member function
 	function Describe()
 	{
 		printl( "Criterion " + key + " " + bottom + ".." + top )
 	}
-	
+
 	//property
 	key = null;
 	bottom = null;
@@ -1286,13 +1286,13 @@ class ::VSLib.ResponseRules.CriterionFunc
 		key = k
 		func = f
 	}
-	
+
 	//member function
 	function Describe()
 	{
 		printl( "Criterion functor " + key + " -> " + func )
 	}
-	
+
 	//property
 	key = null;
 	func = null;
@@ -1320,19 +1320,19 @@ class ::VSLib.ResponseRules.Rule
 		criteria = crits
 		responses = _responses
 		group_params = _group_params
-		
+
 		// type-check
 		assert( responses.len() > 0 )
-		
+
 		// make a shallow copy of selection_state to avoid overwriting shared state
 		// (otherwise changes made in one instance will affect all others)
 		selection_state = clone selection_state
-		
-		
+
+
 		// make an array of one 'false' per response (eg no response has played yet)
 		selection_state.playedresponses <- responses.map( @(x) false )
 	}
-	
+
 	function Describe( verbose = true )
 	{
 		printl( rulename + "\n" + criteria.len() + " crits, " + responses.len() + " responses" )
@@ -1352,7 +1352,7 @@ class ::VSLib.ResponseRules.Rule
 			print("\n")
 		}
 	}
-		
+
 	// for some reason can't resolve this from file scope?
 	function ChooseRandomFromArray( arr )
 	{
@@ -1364,7 +1364,7 @@ class ::VSLib.ResponseRules.Rule
 		else
 			return null
 	}
-	
+
 	// When a rule matches, call this to pick a response.
 	// TODO: test
 	function SelectResponse()
@@ -1378,13 +1378,13 @@ class ::VSLib.ResponseRules.Rule
 		{
 			// just randomly pick a response
 			local R = ChooseRandomFromArray( responses )
-			
+
 			if ( Convars.GetFloat("rr_debugresponses") > 0 )
 			{
 				print("Matched " )
 				R.Describe()
 			}
-			
+
 			return R
 		}
 		// else...
@@ -1397,7 +1397,7 @@ class ::VSLib.ResponseRules.Rule
 				unplayed_resps.push( idx )
 			}
 		}
-		
+
 		if ( unplayed_resps.len() == 0 ) // out of unplayed responses, what do we do?
 		{
 			if (group_params.norepeat)
@@ -1410,7 +1410,7 @@ class ::VSLib.ResponseRules.Rule
 				selection_state.playedresponses = responses.map( @(x) false )
 			}
 		}
-		
+
 		// okay, now pick a response
 		if ( group_params.sequential )
 		{
@@ -1420,7 +1420,7 @@ class ::VSLib.ResponseRules.Rule
 			// mark this response as played
 			selection_state.playedresponses[retval] = true
 			local R = responses[retval]
-			
+
 			if ( Convars.GetFloat("rr_debugresponses") > 0 )
 			{
 				print("Matched " )
@@ -1434,7 +1434,7 @@ class ::VSLib.ResponseRules.Rule
 			local retval = ChooseRandomFromArray( unplayed_resps )
 			selection_state.playedresponses[retval] = true
 			local R = responses[retval]
-			
+
 			if ( Convars.GetFloat("rr_debugresponses") > 0 )
 			{
 				print("Matched " )
@@ -1443,19 +1443,19 @@ class ::VSLib.ResponseRules.Rule
 			return R
 		}
 	}
-	
+
 	// tell the response engine to disable me
 	function Disable()
 	{
 		printl( "TODO: rule " + rulename + " wants to disable itself." )
 	}
-	
+
 	// properties
 	rulename = null;
 	criteria = [];
 	responses = [];
 	group_params = null;
-	
+
 	// handles the 'response group' state which is
 	// used to pick the next response in sequence, etc
 	selection_state =

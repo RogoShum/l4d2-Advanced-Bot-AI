@@ -2299,6 +2299,9 @@ function BotAI::botDeath(bot, pos = null) {
 	infoTarget = null;
 	while(infoTarget = Entities.FindByName(infoTarget, "botai_navigator_timer_" + bot.GetEntityIndex()))
         infoTarget.Kill();
+	infoTarget = null;
+	while(infoTarget = Entities.FindByName(infoTarget, "botai_item_seacher_timer_" + bot.GetEntityIndex()))
+		infoTarget.Kill();
 	if(bot in BotAI.playerNavigator)
 		delete BotAI.playerNavigator[bot];
 	if(bot in BotAI.BotLinkGasCan) {
