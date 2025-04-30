@@ -1862,7 +1862,7 @@ function BotAI::displayOptionMenuNext(player, args, args1) {
 		menu.AddOption(BotAI.fromParams(BotAI.NeedBotAlive, lang)+I18n.getTranslationKeyByLang(lang, "menu_alive"), BotAliveCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Defibrillator, lang)+I18n.getTranslationKeyByLang(lang, "menu_defibrillator"), BotDefibrillatorCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.NeedGasFinding, lang)+I18n.getTranslationKeyByLang(lang, "menu_find_gas"), BotGascanFindCmd);
-		menu.AddOption(BotAI.fromParams(BotAI.UseUpgrads, lang)+I18n.getTranslationKeyByLang(lang, "menu_upgrads"), BotUseUpgradesCmd);
+		menu.AddOption(BotAI.fromParams(BotAI.UseUpgrades, lang)+I18n.getTranslationKeyByLang(lang, "menu_upgrads"), BotUseUpgradesCmd);
 		menu.AddOption("emp_0", BotEmptyCmd);
 	}
 
@@ -2460,7 +2460,11 @@ function resetAllBots() {
 	local function allBot(arg){
 		if(BotAI.NeedBotAlive) {
 			Convars.SetValue( "sb_all_bot_game", 1);
+			Convars.SetValue( "allow_all_bot_survivor_team", 1 );
 			printl("sb_all_bot_game on.");
+		} else {
+			Convars.SetValue( "sb_all_bot_game", 0);
+			Convars.SetValue( "allow_all_bot_survivor_team", 0 );
 		}
 	}
 
@@ -2476,7 +2480,6 @@ function resetAllBots() {
 	Convars.SetValue( "sv_consistency", 0 );
 	Convars.SetValue( "sb_melee_approach_victim", 0 );
 	Convars.SetValue( "sb_allow_shoot_through_survivors", 0 );
-	Convars.SetValue( "allow_all_bot_survivor_team", 1 );
 	Convars.SetValue( "sb_toughness_buffer", 25 );
 	Convars.SetValue( "sb_temp_health_consider_factor", 0.85 );
 

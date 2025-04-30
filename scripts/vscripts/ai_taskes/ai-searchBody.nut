@@ -120,12 +120,12 @@ class ::AITaskSearchBody extends AITaskGroup
 				}
 			}
 
-			if(findDef != null)
-			{
+			if(findDef != null) {
 				if (defDis > 150) {
 					if(!BotAI.IsInCombat(player, true)) {
-						if(BotAI.BotDebugMode)
+						if(BotAI.BotDebugMode) {
 							printl("[Bot AI] Found defib");
+						}
 						local bo = ironBanner;
 						local function needSearch() {
 							return !BotAI.Defibrillator || !BotAI.IsEntityValid(bo) || !BotAI.IsEntityValid(findDef) || findDef.GetOwnerEntity() != null || BotAI.HasItem(player, "defibrillator");
@@ -151,7 +151,7 @@ class ::AITaskSearchBody extends AITaskGroup
 	function playerUpdate(player) {
 		if(ironBanner != null && player != null) {
 			local distance = BotAI.distanceof(ironBanner.GetOrigin(), player.GetOrigin());
-			if (distance > 2000) {
+			if (distance > 8000) {
 				ironBanner = null;
 				GUY = null;
 				BotAI.setBotLockTheard(player, -1);

@@ -58,8 +58,10 @@ class ::AITaskShoveInfected extends AITaskSingle {
 				}
 			}
 
-			if(target.GetClassname() == "func_button_timed")
+			if(target.GetClassname() == "func_button_timed") {
 				shove = false;
+			}
+			
 			local shoveDis = BotAI.nextTickDistance(player, target, 5.0, true);
 
 			local shoveFlag = shoveDis <= maxDis;

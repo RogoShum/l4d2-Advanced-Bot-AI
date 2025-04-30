@@ -160,22 +160,14 @@
 	}
 	*/
 
-	if(BotAI.IsEntitySurvivor(p)) {
-		if(BotAI.BotDebugMode) {
-			NetProps.SetPropInt(p, "m_bDucked", 1);
-			NetProps.SetPropInt(p, "m_bDucking", 0);
-		} else {
-			NetProps.SetPropInt(p, "m_bDucked", 0);
-			NetProps.SetPropInt(p, "m_bDucking", 1);
-		}
-	}
-
 	if(p != null && p.IsSurvivor() && IsPlayerABot(p)) {
 		local wep = p.GetActiveWeapon();
 		local ename = " ";
 
 		if(BotAI.IsEntityValid(wep))
 			ename = wep.GetClassname();
+
+		local isSniper = ename.find("shotgun") != null || ename.find("sniper") != null || ename.find("pistol") != null;
 
 		local pass = false;
 		local function counterSpecial(target, sight) {
@@ -203,8 +195,6 @@
 		if(!pass && p in BotAI.botAim) {
 			counterSpecial(BotAI.botAim[p], false);
 		}
-
-		local isSniper = ename == "weapon_sniper_awp" || ename == "weapon_sniper_scout" || ename == "weapon_pumpshotgun" || ename == "weapon_shotgun_chrome" || ename == "weapon_shotgun_chrome" || ename == "weapon_pistol" || ename == "weapon_pistol_magnum";
 
 		if(ename == "weapon_melee" || ename == "weapon_chainsaw") {
 			local target = null;
@@ -268,6 +258,8 @@
 			local endTime = NetProps.GetPropFloat(wep, "m_flNextPrimaryAttack");
 			local nowTime = Time();
 			local duration = (endTime - nowTime) * mult;
+			
+			//seems not working
 			NetProps.SetPropFloat(wep, "m_flNextPrimaryAttack", nowTime + duration);
 		}
 	}
@@ -458,8 +450,7 @@
 	}
 }
 
-::BotAI.Events.OnGameEvent_charger_pummel_start <- function(event)
-{
+::BotAI.Events.OnGameEvent_charger_pummel_start <- function(event) {
 	if(!("victim" in event) || event.victim == null)
 		return;
 
@@ -469,8 +460,7 @@
 	BotAI.SurvivorTrappedTimed[victim.GetEntityIndex()] <- victim;
 }
 
-::BotAI.Events.OnGameEvent_charger_pummel_end <- function(event)
-{
+::BotAI.Events.OnGameEvent_charger_pummel_end <- function(event) {
 	if(!("victim" in event) || event.victim == null)
 		return;
 	victim <- GetPlayerFromUserID(event.victim);
@@ -574,8 +564,7 @@
 
 	BotAI.SurvivorTrapped[victim.GetEntityIndex()] <- victim;
 	BotAI.SurvivorTrappedTimed[victim.GetEntityIndex()] <- victim;
-	local function addTimed(vic)
-	{
+	local function addTimed(vic) {
 		BotAI.SurvivorTrappedTimed[vic.GetEntityIndex()] <- null;
 	}
 

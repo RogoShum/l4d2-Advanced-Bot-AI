@@ -1598,8 +1598,7 @@ function BotAI::IsSurvivorTrapped(_ent) {
 	return BotAI.SurvivorTrapped[_ent.GetEntityIndex()] != null;
 }
 
-function BotAI::IsSurvivorTrappedTimed(_ent)
-{
+function BotAI::IsSurvivorTrappedTimed(_ent) {
 	if (!BotAI.IsEntityValid(_ent))
 	{
 		return false;
@@ -1771,9 +1770,7 @@ function BotAI::CanSeeOtherEntityWithoutBarrier(player, otherEntity, tolerance =
 
 		if (nT && n_trace.enthit == otherEntity)
 			return true;
-	}
-
-	if ("GetBoneOrigins" in otherEntity) {
+	} else if ("GetBoneOrigin" in otherEntity) {
 		local n_trace = { start = player.EyePosition(), end = otherEntity.GetBoneOrigin(14), ignore = player, mask = MaskSet};
 		TraceLine(n_trace);
 

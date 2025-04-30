@@ -110,12 +110,13 @@ class ::AITaskSavePlayer extends AITaskGroup
 		if(NetProps.GetPropInt(victim, "m_jockeyAttacker") > 0)
 			smoker = NetProps.GetPropEntity(victim, "m_jockeyAttacker");
 
-		if(BotAI.IsEntityValid(smoker) && BotAI.CanShotOtherEntityInSight(player, smoker)) {
+		if(BotAI.IsEntityValid(smoker) && BotAI.CanSeeOtherEntityWithoutBarrier(player, smoker, 180)) {
 			local function needSave() {
 				if(!BotAI.IsAlive(smoker)) return true;
 
 				return false;
 			}
+			
 			BotAI.botRunPos(player, smoker, "savePlayer", 5, needSave);
 		} else if (BotAI.distanceof(player.GetOrigin(), victim.GetOrigin()) > 125) {
 			local function needSave() {
