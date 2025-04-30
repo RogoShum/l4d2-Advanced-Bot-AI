@@ -1010,6 +1010,10 @@ function ChatTriggers::botcrash( player, args, text ) {
 	BotAI.Timers.AddTimerByName("makeCrash-" + UniqueString(), 0.5, true, makeCrash, player);
 }
 
+function ChatTriggers::botupgrades( player, args, text ) {
+	BotUseUpgradesCmd( player, args, text );
+}
+
 function ChatTriggers::botreset( player, args, text ) {
 	foreach(bot in BotAI.SurvivorBotList) {
 		BotAI.BotReset(bot);

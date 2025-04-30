@@ -170,6 +170,7 @@ if (!("VSLib" in getroottable())) {
 		NeedThrowGrenade = true
 		Immunity = false
 		PathFinding = false
+		UseUpgrades = true
 		Unstick = true
 		Melee = true
 		Defibrillator = true
@@ -405,6 +406,7 @@ BotAI.meleeDmg <- DMG_MELEE | DMG_HEADSHOT;
         "\nBotDebugMode = " + BotAI.BotDebugMode.tostring() +
         "\nNeedGasFinding = " + BotAI.NeedGasFinding.tostring() +
         "\nNeedThrowGrenade = " + BotAI.NeedThrowGrenade.tostring() +
+		"\nUseUpgrades = " + BotAI.UseUpgrades.tostring() +
         "\nImmunity = " + BotAI.Immunity.tostring() +
         "\nPathFinding = " + BotAI.PathFinding.tostring() +
         "\nUnstick = " + BotAI.Unstick.tostring() +
@@ -1373,6 +1375,23 @@ function BotAI::locateUseTarget(args) {
 	BotExitMenuCmd(speaker, args, args1);
 }
 
+::BotUseUpgradesCmd <- function ( speaker, args , args1) {
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
+
+	if (BotAI.UseUpgrades) {
+		BotAI.UseUpgrades = false;
+		BotAI.SendPlayer(player, "botai_use_upgrades_off");
+	} else {
+		BotAI.UseUpgrades = true;
+		BotAI.SendPlayer(player, "botai_use_upgrades_on");
+	}
+
+	BotAI.SaveSetting();
+	BotExitMenuCmd(speaker, args, args1);
+}
+
 ::BotImmunityCmd <- function ( speaker, args  , args1) {
 	BotExitMenuCmd(speaker, args, args1);
 	local player = speaker;
@@ -1843,13 +1862,15 @@ function BotAI::displayOptionMenuNext(player, args, args1) {
 		menu.AddOption(BotAI.fromParams(BotAI.NeedBotAlive, lang)+I18n.getTranslationKeyByLang(lang, "menu_alive"), BotAliveCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Defibrillator, lang)+I18n.getTranslationKeyByLang(lang, "menu_defibrillator"), BotDefibrillatorCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.NeedGasFinding, lang)+I18n.getTranslationKeyByLang(lang, "menu_find_gas"), BotGascanFindCmd);
+		menu.AddOption(BotAI.fromParams(BotAI.UseUpgrads, lang)+I18n.getTranslationKeyByLang(lang, "menu_upgrads"), BotUseUpgradesCmd);
+		menu.AddOption("emp_0", BotEmptyCmd);
 	}
 
 	local function bot(menu) {
 		menu.AddOption("emp_=", BotEmptyCmd);
 		menu.AddOption("emp_", BotEmptyCmd);
-		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
+		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
 	}
 
@@ -1890,8 +1911,8 @@ function BotAI::displayOptionMenuBotCombat(player, args, args1) {
 	local function bot(menu) {
 		menu.AddOption("emp_=", BotEmptyCmd);
 		menu.AddOption("emp_", BotEmptyCmd);
-		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
+		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
 	}
 

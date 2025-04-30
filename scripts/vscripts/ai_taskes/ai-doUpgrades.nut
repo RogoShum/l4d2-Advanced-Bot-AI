@@ -10,6 +10,10 @@ class ::AITaskDoUpgrades extends AITaskGroup {
 	humanPlayer = {};
 
 	function preCheck() {
+		if (!BotAI.UseUpgrades) {
+			return false;
+		}
+
 		local hasUpgradeAmmo = false;
 		local amount = 0;
 		local humanTab = {};
