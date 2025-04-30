@@ -1,5 +1,4 @@
-::BotAI.Events.OnGameEvent_item_pickup <- function(event)
-{
+::BotAI.Events.OnGameEvent_item_pickup <- function(event) {
 	local p = GetPlayerFromUserID(event.userid);
 	local item = event.item;
 	if((item == "first_aid_kit_spawn" || item == "first_aid_kit" || item == "weapon_first_aid_kit_spawn" || item == "weapon_first_aid_kit" )&& p.IsSurvivor() && IsPlayerABot(p))
@@ -957,6 +956,18 @@ function ChatTriggers::botmelee( player, args, text ) {
 
 function ChatTriggers::botmenu( player, args, text ) {
 	BotMenuCmd( player, args, text );
+}
+
+function ChatTriggers::botkeepalive( player, args, text ) {
+	BotAliveCmd( player, args, text );
+}
+
+function ChatTriggers::botbackpack( player, args, text ) {
+	BotBackPackCmd( player, args, text );
+}
+
+function ChatTriggers::botdefib( player, args, text ) {
+	BotDefibrillatorCmd( player, args, text );
 }
 
 function ChatTriggers::botdebug( player, args, text ) {
