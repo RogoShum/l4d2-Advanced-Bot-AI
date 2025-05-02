@@ -15,7 +15,7 @@ class ::AITaskSearchBody extends AITaskGroup
 		if(!BotAI.Defibrillator)
 			return false;
 		if(BotAI.IsEntityValid(GUY)) {
-			if(!BotAI.IsAlive(GUY) || GUY.IsIncapacitated() || BotAI.IsInCombat(GUY, true)) {
+			if(!BotAI.IsAlive(GUY) || GUY.IsIncapacitated() || BotAI.IsInCombat(GUY)) {
 				GUY = null;
 				BotAI.setBotLockTheard(GUY, -1);
 			}
@@ -76,9 +76,8 @@ class ::AITaskSearchBody extends AITaskGroup
 		}
 	}
 
-	function GroupUpdateChecker(player)
-	{
-		if(BotAI.IsInCombat(player, true) || player.IsIncapacitated())
+	function GroupUpdateChecker(player) {
+		if(BotAI.IsInCombat(player) || player.IsIncapacitated())
 			return false;
 
 		if(BotAI.IsEntitySurvivor(GUY) && GUY != player)
@@ -122,7 +121,7 @@ class ::AITaskSearchBody extends AITaskGroup
 
 			if(findDef != null) {
 				if (defDis > 150) {
-					if(!BotAI.IsInCombat(player, true)) {
+					if(!BotAI.IsInCombat(player)) {
 						if(BotAI.BotDebugMode) {
 							printl("[Bot AI] Found defib");
 						}

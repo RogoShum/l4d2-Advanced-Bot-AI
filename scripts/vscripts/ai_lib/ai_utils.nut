@@ -443,8 +443,7 @@ function BotAI::EnableButton(player, button )
 	NetProps.SetPropInt(player, "m_afButtonDisabled", ( buttons & ~button ) );
 }
 
-function BotAI::ChangeItem(p, slot)
-{
+function BotAI::ChangeItem(p, slot) {
 	if(BotAI.IsPlayerClimb(p)) return;
 
 	local wep = p.GetActiveWeapon();
@@ -1241,7 +1240,6 @@ function BotAI::tracePos(player, pos, onlyGround = false) {
 }
 
 function BotAI::GetHitPosition(player, distan, bol) {
-	BotAI.debugCall("GetHitPosition");
 	local m_trace = { start = player.EyePosition(), end = player.EyePosition() + player.EyeAngles().Forward().Scale(distan), ignore = player, mask = g_MapScript.TRACE_MASK_ALL};
 	TraceLine(m_trace);
 
@@ -1251,8 +1249,7 @@ function BotAI::GetHitPosition(player, distan, bol) {
 	if (m_trace.enthit.GetClassname() == "worldspawn" || !m_trace.enthit.IsValid())
 		return null;
 
-	if(bol)
-	{
+	if(bol) {
 		if(m_trace.enthit.GetClassname() == "point_prop_use_target")
 			return m_trace.pos;
 		else
@@ -1446,34 +1443,12 @@ function BotAI::applyDamage(owner, target, amount, damageType, damagepos = null)
 	}
 }
 
-function BotAI::IsInCombat(player, lowCheck = false) {
+function BotAI::IsInCombat(player) {
 	if(!BotAI.IsPlayerEntityValid(player)) return false;
 
-	local target = BotAI.GetTarget(player);
-	if(BotAI.IsEntityValid(target) && !lowCheck) {
-		if(BotAI.isEntitySP(target) || BotAI.isEntityInfected(target)) {
-			return true;
-		}
-	}
-
-	target = BotAI.getBotTarget(player);
-	if(BotAI.IsEntityValid(target) && !lowCheck) {
-		return true;
-	}
-
-	local findInfected = null;
-	while(findInfected = Entities.FindByClassnameWithin(findInfected, "infected", player.GetOrigin(), 200)) {
-		if(BotAI.IsAlive(findInfected) && BotAI.IsTarget(player, findInfected)) {
-			return true;
-		}
-	}
-
-	local findSI = null;
-	while(findSI = Entities.FindByClassnameWithin(findSI, "player", player.GetOrigin(), 500)) {
-		if(!findSI.IsSurvivor() && BotAI.IsAlive(findSI) && BotAI.IsTarget(player, findSI)) {
-			return true;
-		}
-	}
+	local map = BotAI.getBotPropertyMap(player);
+	if(map != null)
+		return BotAI.IsAlive(map.combatTarget);
 
 	return false;
 }
@@ -2467,8 +2442,6 @@ function BotAI::nextTickDistance(entity, entity1, tps = 10.0, xy = false) {
 function BotAI::nextTickPostion(entity, tps = 10.0) {
 	if(!BotAI.IsEntityValid(entity)) return Vector(0, 0, 0);
 
-	local scale = 1.0 / tps;
-	local vel = entity.GetVelocity().Scale(scale);
 	return entity.GetOrigin();
 }
 
@@ -2734,8 +2707,14 @@ function BotAI::BotAttack(boto, otherEntity) {
 	if(BotAI.IsPlayerClimb(boto) || BotAI.IsBotHealing(boto))
 		return;
 
-	if(BotAI.HasItem(boto, BotAI.BotsNeedToFind) && BotAI.UseTargetOri != null && BotAI.distanceof(boto.GetOrigin(), BotAI.UseTargetOri) < 150 && otherEntity.GetClassname() != "player")
-		return;
+	//if(BotAI.HasItem(boto, BotAI.BotsNeedToFind) && BotAI.UseTargetOri != null && BotAI.distanceof(boto.GetOrigin(), BotAI.UseTargetOri) < 150 && otherEntity.GetClassname() != "player")
+		//return;
+
+	/*
+	if (Time() - BotAI.getBotMoveCooldown(boto) > 1.5 && BotAI.getNavigator(boto).moving()) {
+		BotAI.BotReset(boto)
+	}
+	*/
 
 	BotAI.setBotMoveCooldown(boto, Time());
 	BotAI.SetTarget(boto, otherEntity);

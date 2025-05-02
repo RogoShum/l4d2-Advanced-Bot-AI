@@ -1,8 +1,9 @@
 function BotAI::bestAim() {
 	foreach(player in BotAI.SurvivorBotList) {
 		local target = null;
-		if(player in BotAI.botAim)
+		if(player in BotAI.botAim) {
 			target = BotAI.botAim[player];
+		}
 
 		if(BotAI.IsAlive(target)) {
 			BotAI.lookAtEntity(player, target);
@@ -357,8 +358,9 @@ function BotAI::createPlayerTargetTimer(player) {
 		}
 
 		local navigator = BotAI.getNavigator(player);
-		if (navigator.hasPath("searchGascan+")) {
-			awareAngle = -2.0;
+		if (navigator.moving()) {
+			awareAngle -= 2.0;
+			selectedDis += 15;
 		}
 
 		local isShove = BotAI.IsPressingShove(player);
@@ -706,7 +708,7 @@ function BotAI::pingSystem() {
 		local map = {};
 		foreach(player in BotAI.SurvivorHumanList) {
 			local item = null;
-			while(item = Entities.FindInSphere(item, player.GetCenter(), 150)) {
+			while(item = Entities.FindInSphere(item, player.GetCenter(), 200)) {
 				if(BotAI.IsEntityValid(item) && item.GetClassname() in BotAI.enumResource && item.GetOwnerEntity() == null && NetProps.GetPropEntity(item, "m_hOwnerEntity") == null) {
 					if(BotAI.BotDebugMode) {
 						DebugDrawBox(Vector(item.GetOrigin().x, item.GetOrigin().y, item.GetOrigin().z), Vector(-5, -5, -5), Vector(5, 5, 5), 100, 255, 0, 0.2, 1.5);
@@ -717,6 +719,8 @@ function BotAI::pingSystem() {
 		}
 
 		BotAI.humanSearchedEntity = map;
+
+		return 1.5;
 	}
 
 	function BotAI::pickCoolDown() {

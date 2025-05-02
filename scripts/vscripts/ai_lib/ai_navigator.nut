@@ -455,6 +455,8 @@ class::Navigator {
 
 		if (endArea == null)
 			return false;
+
+
 		//endArea.DebugDrawFilled(0, 0, 255, 100, 10, true);
 		local checked = pathSearch.checked;
 		local needCheack = pathSearch.needCheack;
@@ -463,14 +465,20 @@ class::Navigator {
 			startArea = player.GetLastKnownArea();
 		}
 
+
+		if (startArea == null) {
+			return false;
+		}
+
 		if (startArea == endArea) {
 			return true;
 		}
 
-		if (startArea.IsConnected(endArea, -1)) {
-			paths["area0"] <- endArea;
+		if (BotAI.IsEntityValid(BotAI.UseTarget) && BotAI.validVector(BotAI.UseTargetOri) && BotAI.distanceof(BotAI.UseTargetOri, pos) < 50) {
 			return true;
 		}
+
+		return NavMesh.NavAreaBuildPath(startArea, null, pos, distance, 2, false);
 
 		local playerArea = AreaData(startArea, null, 0, BotAI.distanceof(startPos, pos));
 		if (startArea != null)

@@ -257,7 +257,7 @@
 			local endTime = NetProps.GetPropFloat(wep, "m_flNextPrimaryAttack");
 			local nowTime = Time();
 			local duration = (endTime - nowTime) * mult;
-			
+
 			//seems not working
 			NetProps.SetPropFloat(wep, "m_flNextPrimaryAttack", nowTime + duration);
 		}
@@ -651,22 +651,7 @@
 		BotAI.VomitList[victim.GetEntityIndex()] = false;
 }
 
-::BotAI.Events.OnGameEvent_player_hurt <- function(event) {
-	if(!("userid" in event) || event.userid == null)
-		return;
-
-	local player = GetPlayerFromUserID(event.userid);
-	local attacker = GetPlayerFromUserID(event.attacker);
-
-	if(IsPlayerABot(player) && BotAI.UseTarget != null) {
-		if("GetClassname" in attacker && (attacker.GetClassname() == "infected" || (attacker.GetClassname() == "player" && attacker.GetZombieType() != 9))) {
-			BotAI.BotAttack(player, attacker);
-		}
-	}
-}
-
-::BotAI.Events.OnGameEvent_player_entered_checkpoint <- function(event)
-{
+::BotAI.Events.OnGameEvent_player_entered_checkpoint <- function(event) {
 	if(!("userid" in event) || event.userid == null)
 		return;
 		local player = GetPlayerFromUserID(event.userid);
@@ -833,23 +818,20 @@
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("NoticeText", 12, false, BotAI.doNoticeText));
 }
 
-::BotAI.Events.OnGameEvent_round_end <- function(event)
-{
+::BotAI.Events.OnGameEvent_round_end <- function(event) {
 	BotAI.SaveSetting();
 	BotAI.SaveUseTarget();
 	BotAI.GiveUpPlayer(false);
 }
 
-::BotAI.Events.OnGameEvent_map_transition <- function(event)
-{
+::BotAI.Events.OnGameEvent_map_transition <- function(event) {
 	BotAI.SaveSetting();
 	BotAI.SaveUseTarget();
 	BotAI.GiveUpPlayer(false);
 	BotAI.saveBackpack();
 }
 
-::BotAI.Events.OnGameEvent_molotov_thrown <- function(event)
-{
+::BotAI.Events.OnGameEvent_molotov_thrown <- function(event) {
 	local attacker = GetPlayerFromUserID(event.userid);
 
 	BotAI.debugParam1 = attacker.GetOrigin();
@@ -954,6 +936,10 @@ function ChatTriggers::botmelee( player, args, text ) {
 	BotMeleeCmd( player, args, text );
 }
 
+function ChatTriggers::botprotect( player, args, text ) {
+	BotFallProtectCmd( player, args, text );
+}
+
 function ChatTriggers::botmenu( player, args, text ) {
 	BotMenuCmd( player, args, text );
 }
@@ -968,6 +954,26 @@ function ChatTriggers::botbackpack( player, args, text ) {
 
 function ChatTriggers::botdefib( player, args, text ) {
 	BotDefibrillatorCmd( player, args, text );
+}
+
+function ChatTriggers::botfollow( player, args, text ) {
+	BotFollowDistanceCmd( player, args, text );
+}
+
+function ChatTriggers::botwitchdamage( player, args, text ) {
+	BotWitchDamageCmd( player, args, text );
+}
+
+function ChatTriggers::botspecialdamage( player, args, text ) {
+	BotSpecialDamageCmd( player, args, text );
+}
+
+function ChatTriggers::bottankdamage( player, args, text ) {
+	BotTankDamageCmd( player, args, text );
+}
+
+function ChatTriggers::botcommondamage( player, args, text ) {
+	BotCommonDamageCmd( player, args, text );
 }
 
 function ChatTriggers::botdebug( player, args, text ) {
@@ -1065,7 +1071,7 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 				return false;
 		}
 
-		if(damageTable.DamageDone >= 100) {
+		if(BotAI.FallProtect && damageTable.DamageDone >= 100) {
 			local noneAliveEntity = damageTable.Attacker == null ||
 			(damageTable.Attacker.GetClassname() != "player" && damageTable.Attacker.GetClassname() != "infected" && damageTable.Attacker.GetClassname() != "witch")
 
@@ -1092,23 +1098,27 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 		}
 	}
 
-	if(BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim) && BotAI.IsEntityValid(attacker) && attacker.GetClassname() == "infected") {
-		if(BotAI.IsPlayerReviving(victim)) {
-			local falledPlayer = null;
-			local player = BotAI.getPlayerRevived(victim);
-			if(!player.IsIncapacitated() && !player.IsHangingFromLedge()) {
-				local findPlayer = null;
-				while(findPlayer = Entities.FindByClassnameWithin(findPlayer, "player", victim.GetOrigin(), 220)) {
-					if(BotAI.IsAlive(findPlayer) && (findPlayer.IsIncapacitated() || findPlayer.IsHangingFromLedge()))
-						falledPlayer = findPlayer;
+	if(BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim) && BotAI.IsEntityValid(attacker)) {
+		if (attacker.GetClassname() == "infected") {
+			if(BotAI.IsPlayerReviving(victim)) {
+				local falledPlayer = null;
+				local player = BotAI.getPlayerRevived(victim);
+				if(!player.IsIncapacitated() && !player.IsHangingFromLedge()) {
+					local findPlayer = null;
+					while(findPlayer = Entities.FindByClassnameWithin(findPlayer, "player", victim.GetOrigin(), 220)) {
+						if(BotAI.IsAlive(findPlayer) && (findPlayer.IsIncapacitated() || findPlayer.IsHangingFromLedge()))
+							falledPlayer = findPlayer;
+					}
+				} else {
+					falledPlayer = player;
+				}
+
+				if(BotAI.IsPlayerEntityValid(falledPlayer)) {
+					RushVictim(falledPlayer, 210);
+					return false;
 				}
 			} else {
-				falledPlayer = player;
-			}
-
-			if(BotAI.IsPlayerEntityValid(falledPlayer)) {
-				RushVictim(falledPlayer, 210);
-				return false;
+				BotAI.BotAttack(victim, attacker);
 			}
 		}
 	}
@@ -1150,17 +1160,30 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 	if(victim != null && BotAI.IsPlayerEntityValid(attacker) && IsPlayerABot(attacker) && attacker.IsSurvivor()) {
 		local className = victim.GetClassname();
 
-		if(className == "player" && victim.GetZombieType() == 8) {
-			if(damageTable.DamageType & DMG_BURN) {
-				BotAI.dontYouWannaExtinguish[victim] <- victim;
+		if(className == "player") {
+			if (victim.GetZombieType() == 8) {
+				damageTable.DamageDone *= BotAI.TankDamageMultiplier;
+
+				if(damageTable.DamageType & DMG_BURN) {
+					BotAI.dontYouWannaExtinguish[victim] <- victim;
+				}
+			} else {
+				damageTable.DamageDone *= BotAI.SpecialDamageMultiplier;
+			}
+
+			if (BotAI.playerLive <= 2) {
+				damageTable.DamageDone *= 1.5;
 			}
 		}
 
-		if(className == "player" && BotAI.playerLive <= 2) {
-			damageTable.DamageDone *= 1.5;
+
+		if(className == "infected") {
+			damageTable.DamageDone *= BotAI.CommonDamageMultiplier;
 		}
 
 		if(damageTable.DamageDone > 1 && victim.IsValid() && className == "witch") {
+			damageTable.DamageDone *= BotAI.WitchDamageMultiplier;
+
 			if(!BotAI.witchKilling(victim) && !BotAI.witchRetreat(victim) && !BotAI.witchRunning(victim)) {
 				damageTable.DamageDone == 0;
 				return false;

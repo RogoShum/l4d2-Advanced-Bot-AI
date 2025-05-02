@@ -126,9 +126,11 @@ class ::AITaskSearchEntity extends AITaskSingle
 		local function changeAndUse() {
 			if(!BotAI.IsAlive(player)) return true;
 			if(!BotAI.IsEntityValid(entity)) return true;
-			if(BotAI.distanceof(entity.GetOrigin(), player.GetOrigin()) <= 130) {
+			local currentDistance = BotAI.distanceof(entity.GetOrigin(), player.GetOrigin());
+			if(currentDistance <= 80 || currentDistance > 400) {
 				return true;
 			}
+
 			return false;
 		}
 

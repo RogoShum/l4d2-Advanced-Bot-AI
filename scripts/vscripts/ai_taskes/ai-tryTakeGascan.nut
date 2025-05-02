@@ -18,7 +18,7 @@ class ::AITaskTryTakeGascan extends AITaskGroup
 				needOil = true;
 		}
 
-		if(BotAI.UseTarget == null || BotAI.HasTank || !BotAI.NeedGasFinding)
+		if(BotAI.UseTarget == null || !BotAI.NeedGasFinding)
 			needOil = false;
 		else
 			needOil = true;
@@ -31,19 +31,18 @@ class ::AITaskTryTakeGascan extends AITaskGroup
 		return BotAI.HasItem(player, BotAI.BotsNeedToFind) && needOil;
 	}
 
-	function playerUpdate(player)
-	{
+	function playerUpdate(player) {
 		updating = false;
 
 		local Posi = BotAI.UseTarget.GetOrigin();
 		if(BotAI.UseTargetOri != null)
 			Posi = BotAI.UseTargetOri;
 
-		if(BotAI.distanceof(player.GetOrigin(), Posi) < 150 && !BotAI.useTargetUsing) {
+		if(BotAI.distanceof(player.GetOrigin(), Posi) < 150 && !BotAI.IsInCombat(player) && !BotAI.useTargetUsing) {
 			if(BotAI.UseTargetVec != null) {
 				player.SetOrigin(BotAI.UseTargetOri);
-				BotAI.lookAtPosition(player, BotAI.UseTargetVec, true);
-				NetProps.SetPropVector(player, "m_angRotation", Vector(BotAI.UseTargetVec.x - player.EyePosition().x, BotAI.UseTargetVec.y - player.EyePosition().y, BotAI.UseTargetVec.z - player.EyePosition().z));
+				BotAI.lookAtPosition(player, BotAI.UseTargetVec + player.EyePosition(), true);
+				NetProps.SetPropVector(player, "m_angRotation", BotAI.UseTargetVec);
 				NetProps.SetPropEntity(player, "m_lookatPlayer", BotAI.UseTarget);
 				if(player in BotAI.BotLinkGasCan) {
 					local gas = BotAI.BotLinkGasCan[player];

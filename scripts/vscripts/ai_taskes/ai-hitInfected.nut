@@ -96,8 +96,8 @@ class ::AITaskHitInfected extends AITaskSingle {
 		}
 
 		local navigator = BotAI.getNavigator(player);
-		if (navigator.hasPath("searchGascan+")) {
-			awareAngle -= 0.3;
+		if (navigator.moving()) {
+			awareAngle -= 0.5;
 		}
 
 		foreach(infected in BotAI.SpecialList) {
@@ -121,7 +121,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 					currentPriority = 1;
 				}
 
-				local infecDis = BotAI.nextTickDistance(player, infected, 5.0, true);
+				local infecDis = BotAI.nextTickDistance(player, infected, 5.0);
 				local smoker = false;
 
 				if(infected.GetZombieType() == 1 && NetProps.GetPropFloat(NetProps.GetPropEntity(infected, "m_customAbility"), "m_nextActivationTimer.m_timestamp") <= Time()) {
@@ -135,6 +135,17 @@ class ::AITaskHitInfected extends AITaskSingle {
 				}
 			}
 		}
+
+		local dangerTarget = null;
+
+		if (entS != null && BotAI.nextTickDistance(player, entS, 5.0) < 400 && BotAI.GetTarget(entS) == player) {
+			dangerTarget = entS;
+		} else if (selected != null && BotAI.GetTarget(selected) == player && BotAI.nextTickDistance(player, selected, 5.0) < 200) {
+			dangerTarget = selected;
+		}
+
+		BotAI.setBotCombatTarget(player, dangerTarget);
+
 
 		if(!BotAI.HasTank && entS == null && playerFallingDown != null) {
 			infectedList[player] <- playerFallingDown;
@@ -175,6 +186,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 			if(siDistance < 90) {
 				danger[player] = true;
 			}
+
 			return true;
 		}
 
@@ -184,6 +196,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 			if(coDistance < 90) {
 				danger[player] = true;
 			}
+
 			return true;
 		}
 
@@ -215,10 +228,13 @@ class ::AITaskHitInfected extends AITaskSingle {
 					BotAI.setBotShoveTarget(player, val);
 				}
 				BotAI.BotAttack(player, val);
-				if(BotAI.IsEntityValid(val) && !IsPlayerABot(player))
+				if(BotAI.IsEntityValid(val) && !IsPlayerABot(player)) {
 					BotAI.lookAtEntity(player, val);
-			} else
+				}
+			} else {
 				infectedList[player] <- null;
+				BotAI.botAim[player] <- null;
+			}
 		}
 
 		updating[player] <- false;

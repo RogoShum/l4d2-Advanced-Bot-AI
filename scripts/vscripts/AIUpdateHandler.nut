@@ -171,11 +171,17 @@ if (!("VSLib" in getroottable())) {
 		Immunity = false
 		PathFinding = false
 		UseUpgrades = true
-		Unstick = true
+		UnStick = true
+		FollowDistance = 1000
 		Melee = true
 		Defibrillator = true
 		BackPack = true
+		FallProtect = true
 		ServerMode = false
+		WitchDamageMultiplier = 1.0
+		SpecialDamageMultiplier = 1.0
+		TankDamageMultiplier = 1.0
+		CommonDamageMultiplier = 1.0
 		ServerLanguage = "english"
 		ABA_Admins = {}
 		NoticeConfig = true
@@ -403,15 +409,21 @@ BotAI.meleeDmg <- DMG_MELEE | DMG_HEADSHOT;
 
     local settingList =
         "BotCombatSkill = " + BotAI.BotCombatSkill.tostring() +
+		"\nFollowDistance = " + BotAI.FollowDistance.tostring() +
         "\nBotDebugMode = " + BotAI.BotDebugMode.tostring() +
         "\nNeedGasFinding = " + BotAI.NeedGasFinding.tostring() +
         "\nNeedThrowGrenade = " + BotAI.NeedThrowGrenade.tostring() +
 		"\nUseUpgrades = " + BotAI.UseUpgrades.tostring() +
         "\nImmunity = " + BotAI.Immunity.tostring() +
         "\nPathFinding = " + BotAI.PathFinding.tostring() +
-        "\nUnstick = " + BotAI.Unstick.tostring() +
+        "\nUnStick = " + BotAI.UnStick.tostring() +
+		"\nFallProtect = " + BotAI.FallProtect.tostring() +
         "\nDefibrillator = " + BotAI.Defibrillator.tostring() +
         "\nServerMode = " + BotAI.ServerMode.tostring() +
+		"\nWitchDamageMultiplier = " + BotAI.WitchDamageMultiplier.tostring() +
+		"\nSpecialDamageMultiplier = " + BotAI.SpecialDamageMultiplier.tostring() +
+		"\nTankDamageMultiplier = " + BotAI.TankDamageMultiplier.tostring() +
+		"\nCommonDamageMultiplier = " + BotAI.CommonDamageMultiplier.tostring() +
 		"\nServerLanguage = \"" + BotAI.ServerLanguage.tostring() + "\"" +
         "\nMelee = " + BotAI.Melee.tostring() +
         "\nNoticeConfig = " + BotAI.NoticeConfig.tostring() +
@@ -615,16 +627,21 @@ function BotAI::removeNullString(array) {
 	return null;
 }
 
-::BotAI.setBotTarget <- function(player, target)
-{
+::BotAI.setBotTarget <- function(player, target) {
 	local map = BotAI.getBotPropertyMap(player);
 	if(map != null)
 		map.target = target;
 }
 
-::BotAI.getBotShoveTarget <- function(player)
-{
+::BotAI.setBotCombatTarget <- function(player, target) {
 	local map = BotAI.getBotPropertyMap(player);
+	if(map != null)
+		map.combatTarget = target;
+}
+
+::BotAI.getBotShoveTarget <- function(player) {
+	local map = BotAI.getBotPropertyMap(player);
+
 	if(map != null)
 		return map.shove_target;
 
@@ -695,15 +712,13 @@ function BotAI::removeNullString(array) {
 	return false;
 }
 
-::BotAI.setBotLockTheard <- function(player, lock)
-{
+::BotAI.setBotLockTheard <- function(player, lock) {
 	local map = BotAI.getBotPropertyMap(player);
 	if(map != null)
 		map.taskLock = lock;
 }
 
-::BotAI.expiredBotTheard <- function(player, lock)
-{
+::BotAI.expiredBotTheard <- function(player, lock) {
 	local map = BotAI.getBotPropertyMap(player);
 	if(map != null && lock == map.taskLock)
 		map.taskLock = -1;
@@ -721,6 +736,7 @@ class ::BotProperty {
 	avoidList = {};
 	taskLock = 0;
 	moveCooldown = Time();
+	combatTarget = null;
 }
 
 class ::BotLinkedGas
@@ -1123,11 +1139,8 @@ function BotAI::AdjustBotsUpdateRate(args) {
 						area.MarkAsBlocked(2);
 						BotAI.dangerPlace[area.GetID()] <- area;
 					}
-
-					Convars.SetValue( "sb_revive_friend_distance", 50 );
 				} else if(area.GetID() in BotAI.dangerPlace) {
 					area.UnblockArea();
-					Convars.SetValue( "sb_revive_friend_distance", BotAI.reviveDistance );
 				}
 			}
 		}
@@ -1135,9 +1148,8 @@ function BotAI::AdjustBotsUpdateRate(args) {
 		foreach(area in BotAI.dangerPlace) {
 			area.UnblockArea();
 		}
-		BotAI.dangerPlace = {};
 
-		Convars.SetValue( "sb_revive_friend_distance", BotAI.reviveDistance );
+		BotAI.dangerPlace = {};
 	}
 }
 
@@ -1179,20 +1191,16 @@ function BotAI::locateUseTarget(args) {
 
 	notBotPlayerBoolean <- true;
 
-	if(BotAI.UseTarget == null && BotAI.MapName in BotAI.UseTargetList && BotAI.MapName in BotAI.UseTargetOriList && BotAI.MapName in BotAI.UseTargetVecList)
-	{
-		if(Entities.FindByName( null, BotAI.UseTargetList[BotAI.MapName]))
-		{
+	if(BotAI.UseTarget == null && BotAI.MapName in BotAI.UseTargetList && BotAI.MapName in BotAI.UseTargetOriList && BotAI.MapName in BotAI.UseTargetVecList) {
+		if(Entities.FindByName( null, BotAI.UseTargetList[BotAI.MapName])) {
 			local UseTarget = Entities.FindByName( null, BotAI.UseTargetList[BotAI.MapName] );
 			local UseTargetOri = BotAI.UseTargetOriList[BotAI.MapName];
 			local UseTargetVec = BotAI.UseTargetVecList[BotAI.MapName];
 
 			playerSet <- null;
 
-			while(playerSet = Entities.FindByClassname(playerSet, "player"))
-			{
-				if(BotAI.IsEntityValid(UseTarget) && BotAI.IsPlayerEntityValid(playerSet) && playerSet.IsSurvivor() && (BotAI.distanceof(playerSet.GetOrigin(), UseTargetOri) < 301 || BotAI.scavenge_start))
-				{
+			while(playerSet = Entities.FindByClassname(playerSet, "player")) {
+				if(BotAI.IsEntityValid(UseTarget) && BotAI.IsPlayerEntityValid(playerSet) && playerSet.IsSurvivor() && (BotAI.distanceof(playerSet.GetOrigin(), UseTargetOri) < 301 || BotAI.scavenge_start)) {
 					BotAI.UseTarget = UseTarget;
 					BotAI.UseTargetOri = UseTargetOri;
 					BotAI.UseTargetVec = UseTargetVec;
@@ -1203,58 +1211,22 @@ function BotAI::locateUseTarget(args) {
 		}
 	}
 
-	if(BotAI.UseTarget == null)
-	{
+	if(BotAI.UseTarget == null) {
 		notBotPlayer <- null;
-		while(notBotPlayer = Entities.FindByClassname(notBotPlayer, "player"))
-		{
-			if(BotAI.IsPlayerEntityValid(notBotPlayer) && notBotPlayer.IsSurvivor() && !IsPlayerABot(notBotPlayer) && NetProps.GetPropInt(notBotPlayer, "m_iTeamNum") != 1 && !notBotPlayer.IsDead())
-			{
+		while(notBotPlayer = Entities.FindByClassname(notBotPlayer, "player")) {
+			if(BotAI.IsPlayerEntityValid(notBotPlayer) && notBotPlayer.IsSurvivor() && !IsPlayerABot(notBotPlayer) && NetProps.GetPropInt(notBotPlayer, "m_iTeamNum") != 1 && !notBotPlayer.IsDead()) {
 				notBotPlayerBoolean = false;
-				if((BotAI.IsPressingUse(notBotPlayer) || BotAI.IsPressingAttack(notBotPlayer)) && BotAI.HasItem(notBotPlayer, BotAI.BotsNeedToFind))
-				{
+				if((BotAI.IsPressingUse(notBotPlayer) || BotAI.IsPressingAttack(notBotPlayer)) && BotAI.HasItem(notBotPlayer, BotAI.BotsNeedToFind)) {
 					target <- null;
-					while (target = Entities.FindByClassnameWithin(target, "point_prop_use_target", notBotPlayer.GetOrigin() + Vector(0, 0, 40), 150))
-					{
-						if(NetProps.GetPropInt(target, "m_spawnflags") == 1)
-						{
-							if(BotAI.GetHitPosition(notBotPlayer, 9999, true) != null)
-							{
-								BotAI.UseTarget = target;
-								BotAI.UseTargetList[BotAI.MapName] <- target.GetName();
-								BotAI.UseTargetVec = BotAI.GetHitPosition(notBotPlayer, 9999, true);
-								BotAI.UseTargetVecList[BotAI.MapName] <- BotAI.UseTargetVec;
-								BotAI.UseTargetOri = notBotPlayer.GetOrigin();
-								BotAI.UseTargetOriList[BotAI.MapName] <- notBotPlayer.GetOrigin();
-								printl("[Bot AI] Located target at " + BotAI.UseTarget.GetOrigin());
-							}
-							else
-							{
-								local m_trace = { start = target.GetOrigin(), end = notBotPlayer.EyePosition(), ignore = target, mask = g_MapScript.TRACE_MASK_ALL};
-								TraceLine(m_trace);
-
-								if (m_trace.hit && m_trace.enthit != null && m_trace.enthit == notBotPlayer)
-								{
-									BotAI.UseTarget = target;
-									BotAI.UseTargetList[BotAI.MapName] <- target.GetName();
-									BotAI.UseTargetVec = target.GetOrigin();
-									BotAI.UseTargetVecList[BotAI.MapName] <- BotAI.UseTargetVec;
-									BotAI.UseTargetOri = notBotPlayer.GetOrigin();
-									BotAI.UseTargetOriList[BotAI.MapName] <- notBotPlayer.GetOrigin();
-									printl("[Bot AI] Located target at " + BotAI.UseTarget.GetOrigin());
-								}
-							}
-
-							if(BotAI.UseTargetVec == null && BotAI.GetHitPosition(notBotPlayer, 9999, false) != null)
-							{
-								BotAI.UseTarget = target;
-								BotAI.UseTargetList[BotAI.MapName] <- target.GetName();
-								BotAI.UseTargetVec = BotAI.GetHitPosition(notBotPlayer, 9999, false);
-								BotAI.UseTargetVecList[BotAI.MapName] <- BotAI.UseTargetVec;
-								BotAI.UseTargetOri = notBotPlayer.GetOrigin();
-								BotAI.UseTargetOriList[BotAI.MapName] <- notBotPlayer.GetOrigin();
-								printl("[Bot AI] Located target at " + BotAI.UseTarget.GetOrigin());
-							}
+					while (target = Entities.FindByClassnameWithin(target, "point_prop_use_target", notBotPlayer.GetOrigin() + Vector(0, 0, 40), 150)) {
+						if(NetProps.GetPropInt(target, "m_spawnflags") == 1) {
+							BotAI.UseTarget = target;
+							BotAI.UseTargetList[BotAI.MapName] <- target.GetName();
+							BotAI.UseTargetVec = notBotPlayer.EyeAngles().Forward();
+							BotAI.UseTargetVecList[BotAI.MapName] <- BotAI.UseTargetVec;
+							BotAI.UseTargetOri = notBotPlayer.GetOrigin();
+							BotAI.UseTargetOriList[BotAI.MapName] <- notBotPlayer.GetOrigin();
+							printl("[Bot AI] Located target at " + BotAI.UseTarget.GetOrigin());
 						}
 					}
 				}
@@ -1280,6 +1252,8 @@ function BotAI::locateUseTarget(args) {
 				}
 			}
 		}
+	} else {
+		BotAI.useTargetUsing = BotAI.IsEntityValid(NetProps.GetPropEntity(BotAI.UseTarget, "m_useActionOwner"))
 	}
 }
 
@@ -1342,6 +1316,37 @@ function BotAI::locateUseTarget(args) {
 	BotAI.SaveSetting();
 }
 
+::BotFollowDistanceCmd <- function (speaker, args, args1) {
+    local player = speaker;
+    if (typeof player == "VSLIB_PLAYER") {
+		player = player.GetBaseEntity();
+	}
+
+    local input = "";
+    foreach (idx, val in args) {
+        input += val + " ";
+    }
+
+    input = strip(input);
+
+    local distance = null;
+    try {
+        distance = input.tointeger();
+    } catch (ex) {
+        distance = 1500;
+    }
+
+    if (distance < 100) distance = 100;
+    if (distance > 999999) distance = 999999;
+
+    BotAI.FollowDistance = distance;
+    Convars.SetValue("sb_enforce_proximity_range", distance);
+    BotAI.SendPlayer(player, "botai_bot_follow_distance", 0.2, distance);
+
+    BotExitMenuCmd(speaker, args, args1);
+    BotAI.SaveSetting();
+}
+
 ::BotGascanFindCmd <- function ( speaker, args  , args1) {
 	local player = speaker;
 	if (typeof player == "VSLIB_PLAYER")
@@ -1377,8 +1382,9 @@ function BotAI::locateUseTarget(args) {
 
 ::BotUseUpgradesCmd <- function ( speaker, args , args1) {
 	local player = speaker;
-	if (typeof player == "VSLIB_PLAYER")
+	if (typeof player == "VSLIB_PLAYER") {
 		player = player.GetBaseEntity();
+	}
 
 	if (BotAI.UseUpgrades) {
 		BotAI.UseUpgrades = false;
@@ -1392,11 +1398,13 @@ function BotAI::locateUseTarget(args) {
 	BotExitMenuCmd(speaker, args, args1);
 }
 
-::BotImmunityCmd <- function ( speaker, args  , args1) {
+::BotImmunityCmd <- function ( speaker, args , args1) {
 	BotExitMenuCmd(speaker, args, args1);
 	local player = speaker;
-	if (typeof player == "VSLIB_PLAYER")
+	if (typeof player == "VSLIB_PLAYER") {
 		player = player.GetBaseEntity();
+	}
+
 	if(!ABA_IsAdmin(speaker)) {
 		BotAI.SendPlayer(player, "botai_admin_only");
 		return;
@@ -1415,8 +1423,9 @@ function BotAI::locateUseTarget(args) {
 ::BotDefibrillatorCmd <- function ( speaker, args, args1) {
 	BotExitMenuCmd(speaker, args, args1);
 	local player = speaker;
-	if (typeof player == "VSLIB_PLAYER")
+	if (typeof player == "VSLIB_PLAYER") {
 		player = player.GetBaseEntity();
+	}
 
 	if(BotAI.Defibrillator) {
 		BotAI.Defibrillator = false;
@@ -1431,8 +1440,10 @@ function BotAI::locateUseTarget(args) {
 ::BotBackPackCmd <- function ( speaker, args  , args1) {
 	BotExitMenuCmd(speaker, args, args1);
 	local player = speaker;
-	if (typeof player == "VSLIB_PLAYER")
+	if (typeof player == "VSLIB_PLAYER") {
 		player = player.GetBaseEntity();
+	}
+
 	if(BotAI.BackPack) {
 		BotAI.BackPack = false;
 		BotAI.SendPlayer(player, "botai_bot_carry_off");
@@ -1446,8 +1457,9 @@ function BotAI::locateUseTarget(args) {
 ::BotAliveCmd <- function ( speaker, args  , args1) {
 	BotExitMenuCmd(speaker, args, args1);
 	local player = speaker;
-	if (typeof player == "VSLIB_PLAYER")
+	if (typeof player == "VSLIB_PLAYER") {
 		player = player.GetBaseEntity();
+	}
 
 	if(BotAI.NeedBotAlive) {
 		BotAI.NeedBotAlive = false;
@@ -1501,19 +1513,127 @@ function BotAI::locateUseTarget(args) {
 	if (typeof player == "VSLIB_PLAYER")
 		player = player.GetBaseEntity();
 
-	if(BotAI.Unstick) {
-		BotAI.Unstick = false;
+	if(BotAI.UnStick) {
+		BotAI.UnStick = false;
 		Convars.SetValue( "sb_unstick", 0 );
 		BotAI.SendPlayer(player, "botai_unstick_off");
 	} else {
-		BotAI.Unstick = true;
+		BotAI.UnStick = true;
 		Convars.SetValue( "sb_unstick", 1 );
 		BotAI.SendPlayer(player, "botai_unstick_on");
 		if(BotAI.PathFinding) {
 			BotAI.SendPlayer(player, "botai_unstick_pathfinding");
 		}
 	}
+
 	BotAI.SaveSetting();
+}
+
+::BotFallProtectCmd <- function ( speaker, args , args1) {
+	BotExitMenuCmd(speaker, args, args1);
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
+
+	if(BotAI.FallProtect) {
+		BotAI.FallProtect = false;
+		BotAI.SendPlayer(player, "botai_fall_protect_off");
+	} else {
+		BotAI.FallProtect = true;
+		BotAI.SendPlayer(player, "botai_fall_protect_on");
+	}
+
+	BotAI.SaveSetting();
+}
+
+function BotAI::getDamageMultiplier(args, minValue = -16.0, maxValue = 16.0) {
+	local defaultMultiplier = 1.0;
+
+    local input = "";
+    foreach (idx, val in args) {
+        input += val + " ";
+    }
+    input = strip(input);
+
+    local multiplier = null;
+    try {
+        multiplier = input.tofloat();
+    } catch (ex) {
+        multiplier = defaultMultiplier;
+    }
+
+    if (multiplier < minValue) multiplier = minValue;
+    if (multiplier > maxValue) multiplier = maxValue;
+
+	return multiplier;
+}
+
+::BotWitchDamageCmd <- function ( speaker, args , args1) {
+	BotExitMenuCmd(speaker, args, args1);
+	local player = speaker;
+    if (typeof player == "VSLIB_PLAYER")
+        player = player.GetBaseEntity();
+
+	if(!ABA_IsAdmin(speaker)) {
+		BotAI.SendPlayer(player, "botai_admin_only");
+		return;
+	}
+
+    BotAI.WitchDamageMultiplier = BotAI.getDamageMultiplier(args);
+
+    BotAI.SaveSetting();
+    BotAI.SendPlayer(player, "botai_witch_damage", 0.2, BotAI.WitchDamageMultiplier);
+}
+
+::BotSpecialDamageCmd <- function ( speaker, args , args1) {
+	BotExitMenuCmd(speaker, args, args1);
+	local player = speaker;
+    if (typeof player == "VSLIB_PLAYER")
+        player = player.GetBaseEntity();
+
+	if(!ABA_IsAdmin(speaker)) {
+		BotAI.SendPlayer(player, "botai_admin_only");
+		return;
+	}
+
+    BotAI.SpecialDamageMultiplier = BotAI.getDamageMultiplier(args);
+
+    BotAI.SaveSetting();
+    BotAI.SendPlayer(player, "botai_special_damage", 0.2, BotAI.SpecialDamageMultiplier);
+}
+
+::BotTankDamageCmd <- function ( speaker, args , args1) {
+	BotExitMenuCmd(speaker, args, args1);
+	local player = speaker;
+    if (typeof player == "VSLIB_PLAYER")
+        player = player.GetBaseEntity();
+
+	if(!ABA_IsAdmin(speaker)) {
+		BotAI.SendPlayer(player, "botai_admin_only");
+		return;
+	}
+
+    BotAI.TankDamageMultiplier = BotAI.getDamageMultiplier(args);
+
+    BotAI.SaveSetting();
+    BotAI.SendPlayer(player, "botai_tank_damage", 0.2, BotAI.TankDamageMultiplier);
+}
+
+::BotCommonDamageCmd <- function ( speaker, args , args1) {
+	BotExitMenuCmd(speaker, args, args1);
+	local player = speaker;
+    if (typeof player == "VSLIB_PLAYER")
+        player = player.GetBaseEntity();
+
+	if(!ABA_IsAdmin(speaker)) {
+		BotAI.SendPlayer(player, "botai_admin_only");
+		return;
+	}
+
+    BotAI.CommonDamageMultiplier = BotAI.getDamageMultiplier(args);
+
+    BotAI.SaveSetting();
+    BotAI.SendPlayer(player, "botai_common_damage", 0.2, BotAI.CommonDamageMultiplier);
 }
 
 ::BotMeleeCmd <- function ( speaker, args , args1) {
@@ -1530,6 +1650,7 @@ function BotAI::locateUseTarget(args) {
 		BotAI.resetBotMeleeAction();
 		BotAI.SendPlayer(player, "botai_melee_on");
 	}
+
 	BotAI.SaveSetting();
 	BotExitMenuCmd(speaker, args, args1);
 }
@@ -1546,12 +1667,22 @@ function BotAI::locateUseTarget(args) {
 }
 
 ::BotAI.SendPlayer <- function (player, str, time = 0.2, args = "") {
-
 	local function cPrint(s) {
 		if (BotAI.BotDebugMode) {
 			printl(str);
 		}
 		ClientPrint(player, 5, "[Advanced Bot AI]: " + "\x01" + I18n.getTranslationKey(str) + args);
+	}
+
+	::BotAI.Timers.AddTimer(0.2, false, cPrint, str);
+}
+
+::BotAI.SendPlayerNoPrefix <- function (player, str, time = 0.2, args = "") {
+	local function cPrint(s) {
+		if (BotAI.BotDebugMode) {
+			printl(str);
+		}
+		ClientPrint(player, 5, "\x01" + I18n.getTranslationKey(str) + args);
 	}
 
 	::BotAI.Timers.AddTimer(0.2, false, cPrint, str);
@@ -1839,15 +1970,15 @@ function BotAI::displayOptionMenu(player, args, args1) {
 	local lang = BotAI.language;
 	local function top(menu) {
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_bot_skill") + ": " + (1 + BotAI.BotCombatSkill).tostring(), BotAI.displayOptionMenuBotCombat);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_follow") + ": " + (BotAI.FollowDistance).tostring(), BotAI.displayOptionMenuBotDistance);
 		menu.AddOption(BotAI.fromParams(BotAI.NeedThrowGrenade, lang)+I18n.getTranslationKeyByLang(lang, "menu_throw"), BotThrowGrenadeCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Melee, lang)+I18n.getTranslationKeyByLang(lang, "menu_take_melee"), BotMeleeCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Immunity, lang)+I18n.getTranslationKeyByLang(lang, "menu_immunity"), BotImmunityCmd);
-		menu.AddOption(BotAI.fromParams(BotAI.PathFinding, lang)+I18n.getTranslationKeyByLang(lang, "menu_pathfinding"), BotPathFindingCmd);
 	}
 
 	local function bot(menu) {
-		menu.AddOption(BotAI.fromParams(BotAI.Unstick, lang)+I18n.getTranslationKeyByLang(lang, "menu_unstick"), BotUnstickCmd);
-		menu.AddOption(BotAI.fromParams(BotAI.BackPack, lang)+I18n.getTranslationKeyByLang(lang, "menu_carry"), BotBackPackCmd);
+		menu.AddOption(BotAI.fromParams(BotAI.PathFinding, lang)+I18n.getTranslationKeyByLang(lang, "menu_pathfinding"), BotPathFindingCmd);
+		menu.AddOption(BotAI.fromParams(BotAI.UnStick, lang)+I18n.getTranslationKeyByLang(lang, "menu_unstick"), BotUnstickCmd);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_next"), BotAI.displayOptionMenuNext);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
@@ -1859,17 +1990,40 @@ function BotAI::displayOptionMenu(player, args, args1) {
 function BotAI::displayOptionMenuNext(player, args, args1) {
 	local lang = BotAI.language;
 	local function top(menu) {
+		menu.AddOption(BotAI.fromParams(BotAI.NeedGasFinding, lang)+I18n.getTranslationKeyByLang(lang, "menu_find_gas"), BotGascanFindCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.NeedBotAlive, lang)+I18n.getTranslationKeyByLang(lang, "menu_alive"), BotAliveCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Defibrillator, lang)+I18n.getTranslationKeyByLang(lang, "menu_defibrillator"), BotDefibrillatorCmd);
-		menu.AddOption(BotAI.fromParams(BotAI.NeedGasFinding, lang)+I18n.getTranslationKeyByLang(lang, "menu_find_gas"), BotGascanFindCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.UseUpgrades, lang)+I18n.getTranslationKeyByLang(lang, "menu_upgrads"), BotUseUpgradesCmd);
-		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption(BotAI.fromParams(BotAI.BackPack, lang)+I18n.getTranslationKeyByLang(lang, "menu_carry"), BotBackPackCmd);
 	}
 
 	local function bot(menu) {
-		menu.AddOption("emp_=", BotEmptyCmd);
-		menu.AddOption("emp_", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_witch_damage") + ": " + (BotAI.WitchDamageMultiplier).tostring(), BotAI.displayOptionMenuBotWitchDamage);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_special_damage") + ": " + (BotAI.SpecialDamageMultiplier).tostring(), BotAI.displayOptionMenuBotSpecialDamage);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_next"), BotAI.displayOptionMenuNextNext);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
+	}
+
+	BotAI.buildMenu(player, top, bot);
+}
+
+function BotAI::displayOptionMenuNextNext(player, args, args1) {
+	local lang = BotAI.language;
+	local function top(menu) {
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_tank_damage") + ": " + (BotAI.TankDamageMultiplier).tostring(), BotAI.displayOptionMenuBotTankDamage);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_common_damage") + ": " + (BotAI.CommonDamageMultiplier).tostring(), BotAI.displayOptionMenuBotCommonDamage);
+		menu.AddOption(BotAI.fromParams(BotAI.FallProtect, lang)+I18n.getTranslationKeyByLang(lang, "menu_fall_protect"), BotFallProtectCmd);
+		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption("emp_3", BotEmptyCmd);
+		menu.AddOption("emp_4", BotEmptyCmd);
+	}
+
+	local function bot(menu) {
+		menu.AddOption("emp_1", BotEmptyCmd);
+		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNext);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
 	}
@@ -1919,6 +2073,226 @@ function BotAI::displayOptionMenuBotCombat(player, args, args1) {
 	BotAI.buildMenu(player, top, bot);
 }
 
+function BotAI::displayOptionMenuBotDistance(player, args, args1) {
+	local lang = BotAI.language;
+	local function followDistance(value) {
+		local ability = [];
+		ability.append(value.tostring());
+		BotFollowDistanceCmd(player, ability, "");
+	}
+	local function normal(player, args, args1) {
+		followDistance(200);
+	}
+	local function high(player, args, args1) {
+		followDistance(700);
+	}
+	local function ultra(player, args, args1) {
+		followDistance(1000);
+	}
+	local function extreme(player, args, args1) {
+		followDistance(1500);
+	}
+	local function pro(player, args, args1) {
+		followDistance(2000);
+	}
+	local function pro_(player, args, args1) {
+		followDistance(3000);
+	}
+	local function pro__(player, args, args1) {
+		followDistance(99999);
+	}
+
+	local function top(menu) {
+		menu.AddOption("200", normal);
+		menu.AddOption("700", high);
+		menu.AddOption("1000", ultra);
+		menu.AddOption("1500", extreme);
+		menu.AddOption("2000", pro);
+	}
+
+	local function bot(menu) {
+		menu.AddOption("3000", pro_);
+		menu.AddOption("99999", pro__);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
+		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
+	}
+
+	BotAI.buildMenu(player, top, bot);
+}
+
+function BotAI::displayOptionMenuBotWitchDamage(player, args, args1) {
+	local lang = BotAI.language;
+	local function damageMultiplier(value) {
+		local ability = [];
+		ability.append(value.tostring());
+		BotWitchDamageCmd(player, ability, "");
+	}
+
+	local function normal(player, args, args1) {
+		damageMultiplier(0.2);
+	}
+	local function high(player, args, args1) {
+		damageMultiplier(0.5);
+	}
+	local function ultra(player, args, args1) {
+		damageMultiplier(1.0);
+	}
+	local function extreme(player, args, args1) {
+		damageMultiplier(1.5);
+	}
+	local function pro(player, args, args1) {
+		damageMultiplier(2.0);
+	}
+
+	local function top(menu) {
+		menu.AddOption("0.2", normal);
+		menu.AddOption("0.5", high);
+		menu.AddOption("1.0", ultra);
+		menu.AddOption("1.5", extreme);
+		menu.AddOption("2.0", pro);
+	}
+
+	local function bot(menu) {
+		menu.AddOption("emp_1", BotEmptyCmd);
+		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNext);
+		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
+	}
+
+	BotAI.buildMenu(player, top, bot);
+}
+
+function BotAI::displayOptionMenuBotSpecialDamage(player, args, args1) {
+	local lang = BotAI.language;
+	local function damageMultiplier(value) {
+		local ability = [];
+		ability.append(value.tostring());
+		BotSpecialDamageCmd(player, ability, "");
+	}
+
+	local function normal(player, args, args1) {
+		damageMultiplier(0.2);
+	}
+	local function high(player, args, args1) {
+		damageMultiplier(0.5);
+	}
+	local function ultra(player, args, args1) {
+		damageMultiplier(1.0);
+	}
+	local function extreme(player, args, args1) {
+		damageMultiplier(1.5);
+	}
+	local function pro(player, args, args1) {
+		damageMultiplier(2.0);
+	}
+
+	local function top(menu) {
+		menu.AddOption("0.2", normal);
+		menu.AddOption("0.5", high);
+		menu.AddOption("1.0", ultra);
+		menu.AddOption("1.5", extreme);
+		menu.AddOption("2.0", pro);
+	}
+
+	local function bot(menu) {
+		menu.AddOption("emp_1", BotEmptyCmd);
+		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNext);
+		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
+	}
+
+	BotAI.buildMenu(player, top, bot);
+}
+
+function BotAI::displayOptionMenuBotTankDamage(player, args, args1) {
+	local lang = BotAI.language;
+	local function damageMultiplier(value) {
+		local ability = [];
+		ability.append(value.tostring());
+		BotTankDamageCmd(player, ability, "");
+	}
+
+	local function normal(player, args, args1) {
+		damageMultiplier(0.2);
+	}
+	local function high(player, args, args1) {
+		damageMultiplier(0.5);
+	}
+	local function ultra(player, args, args1) {
+		damageMultiplier(1.0);
+	}
+	local function extreme(player, args, args1) {
+		damageMultiplier(1.5);
+	}
+	local function pro(player, args, args1) {
+		damageMultiplier(2.0);
+	}
+
+	local function top(menu) {
+		menu.AddOption("0.2", normal);
+		menu.AddOption("0.5", high);
+		menu.AddOption("1.0", ultra);
+		menu.AddOption("1.5", extreme);
+		menu.AddOption("2.0", pro);
+	}
+
+	local function bot(menu) {
+		menu.AddOption("emp_1", BotEmptyCmd);
+		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNextNext);
+		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
+	}
+
+	BotAI.buildMenu(player, top, bot);
+}
+
+function BotAI::displayOptionMenuBotCommonDamage(player, args, args1) {
+	local lang = BotAI.language;
+	local function damageMultiplier(value) {
+		local ability = [];
+		ability.append(value.tostring());
+		BotCommonDamageCmd(player, ability, "");
+	}
+
+	local function normal(player, args, args1) {
+		damageMultiplier(0.2);
+	}
+	local function high(player, args, args1) {
+		damageMultiplier(0.5);
+	}
+	local function ultra(player, args, args1) {
+		damageMultiplier(1.0);
+	}
+	local function extreme(player, args, args1) {
+		damageMultiplier(1.5);
+	}
+	local function pro(player, args, args1) {
+		damageMultiplier(2.0);
+	}
+
+	local function top(menu) {
+		menu.AddOption("0.2", normal);
+		menu.AddOption("0.5", high);
+		menu.AddOption("1.0", ultra);
+		menu.AddOption("1.5", extreme);
+		menu.AddOption("2.0", pro);
+	}
+
+	local function bot(menu) {
+		menu.AddOption("emp_1", BotEmptyCmd);
+		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNextNext);
+		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
+	}
+
+	BotAI.buildMenu(player, top, bot);
+}
+
 ::BotExitMenuCmd <- function(speaker, args, args1) {
 	foreach(menu in BotAI.MainMenu) {
 		menu.CloseMenu();
@@ -1946,8 +2320,8 @@ function BotAI::ResetBotFireRate() {
 	combatSpeed += BotAI.BotCombatSkill * 1000;
 	normalSpeed += BotAI.BotCombatSkill * 50;
 
-	Convars.SetValue( "sb_combat_saccade_speed", combatSpeed );
-	Convars.SetValue( "sb_normal_saccade_speed", normalSpeed );
+	Convars.SetValue( "sb_combat_saccade_speed", 9999 );
+	Convars.SetValue( "sb_normal_saccade_speed", 9999 );
 }
 
 ::NavigatorPause.fall <- function(player) {
@@ -2115,7 +2489,7 @@ function BotAI::AdjustBotState(args) {
 		BotAI.resetBotMeleeAction();
 	}
 
-	if(BotAI.Unstick) {
+	if(BotAI.UnStick) {
 		Convars.SetValue( "sb_unstick", 1 );
 	} else {
 		Convars.SetValue( "sb_unstick", 0 );
@@ -2212,6 +2586,24 @@ function BotAI::AdjustBotState(args) {
 	if(BotAI.UseTarget != null && BotAI.NeedGasFinding)
 		needRecall = false;
 
+	foreach(player in BotAI.SurvivorHumanList) {
+		if(BotAI.IsPlayerEntityValid(player)) {
+			local lastArea = player.GetLastKnownArea();
+			if(lastArea != null && !lastArea.IsValidForWanderingPopulation())
+				BotAI.validArea[lastArea] <- lastArea;
+			local elevator = Entities.FindByClassnameNearest("func_elevator", player.GetOrigin(), 300);
+			if(BotAI.IsEntityValid(elevator)) {
+				local flow = GetCurrentFlowDistanceForPlayer(player);
+				foreach(bot in BotAI.SurvivorBotList) {
+					local botFlow = GetCurrentFlowDistanceForPlayer(bot);
+					if(BotAI.distanceof(bot.GetOrigin(), player.GetOrigin()) > 100 && (botFlow > flow || BotAI.getNavigator(bot).moving())) {
+						bot.SetOrigin(player.GetOrigin());
+					}
+				}
+			}
+		}
+	}
+
 	if(needRecall) {
 		foreach(bot in BotAI.SurvivorBotList) {
 			if(!BotAI.IsPlayerEntityValid(bot) || bot.IsIncapacitated() || bot.IsHangingFromLedge() || bot.IsDominatedBySpecialInfected()) continue;
@@ -2222,6 +2614,38 @@ function BotAI::AdjustBotState(args) {
 			local navigator = BotAI.getNavigator(bot);
 			local stuck = false;
 			local idle = bot.GetSequenceName(bot.GetSequence()).tolower().find("idle") != null;
+
+			if(!idle) {
+				local dis = 99999;
+				local tpPoint = null;
+
+				foreach(sur in BotAI.SurvivorHumanList) {
+					if(!BotAI.IsAlive(sur)) continue;
+
+					local disToHuman = BotAI.distanceof(sur.GetOrigin(), bot.GetOrigin());
+
+					if (disToHuman <= dis) {
+						tpPoint = sur;
+						dis = disToHuman;
+					}
+				}
+
+				if(tpPoint != null && dis > (BotAI.FollowDistance + 200)) {
+					for(local i = 0; i < 5; ++i) {
+						local pos = tpPoint.TryGetPathableLocationWithin(200);
+						if(!BotAI.CanHumanSeePlace(pos) && BotAI.distanceof(pos, tpPoint.GetOrigin()) > 100) {
+							if(BotAI.BotDebugMode) {
+								BotAI.EasyPrint(BotAI.getPlayerBaseName(bot) + " behind! try teleport.");
+							}
+
+							bot.SetOrigin(pos);
+							BotAI.BotReset(bot);
+							navigator.stop();
+							break;
+						}
+					}
+				}
+			}
 
 			if(BotAI.PossibleBotStuck(bot) && !idle) {
 				if(!(bot in BotAI.BotStuckCount)) {
@@ -2253,19 +2677,49 @@ function BotAI::AdjustBotState(args) {
 		local scope = BotAI.UseTarget.GetScriptScope();
 
 		local function using() {
-			BotAI.useTargetUsing = true;
+			printl("----------------------------------")
+			printl("using: " + BotAI.UseTarget)
+
+			local gascan = NetProps.GetPropEntity(BotAI.UseTarget, "m_useActionOwner");
+
+			if (BotAI.IsEntityValid(gascan)) {
+				local player = gascan.GetOwnerEntity();
+				printl("gascan owner: " + player)
+				if (BotAI.IsEntitySurvivor(player)) {
+					if (!IsPlayerABot(player)) {
+						BotAI.UseTarget = self;
+						BotAI.UseTargetList[BotAI.MapName] <- self.GetName();
+						BotAI.UseTargetVec = player.EyeAngles().Forward();
+						BotAI.UseTargetVecList[BotAI.MapName] <- BotAI.UseTargetVec;
+						BotAI.UseTargetOri = player.GetOrigin();
+						BotAI.UseTargetOriList[BotAI.MapName] <- player.GetOrigin();
+						printl("[Bot AI] Re-Located target at " + BotAI.UseTarget.GetOrigin());
+					} else {
+						BotAI.FullPress[player] = 100;
+					}
+				}
+			}
+			printl("----------------------------------")
 		}
 
 		local function finish() {
-			BotAI.useTargetUsing = false;
+			printl("----------------------------------")
+			printl("finish: " + BotAI.UseTarget)
+			printl("----------------------------------")
+		}
+
+		local function canceled() {
+			printl("----------------------------------")
+			printl("canceled: " + BotAI.UseTarget)
+			printl("----------------------------------")
 		}
 
 		scope["BotAI_UseStart"] <- using;
-		scope["BotAI_UseCanceled"] <- finish;
+		scope["BotAI_UseCanceled"] <- canceled;
 		scope["BotAI_UseFinished"] <- finish;
 
 		BotAI.UseTarget.ConnectOutput("OnUseStarted", "BotAI_UseStart");
-		BotAI.UseTarget.ConnectOutput("OnUseCanceled", "BotAI_UseCanceled");
+		BotAI.UseTarget.ConnectOutput("OnUseCancelled", "BotAI_UseCanceled");
 		BotAI.UseTarget.ConnectOutput("OnUseFinished", "BotAI_UseFinished");
 
 		BotAI.useTargetHooks = true;
@@ -2273,48 +2727,75 @@ function BotAI::AdjustBotState(args) {
 }
 
 function BotAI::doNoticeText(args) {
-	if(!BotAI.NoticeConfig) return;
+	if(!BotAI.NoticeConfig) {
+		return;
+	}
+
 	foreach(player in BotAI.SurvivorHumanList) {
 		if(BotAI.IsPlayerEntityValid(player) && ABA_IsAdmin(player)) {
-			local settings = [
+			local settings_0 = [
 				{ key = "menu_bot_skill", value = ::BotAI.BotCombatSkill + 1, enabled = true, isValue = true },
-				{ key = "menu_find_gas", value = "", enabled = ::BotAI.NeedGasFinding, isValue = false },
-				{ key = "menu_throw", value = "", enabled = ::BotAI.NeedThrowGrenade, isValue = false },
-				{ key = "menu_immunity", value = "", enabled = ::BotAI.Immunity, isValue = false },
+				{ key = "menu_follow", value = ::BotAI.FollowDistance, enabled = true, isValue = true },
 				{ key = "menu_pathfinding", value = "", enabled = ::BotAI.PathFinding, isValue = false },
-				{ key = "menu_unstick", value = "", enabled = ::BotAI.Unstick, isValue = false },
+				{ key = "menu_unstick", value = "", enabled = ::BotAI.UnStick, isValue = false },
+				{ key = "menu_find_gas", value = "", enabled = ::BotAI.NeedGasFinding, isValue = false },
+				{ key = "menu_immunity", value = "", enabled = ::BotAI.Immunity, isValue = false },
+				{ key = "menu_throw", value = "", enabled = ::BotAI.NeedThrowGrenade, isValue = false },
 				{ key = "menu_take_melee", value = "", enabled = ::BotAI.Melee, isValue = false },
-				{ key = "menu_defibrillator", value = "", enabled = ::BotAI.Defibrillator, isValue = false },
-				{ key = "menu_carry", value = "", enabled = ::BotAI.BackPack, isValue = false }
+				{ key = "menu_defibrillator", value = "", enabled = ::BotAI.Defibrillator, isValue = false }
+			];
+
+			local settings_1 = [
+				{ key = "menu_carry", value = "", enabled = ::BotAI.BackPack, isValue = false },
+				{ key = "menu_upgrads", value = "", enabled = ::BotAI.UseUpgrades, isValue = false },
+				{ key = "menu_alive", value = "", enabled = ::BotAI.NeedBotAlive, isValue = false },
+				{ key = "menu_witch_damage", value = ::BotAI.WitchDamageMultiplier, enabled = true, isValue = true },
+				{ key = "menu_special_damage", value = ::BotAI.SpecialDamageMultiplier, enabled = true, isValue = true },
+				{ key = "menu_tank_damage", value = ::BotAI.TankDamageMultiplier, enabled = true, isValue = true }
+				{ key = "menu_common_damage", value = ::BotAI.CommonDamageMultiplier, enabled = true, isValue = true }
 			];
 
 			::BotAI.SendPlayer(player, "botai_current_settings", 0.1);
 
 			local output = "";
 
-			foreach (setting in settings) {
-				local settingName = I18n.getTranslationKey(setting.key);
+			local function decodeSettings(settings) {
+				foreach (setting in settings) {
+					local settingName = I18n.getTranslationKey(setting.key);
 
-				output += "\x04[";
+					output += "\x04[";
 
-				if (setting.isValue) {
-					output += format("\x01%s: \x05%d", settingName, setting.value);
-				} else {
-					if (setting.enabled) {
-						output += "\x05" + I18n.getTranslationKey("menu_enable");
+					if (setting.isValue) {
+						local valueStr = "";
+						switch (typeof(setting.value)) {
+							case "float":
+								valueStr = format("%.2f", setting.value.tofloat());
+								break;
+							default:
+								valueStr = setting.value.tostring();
+						}
+
+						output += format("\x01%s: \x05%s", settingName, valueStr);
 					} else {
-						output += "\x01" + I18n.getTranslationKey("menu_disable");
+						if (setting.enabled) {
+							output += "\x05" + I18n.getTranslationKey("menu_enable");
+						} else {
+							output += "\x01" + I18n.getTranslationKey("menu_disable");
+						}
+						output += "\x01" + settingName;
 					}
-					output += "\x01" + settingName;
-				}
 
-				output += "\x04] ";
+					output += "\x04] ";
+				}
 			}
 
-			//output += "\n\x01" + I18n.getTranslationKey("botai_use_command_notice");
+			decodeSettings(settings_0);
+			::BotAI.SendPlayerNoPrefix(player, output, 0.3);
 
-			::BotAI.SendPlayer(player, output, 0.3);
-			::BotAI.SendPlayer(player, "botai_use_command_notice", 0.5);
+			output = "";
+			decodeSettings(settings_1);
+			::BotAI.SendPlayerNoPrefix(player, output, 0.5);
+			::BotAI.SendPlayer(player, "botai_use_command_notice", 0.7);
 		}
 	}
 }
@@ -2456,8 +2937,9 @@ function resetAllBots() {
 	}
 
 	Convars.SetValue( "sb_max_team_melee_weapons", 0 );
+	Convars.SetValue( "sb_enforce_proximity_range", BotAI.FollowDistance );
 
-	local function allBot(arg){
+	local function allBot(arg) {
 		if(BotAI.NeedBotAlive) {
 			Convars.SetValue( "sb_all_bot_game", 1);
 			Convars.SetValue( "allow_all_bot_survivor_team", 1 );
@@ -2475,16 +2957,13 @@ function resetAllBots() {
 	BotAI.tongueSpeed <- Convars.GetFloat("tongue_fly_speed");
 	BotAI.tongueRange <- Convars.GetFloat("tongue_range");
 	BotAI.language <- BotAI.getSeverLanguage();
-	BotAI.reviveDistance <- Convars.GetFloat("sb_revive_friend_distance");
 
 	Convars.SetValue( "sv_consistency", 0 );
 	Convars.SetValue( "sb_melee_approach_victim", 0 );
 	Convars.SetValue( "sb_allow_shoot_through_survivors", 0 );
 	Convars.SetValue( "sb_toughness_buffer", 25 );
 	Convars.SetValue( "sb_temp_health_consider_factor", 0.85 );
-
-	Convars.SetValue( "sb_enforce_proximity_lookat_timeout", 1 );
-	//Convars.SetValue( "sb_enforce_proximity_range", 1000 );
+	Convars.SetValue( "sb_enforce_proximity_lookat_timeout", 0.1 );
 	Convars.SetValue( "sb_battlestation_human_hold_time", 0.1 );
 	Convars.SetValue( "sb_sidestep_for_horde", 1 );
 	Convars.SetValue( "sb_close_checkpoint_door_interval", 0.15 );

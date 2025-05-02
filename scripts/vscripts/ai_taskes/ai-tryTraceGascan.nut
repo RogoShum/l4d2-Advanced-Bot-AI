@@ -9,15 +9,14 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 	playerList = {};
 	cabal_oil = {};
 
-	function preCheck()
-	{
+	function preCheck() {
 		local display = null;
 		while(display = Entities.FindByClassname(display, "terror_gamerules")) {
 			if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") >= NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal"))
 				return false;
 		}
 
-		if(BotAI.UseTarget == null || BotAI.HasTank || !BotAI.NeedGasFinding)
+		if(BotAI.UseTarget == null || !BotAI.NeedGasFinding)
 			return false;
 
 		foreach(idx, gascan in cabal_oil) {
@@ -45,7 +44,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 	}
 
 	function GroupUpdateChecker(player) {
-		if(BotAI.HasItem(player, BotAI.BotsNeedToFind)) {
+		if(BotAI.HasItem(player, BotAI.BotsNeedToFind) || !BotAI.IsAlive(player)) {
 			if(player.GetEntityIndex() in cabal_oil)
 				delete cabal_oil[player.GetEntityIndex()];
 			return false;
@@ -62,14 +61,12 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 		local GasTryFind = null;
 		while (GasTryFind = Entities.FindByClassnameWithin(GasTryFind, BotAI.BotsNeedToFind, player.GetOrigin(), 4000)) {
 			local flag = true;
-			foreach(idx, gascan in cabal_oil)
-			{
+			foreach(idx, gascan in cabal_oil) {
 				if(BotAI.IsEntityValid(gascan) && GasTryFind.GetEntityIndex() == gascan.GetEntityIndex())
 					flag = false;
 			}
 
-			if(flag && GasTryFind.GetOwnerEntity() == null)
-			{
+			if(flag && GasTryFind.GetOwnerEntity() == null) {
 				local bool = false;
 				foreach(link in BotAI.BotLinkGasCan) {
 					if(link == GasTryFind)
@@ -85,8 +82,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 		return false;
 	}
 
-	function playerUpdate(player)
-	{
+	function playerUpdate(player) {
 		if(player.GetEntityIndex() in cabal_oil) {
 			local gas_can = cabal_oil[player.GetEntityIndex()];
 			if(BotAI.IsEntityValid(gas_can) && gas_can.GetOwnerEntity() != player) {
