@@ -655,16 +655,15 @@
 	if(!("userid" in event) || event.userid == null)
 		return;
 		local player = GetPlayerFromUserID(event.userid);
-		if(player.IsSurvivor() && IsPlayerABot(player))
+		if(player.IsSurvivor())
 			BotAI.SetPlayerAtCheckPoint(player, true);
 }
 
-::BotAI.Events.OnGameEvent_player_left_checkpoint <- function(event)
-{
+::BotAI.Events.OnGameEvent_player_left_checkpoint <- function(event) {
 	if(!("userid" in event) || event.userid == null)
 		return;
 		local player = GetPlayerFromUserID(event.userid);
-		if(player.IsSurvivor() && IsPlayerABot(player))
+		if(player.IsSurvivor())
 			BotAI.SetPlayerAtCheckPoint(player, false);
 }
 

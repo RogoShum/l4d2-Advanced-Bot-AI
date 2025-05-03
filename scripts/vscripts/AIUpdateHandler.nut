@@ -2344,34 +2344,6 @@ function BotAI::ResetBotFireRate() {
 	return false;
 }
 
-/*
-::NavigatorPause.avoidDanger <- function(player) {
-	if(!BotAI.IsEntityValid(player)) return true;
-	local target = BotAI.GetTarget(player);
-	if(BotAI.IsEntitySI(target) && BotAI.GetTarget(target) == player) {
-		if(target.GetZombieType() != 8) {
-			return true;
-		} else if(BotAI.nextTickDistance(player, target) <= 200) {
-			return true;
-		}
-	}
-	local dangerous = BotAI.getBotAvoid(player);
-	foreach(danger in dangerous) {
-		if(BotAI.IsEntitySI(danger) && BotAI.GetTarget(danger) == player) {
-			if(!BotAI.HasTank)
-            	player.OverrideFriction(1, 0.7);
-			if(danger.GetZombieType() != 8) {
-				return true;
-			} else if(BotAI.nextTickDistance(player, danger) <= 200) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-*/
-
 ::BotAI.Sort <- function(List) {
     for (local i = 0; i < List.len(); i++) {
         local minIndex = i;
@@ -2589,14 +2561,13 @@ function BotAI::AdjustBotState(args) {
 	foreach(player in BotAI.SurvivorHumanList) {
 		if(BotAI.IsPlayerEntityValid(player)) {
 			local lastArea = player.GetLastKnownArea();
+
 			if(lastArea != null && !lastArea.IsValidForWanderingPopulation())
 				BotAI.validArea[lastArea] <- lastArea;
 			local elevator = Entities.FindByClassnameNearest("func_elevator", player.GetOrigin(), 300);
 			if(BotAI.IsEntityValid(elevator)) {
-				local flow = GetCurrentFlowDistanceForPlayer(player);
 				foreach(bot in BotAI.SurvivorBotList) {
-					local botFlow = GetCurrentFlowDistanceForPlayer(bot);
-					if(BotAI.distanceof(bot.GetOrigin(), player.GetOrigin()) > 100 && (botFlow > flow || BotAI.getNavigator(bot).moving())) {
+					if(BotAI.distanceof(bot.GetOrigin(), player.GetOrigin()) > 100 && BotAI.getNavigator(bot).moving()) {
 						bot.SetOrigin(player.GetOrigin());
 					}
 				}
@@ -2627,6 +2598,27 @@ function BotAI::AdjustBotState(args) {
 					if (disToHuman <= dis) {
 						tpPoint = sur;
 						dis = disToHuman;
+					}
+				}
+
+				if (tpPoint != null && Director.IsAnySurvivorInExitCheckpoint() && BotAI.IsPlayerAtCheckPoint(tpPoint) && !BotAI.IsPlayerAtCheckPoint(bot)) {
+					local function changeAndUse() {
+						if(!BotAI.IsAlive(bot) || BotAI.IsPlayerAtCheckPoint(bot)) return true;
+
+						return false;
+					}
+
+					BotAI.botRunPos(bot, tpPoint, "checkpoint", 4, changeAndUse);
+				}
+
+				if (BotAI.UnStick) {
+					if (tpPoint != null && Director.IsFinaleVehicleReady()) {
+						local function changeAndUse() {
+							if(!BotAI.IsAlive(bot)) return true;
+							return false;
+						}
+
+						BotAI.botRunPos(bot, tpPoint, "checkpoint", 4, changeAndUse);
 					}
 				}
 
@@ -2695,23 +2687,31 @@ function BotAI::AdjustBotState(args) {
 						BotAI.UseTargetOriList[BotAI.MapName] <- player.GetOrigin();
 						printl("[Bot AI] Re-Located target at " + BotAI.UseTarget.GetOrigin());
 					} else {
-						BotAI.FullPress[player] = 100;
+						BotAI.ForceButton(player, 32 , 8);
 					}
 				}
 			}
 			printl("----------------------------------")
 		}
 
+		local function allRelease() {
+			foreach(bot in BotAI.SurvivorBotList) {
+				BotAI.UnforceButton(bot, 32);
+			}
+		}
+
 		local function finish() {
 			printl("----------------------------------")
 			printl("finish: " + BotAI.UseTarget)
 			printl("----------------------------------")
+			allRelease();
 		}
 
 		local function canceled() {
 			printl("----------------------------------")
 			printl("canceled: " + BotAI.UseTarget)
 			printl("----------------------------------")
+			allRelease();
 		}
 
 		scope["BotAI_UseStart"] <- using;

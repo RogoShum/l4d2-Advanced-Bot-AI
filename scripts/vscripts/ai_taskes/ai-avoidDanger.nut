@@ -152,7 +152,9 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							return distanceSq <= (tankRadius * tankRadius);
 						}
 
-						if (nexDis < innerCircle) {
+						local isTarget = BotAI.IsTarget(player, danger);
+
+						if (nexDis < innerCircle && isTarget) {
 							local navigator = BotAI.getNavigator(player);
 							navigator.clearPath("followPlayer");
 							player.UseAdrenaline(1.0);
@@ -169,12 +171,11 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							}
 
 							if (targetSpot == null) {
-								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 220, 100, 300, 300);
+								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 80, 80, 80, 80);
 							} else {
 								vecList[vecList.len()] <- targetSpot;
 							}
 						} else {
-							local isTarget = BotAI.IsTarget(player, danger);
 							local rock = null;
 							local hasRock = false;
 							while (rock = Entities.FindByClassname(rock, "tank_rock")) {
@@ -196,8 +197,10 @@ class::AITaskAvoidDanger extends AITaskSingle {
 									local navigator = BotAI.getNavigator(player);
 									if (!navigator.isMoving("followPlayer"))
 										return true;
+
 									return false;
 								}
+
 								BotAI.botRunPos(player, closest, "followPlayer", 4, changeOrDieOrRun);
 							} else if (!hasRock) {
 								local navigator = BotAI.getNavigator(player);

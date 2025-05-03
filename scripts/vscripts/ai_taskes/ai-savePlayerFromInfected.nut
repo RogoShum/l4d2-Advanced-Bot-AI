@@ -46,22 +46,28 @@ class ::AITaskSavePlayer extends AITaskGroup
 			return true;
 		}
 
-		if(selectRescuer(player, dominated)) {
+		local maxDis = 9999;
+		if (Director.IsAnySurvivorInExitCheckpoint() || Director.IsFinaleVehicleReady()) {
+			maxDis = 500;
+		}
+
+		if(selectRescuer(player, dominated, maxDis)) {
 			return true;
 		}
 
-		if(selectRescuer(player, falled)) {
+		if(selectRescuer(player, falled, maxDis)) {
 			return true;
 		}
 
 		return false;
 	}
 
-	function selectRescuer(player, table) {
+	function selectRescuer(player, table, maxDistance = 9999) {
 		foreach(idx, victim in table) {
 			if(victim == null || !BotAI.IsAlive(victim))
 				continue;
-			local distance = 9999;
+			local distance = maxDistance;
+
 			local _hero = null;
 			foreach(hero in BotAI.SurvivorBotList) {
 				if(hero in rescuers || BotAI.IsPlayerClimb(hero) || hero.IsDominatedBySpecialInfected() || hero.IsStaggering() || hero.IsIncapacitated() || hero.IsHangingFromLedge()) continue;

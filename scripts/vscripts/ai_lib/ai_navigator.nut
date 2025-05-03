@@ -196,60 +196,6 @@ class::Navigator {
 			}
 		}
 
-		foreach(id, pathFinding in seachingPath) {
-			if (Time() - pathFinding.timeOut >= TIME_OUT_LIMIT || pathFinding.fail) {
-				local inCoolDown = pathFinding.dataGoal in buildCoolDown;
-				if (!inCoolDown)
-					foreach(object, cooldown in buildCoolDown) {
-						if (BotAI.isEntityEqual(object, pathFinding.dataGoal))
-							inCoolDown = true;
-					}
-				if (!inCoolDown) {
-					local count = 200;
-					if (pathFinding.dataGoal in faildTimes) {
-						faildTimes[pathFinding.dataGoal] <- faildTimes[pathFinding.dataGoal] + 1;
-						count *= faildTimes[pathFinding.dataGoal];
-					} else
-						faildTimes[pathFinding.dataGoal] <- 1;
-
-					buildCoolDown[pathFinding.dataGoal] <- count;
-				}
-
-				if (BotAI.BotDebugMode) {
-					navPrint(id + " A-Star build faild." + " goal " + pathFinding.dataGoal);
-				}
-
-				delete seachingPath[id];
-			} else {
-				local success = createPath(pathFinding, pathFinding.dataGoalPos, pathFinding.dataGoalArea, pathFinding.dataDistance, pathFinding.paths);
-				if (success) {
-					if (BotAI.BotDebugMode) {
-						DebugDrawBox(pathFinding.dataGoalPos, Vector(-10, -10, -10), Vector(10, 10, 10), 100, 255, 0, 0.2, 5);
-						DebugDrawText(pathFinding.dataGoalPos, id, true, 5);
-						navPrint(id + " build complete.");
-						if (id == "buildTest") {
-							foreach(idx, path in pathFinding.paths) {
-								path.DebugDrawFilled(0, 255, 0, 50, 5, true);
-								DebugDrawText(path.GetCenter(), idx.tostring(), true, 5);
-							}
-						}
-					}
-
-					local data = PathData(pathFinding.paths, pathFinding.dataGoal, pathFinding.dataPriority, pathFinding.dataDiscardFunc, pathFinding.dataDistance);
-					data.aStar = true;
-					if (BotAI.BotDebugMode) {
-						navPrint("A-Star build success.");
-					}
-
-					if (pathFinding.dataGoal in faildTimes)
-						delete faildTimes[pathFinding.dataGoal];
-					pathCache[id] <- data;
-					run(id);
-					delete seachingPath[id];
-				}
-			}
-		}
-
 		foreach(idx, val in buildCoolDown) {
 			buildCoolDown[idx] <- val - 1;
 			if (val < 2)

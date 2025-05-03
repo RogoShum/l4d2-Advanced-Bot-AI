@@ -651,6 +651,7 @@ function BotAI::pingSystem() {
 					infoTarget.Kill();
 				delete BotAI.playerNavigator[player];
 			}
+
 			local navigator = BotAI.getNavigator(player);
 			navigator.onUpdate();
 			return 0.2;

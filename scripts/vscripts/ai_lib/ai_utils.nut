@@ -111,6 +111,7 @@ function BotAI::saveBackpack() {
 				modelName = prop.GetModelName()
 				clazz = prop.GetClassname()
 			}
+
 			SaveTable("botai_backpack_" + key, value);
 			Msg("[Bot AI] Saving props " + value.clazz + " with model " + value.modelName + "\n");
 			Msg("[Bot AI] key: " + key + "\n");
@@ -617,13 +618,11 @@ function BotAI::EnableSight(arg)
 		arg.infect.SetSenseFlags(arg.infect.GetSenseFlags() & ~BOT_CANT_SEE);
 }
 
-function BotAI::SetPlayerAtCheckPoint(player, boolean)
-{
+function BotAI::SetPlayerAtCheckPoint(player, boolean) {
 	BotAI.InSafeHouse[player.GetEntityIndex()] <- boolean;
 }
 
-function BotAI::IsPlayerAtCheckPoint(player)
-{
+function BotAI::IsPlayerAtCheckPoint(player) {
 	return player.GetEntityIndex() in BotAI.InSafeHouse && BotAI.InSafeHouse[player.GetEntityIndex()];
 }
 

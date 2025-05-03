@@ -4,7 +4,7 @@ class ::AITaskHealInSaferoom extends AITaskGroup
     {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
-	
+
 	updating = false;
 	playerList = {};
 
@@ -33,17 +33,17 @@ class ::AITaskHealInSaferoom extends AITaskGroup
 
 		if(additionKit >= weakCount)
 			return true;
-		else 
+		else
 			return false;
 	}
-	
+
 	function GroupUpdateChecker(player) {
 		if(BotAI.getPlayerTotalHealth(player) >= 80 || !BotAI.HasItem(player, "first_aid_kit"))
 			return false;
 
 		return true;
 	}
-	
+
 	function playerUpdate(player) {
 		BotAI.AddFlag(player, FL_FROZEN );
 		local duration = Convars.GetFloat("first_aid_kit_use_duration") + 0.1;
@@ -51,18 +51,18 @@ class ::AITaskHealInSaferoom extends AITaskGroup
 			if(BotAI.IsEntityValid(ent_))
 				BotAI.RemoveFlag(ent_, FL_FROZEN );
 		}
-		
+
 		::BotAI.Timers.AddTimerByName("[BotAI]Heal" + player.GetEntityIndex(), duration, false, RemoveFlag, player);
-				
+
 		local weapon = player.GetActiveWeapon();
 		if(weapon && weapon.GetClassname() == "weapon_first_aid_kit" && NetProps.GetPropFloat(weapon, "m_flNextPrimaryAttack") <= Time())
 			BotAI.ForceButton(player, 1 , duration, true);
 		else
 			BotAI.ChangeItem(player, 3);
-			
+
 		updating = false;
 	}
-	
+
 	function taskReset(player = null) {
 		base.taskReset(player);
 	}
