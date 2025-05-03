@@ -585,9 +585,6 @@ function BotAI::botMove(player, vec) {
 }
 
 function BotAI::botRun(player, targetPos, speed = 220) {
-	local onGround = BotAI.IsOnGround(player) && !BotAI.HasForcedButton(player, 2) && !BotAI.IsPressingJump(player);
-	if(!onGround && speed > BOT_JUMP_SPEED_LIMIT)
-		speed = BOT_JUMP_SPEED_LIMIT;
 	local pushVec = BotAI.normalize(targetPos - player.GetOrigin()).Scale(speed);
 	local velocity = Vector(pushVec.x, pushVec.y, player.GetVelocity().z);
 
@@ -1270,6 +1267,20 @@ function BotAI::IsEntityValid(_ent) {
 		return false;
 
 	return true;
+}
+
+function BotAI::shoveSpecialInfected(target, player) {
+	target.Stagger(player.GetOrigin());
+
+	local function resetMoveType() {
+		if(BotAI.getMoveType(target) == 2)
+			return true;
+
+		BotAI.setMoveType(target, 2);
+		return false;
+	}
+
+	BotAI.conditionTimer(resetMoveType, 0.1);
 }
 
 function BotAI::spawnParticle(particleName, position, target = null) {
@@ -2842,11 +2853,15 @@ function BotAI::botStayPos(player, pos, id, priority = 4, stayTime = 3, distance
 			position = pos;
 		else
 			position = pos.GetOrigin();
-		DebugDrawCircle(position, Vector(255, 0, 255), 0.2, 20, false, 2);
-		DebugDrawCircle(position, Vector(255, 0, 255), 0.4, 16, false, 2.5);
-		DebugDrawCircle(position, Vector(255, 0, 255), 0.6, 13, false, 3);
-		DebugDrawCircle(position, Vector(255, 0, 255), 0.8, 10, false, 3.5);
-		DebugDrawCircle(position, Vector(255, 0, 255), 1.0, 7, false, 4);
+
+		if (BotAI.BotDebugMode) {
+			DebugDrawCircle(position, Vector(255, 0, 255), 0.2, 20, false, 2);
+			DebugDrawCircle(position, Vector(255, 0, 255), 0.4, 16, false, 2.5);
+			DebugDrawCircle(position, Vector(255, 0, 255), 0.6, 13, false, 3);
+			DebugDrawCircle(position, Vector(255, 0, 255), 0.8, 10, false, 3.5);
+			DebugDrawCircle(position, Vector(255, 0, 255), 1.0, 7, false, 4);
+		}
+
 		return true;
 	}
 

@@ -1866,14 +1866,14 @@ function VSLib::Utils::SetEntityHint( entity, hinttext, icon = "icon_info", rang
 			local scrScope = baseEnt.GetScriptScope();
 			scrScope.hint <- baseEnt;
 			scrScope.prop <- entity.GetBaseEntity();
-			scrScope["ThinkTimer"] <- function()
+			scrScope["botai_think"] <- function()
 			{
 				if (hint.IsValid() && prop.IsValid())
 					hint.SetOrigin(prop.GetOrigin());
 			}
 
 			if (scrScope.prop != null)
-				AddThinkToEnt(baseEnt, "ThinkTimer");
+				AddThinkToEnt(baseEnt, "botai_think");
 		}
 
 		if (duration > 0.0)

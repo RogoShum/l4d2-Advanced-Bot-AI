@@ -350,8 +350,6 @@ getconsttable()["DMG_DROWN"] <- (1 << 14);
 
 getconsttable()["BOT_CANT_SEE"] <- (1 << 0);
 
-getconsttable()["BOT_JUMP_SPEED_LIMIT"] <- 60;
-
 BotAI.headshotDmg <- DMG_BULLET | DMG_HEADSHOT;
 BotAI.meleeDmg <- DMG_MELEE | DMG_HEADSHOT;
 

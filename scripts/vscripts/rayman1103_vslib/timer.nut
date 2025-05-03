@@ -292,8 +292,8 @@ function BotAI::Timers::throwError(func, params) {
 			Msg("\n");
 			func(params);
 		}
-		scrScope["ThinkTimer"] <- thrower;
-		AddThinkToEnt(errorThinker, "ThinkTimer");
+		scrScope["botai_think"] <- thrower;
+		AddThinkToEnt(errorThinker, "botai_think");
 		DoEntFire("!self", "Kill", "", 1, null, errorThinker);
 	}
 }
@@ -301,13 +301,16 @@ function BotAI::Timers::throwError(func, params) {
 /*
  * Create a think timer
  */
+
+ if (AdvancedBotAI == 0) {
 	::BotAI.Timers._thinkTimer <- SpawnEntityFromTable("info_target", { targetname = "botai_timer" });
 	if (::BotAI.Timers._thinkTimer != null)
 	{
 		::BotAI.Timers._thinkTimer.ValidateScriptScope();
 		local scrScope = ::BotAI.Timers._thinkTimer.GetScriptScope();
-		scrScope["ThinkTimer"] <- ::BotAI.Timers._thinkFunc;
-		AddThinkToEnt(::BotAI.Timers._thinkTimer, "ThinkTimer");
+		scrScope["botai_think"] <- ::BotAI.Timers._thinkFunc;
+		AddThinkToEnt(::BotAI.Timers._thinkTimer, "botai_think");
 	}
 	else
 		throw "BotAI Error: Timer system could not be created; Could not create dummy entity";
+ }

@@ -97,22 +97,12 @@
 
 ::BotAI.Events.OnGameEvent_player_jump <- function(event) {
 	local bot = GetPlayerFromUserID(event.userid);
-	if(BotAI.IsPlayerEntityValid(bot) && IsPlayerABot(bot)) {// && BotAI.hasContext(bot, "BOTAI_JUMP")
-		if(bot in BotAI.botMoveMap) {
-			BotAI.botMoveMap[bot] = Vector(0, 0, 0);
-		}
-	}
+
 }
 
 ::BotAI.Events.OnGameEvent_player_jump_apex <- function(event) {
 	local bot = GetPlayerFromUserID(event.userid);
-	if(BotAI.IsPlayerEntityValid(bot) && IsPlayerABot(bot) && BotAI.hasContext(bot, "BOTAI_JUMP")) {
-		if(bot in BotAI.botMoveMap) {
-			if(BotAI.botMoveMap[bot].Length() > BOT_JUMP_SPEED_LIMIT) {
-				BotAI.botMoveMap[bot] = BotAI.normalize(BotAI.botMoveMap[bot]).Scale(BOT_JUMP_SPEED_LIMIT);
-			}
-		}
-	}
+
 }
 
 ::BotAI.Events.OnGameEvent_bullet_impact <- function(event) {
@@ -351,7 +341,6 @@
 	BotAI.setPlayerBeingRevived(revived, false);
 }
 
-
 ::BotAI.Events.OnGameEvent_player_disconnect <- function(event) {
 	local player = GetPlayerFromUserID(event.userid);
 	if(IsPlayerABot(player))
@@ -506,12 +495,19 @@
 	local victim = GetPlayerFromUserID(event.victim);
 	BotAI.setContext(attacker, "BOTAI_BREAK", 1.5);
 
+	if (BotAI.BotCombatSkill > 2 && BotAI.IsEntitySurvivorBot(victim) && RandomInt(0, BotAI.BotCombatSkill - 1) > 0) {
+		NetProps.SetPropEntity(attacker, "m_tongueVictim", -1);
+		NetProps.SetPropEntity(victim, "m_tongueOwner", -1);
+		return;
+	}
+
 	if(attacker.GetEntityIndex() in BotAI.smokerTongue) {
 		delete BotAI.smokerTongue[attacker.GetEntityIndex()];
 
-		if(BotAI.IsEntitySurvivorBot(victim) && BotAI.IsPressingAttack(victim) && BotAI.IsTarget(attacker, victim) && BotAI.getIsMelee(victim)){
+		if(BotAI.IsEntitySurvivorBot(victim) && BotAI.IsPressingAttack(victim) && BotAI.IsTarget(attacker, victim) && BotAI.getIsMelee(victim)) {
 			NetProps.SetPropEntity(attacker, "m_tongueVictim", -1);
 			NetProps.SetPropEntity(victim, "m_tongueOwner", -1);
+			return;
 		}
 	}
 
@@ -547,17 +543,15 @@
 		delete BotAI.smokerTongue[attacker.GetEntityIndex()];
 }
 
-::BotAI.Events.OnGameEvent_jockey_ride <- function(event)
-{
+::BotAI.Events.OnGameEvent_jockey_ride <- function(event) {
 	if(!("victim" in event) || event.victim == null)
 		return;
 
 	local victim = GetPlayerFromUserID(event.victim);
 	local attacker = GetPlayerFromUserID(event.userid);
 
-	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.BotCombatSkill > 2 && RandomInt(0, BotAI.BotCombatSkill + 1) > 0) {
-		NetProps.SetPropInt(victim, "m_jockeyAttacker", -1);
-		NetProps.SetPropInt(attacker, "m_jockeyVictim", 1);
+	if (BotAI.BotCombatSkill > 2 && BotAI.IsEntitySurvivorBot(victim) && RandomInt(0, BotAI.BotCombatSkill * BotAI.BotCombatSkill - 6) > 0) {
+		BotAI.shoveSpecialInfected(attacker, victim);
 		return;
 	}
 
@@ -570,8 +564,7 @@
 	BotAI.Timers.AddTimerByName("addTimed-" + victim.GetEntityIndex(), 0.5, false, addTimed, victim);
 }
 
-::BotAI.Events.OnGameEvent_jockey_ride_end <- function(event)
-{
+::BotAI.Events.OnGameEvent_jockey_ride_end <- function(event) {
 	if(!("victim" in event) || event.victim == null)
 		return;
 	victim <- GetPlayerFromUserID(event.victim);
@@ -580,32 +573,28 @@
 	BotAI.SurvivorTrappedTimed[victim.GetEntityIndex()] <- null;
 }
 
-::BotAI.Events.OnGameEvent_lunge_pounce <- function(event)
-{
+::BotAI.Events.OnGameEvent_lunge_pounce <- function(event) {
 	if(!("victim" in event) || event.victim == null)
 		return;
 
 	local victim = GetPlayerFromUserID(event.victim);
 	local attacker = GetPlayerFromUserID(event.userid);
 
-	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.BotCombatSkill > 2 && RandomInt(0, BotAI.BotCombatSkill + 1) > 0) {
-		NetProps.SetPropInt(victim, "m_pounceAttacker", -1);
-		NetProps.SetPropInt(attacker, "m_pounceVictim", 1);
+	if (BotAI.BotCombatSkill > 2 && BotAI.IsEntitySurvivorBot(victim) && RandomInt(0, BotAI.BotCombatSkill * BotAI.BotCombatSkill - 6) > 0) {
+		BotAI.shoveSpecialInfected(attacker, victim);
 		return;
 	}
 
 	BotAI.SurvivorTrapped[victim.GetEntityIndex()] <- victim;
 	BotAI.SurvivorTrappedTimed[victim.GetEntityIndex()] <- victim;
-	local function addTimed(vic)
-	{
+	local function addTimed(vic) {
 		BotAI.SurvivorTrappedTimed[vic.GetEntityIndex()] <- null;
 	}
 
 	BotAI.Timers.AddTimerByName("addTimed-" + victim.GetEntityIndex(), 0.5, false, addTimed, victim);
 }
 
-::BotAI.Events.OnGameEvent_pounce_stopped <- function(event)
-{
+::BotAI.Events.OnGameEvent_pounce_stopped <- function(event) {
 	if(!("victim" in event) || event.victim == null)
 		return;
 	local victim = GetPlayerFromUserID(event.victim);
@@ -671,8 +660,7 @@
 	victim <- GetPlayerFromUserID(event.userid);
 	attacker <- GetPlayerFromUserID(event.attacker);
 
-	if(BotAI.IsPlayerEntityValid(attacker) && attacker.IsSurvivor() && IsPlayerABot(attacker) && !attacker.IsDead() && BotAI.IsPlayerEntityValid(victim) && !victim.IsSurvivor() && IsPlayerABot(victim) && !victim.IsDead())
-	{
+	if(BotAI.IsPlayerEntityValid(attacker) && attacker.IsSurvivor() && IsPlayerABot(attacker) && !attacker.IsDead() && BotAI.IsPlayerEntityValid(victim) && !victim.IsSurvivor() && IsPlayerABot(victim) && !victim.IsDead()) {
 		if(BotAI.IsOnGround(victim)) {
 			victim.SetSenseFlags(victim.GetSenseFlags() | BOT_CANT_SEE);
 			::BotAI.Timers.AddTimer(1.4, false, BotAI.EnableSight {infect = victim});
@@ -680,13 +668,11 @@
 		BotAI.applyPushVelocity(attacker, victim);
 	}
 
-	if(BotAI.IsPlayerEntityValid(attacker) && attacker.IsSurvivor() && !IsPlayerABot(attacker) && !attacker.IsDead() && BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim) && !victim.IsDead())
-	{
+	if(BotAI.IsPlayerEntityValid(attacker) && attacker.IsSurvivor() && !IsPlayerABot(attacker) && !attacker.IsDead() && BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim) && !victim.IsDead()) {
 		weapon <- attacker.GetActiveWeapon();
 		ename <- weapon.GetClassname();
 
-		local function genStrGet(str)
-		{
+		local function genStrGet(str) {
 			if(str == "weapon_molotov")
 				return "molotov";
 			if(str == "weapon_vomitjar")
@@ -696,8 +682,7 @@
 			return " ";
 		}
 
-		if(BotAI.HasItem(victim, "pipe_bomb") && (ename == "weapon_molotov" || ename == "weapon_vomitjar"))
-		{
+		if(BotAI.HasItem(victim, "pipe_bomb") && (ename == "weapon_molotov" || ename == "weapon_vomitjar")) {
 			BotAI.removeItem(attacker, genStrGet(ename));
 			BotAI.removeItem(victim, "pipe_bomb");
 			attacker.GiveItem("pipe_bomb");
@@ -705,8 +690,7 @@
 			return;
 		}
 
-		if(BotAI.HasItem(victim, "molotov") && (ename == "weapon_pipe_bomb" || ename == "weapon_vomitjar"))
-		{
+		if(BotAI.HasItem(victim, "molotov") && (ename == "weapon_pipe_bomb" || ename == "weapon_vomitjar")) {
 			BotAI.removeItem(attacker, genStrGet(ename));
 			BotAI.removeItem(victim, "molotov");
 			attacker.GiveItem("molotov");
@@ -714,8 +698,7 @@
 			return;
 		}
 
-		if(BotAI.HasItem(victim, "vomitjar") && (ename == "weapon_molotov" || ename == "weapon_pipe_bomb"))
-		{
+		if(BotAI.HasItem(victim, "vomitjar") && (ename == "weapon_molotov" || ename == "weapon_pipe_bomb")) {
 			BotAI.removeItem(attacker, genStrGet(ename));
 			BotAI.removeItem(victim, "vomitjar");
 			attacker.GiveItem("vomitjar");
@@ -885,7 +868,7 @@ function EasyLogic::OnUserCommand::BotAICommands( player, args, text ) {
 				val = menu._options[menu._curSel].text, callb = menu._options[menu._curSel].callback };
 				if(menu._options[menu._curSel].callback == BotEmptyCmd)
 					close = false;
-				::VSLib.Timers.AddTimer(0.1, 0, @(tbl) tbl.callb(tbl.p, tbl.idx, tbl.val), t);
+				::BotAI.Timers.AddTimer(0.1, 0, @(tbl) tbl.callb(tbl.p, tbl.idx, tbl.val), t);
 
 				if(close) {
 					BotAI.playSound(player, "buttons/button14.wav");

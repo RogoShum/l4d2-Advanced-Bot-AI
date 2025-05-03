@@ -72,13 +72,6 @@ class ::AITaskShoveInfected extends AITaskSingle {
 				BotAI.SetTarget(player, target);
 
 				local chance = 2;
-				local function reassess() {
-					if(BotAI.getPlayerTotalHealth(player) <= 30)
-						chance += 1;
-					if(BotAI.getPlayerTotalHealth(player) <= 15)
-						chance += 1;
-				}
-
 				chance -= BotAI.BotCombatSkill;
 
 				if (BotAI.BotCombatSkill > 2) {
@@ -86,8 +79,6 @@ class ::AITaskShoveInfected extends AITaskSingle {
 				}
 
 				if(target.GetClassname() == "player" && !target.IsSurvivor() && (target.GetZombieType() == 1 || target.GetZombieType() == 3 || target.GetZombieType() == 5)) {
-					reassess();
-
 					if(RandomInt(0, chance) == 0) {
 						target.Stagger(player.GetOrigin());
 					}
@@ -106,8 +97,6 @@ class ::AITaskShoveInfected extends AITaskSingle {
 					if (BotAI.BotCombatSkill < 1) {
 						chance += 1;
 					}
-
-					reassess();
 
 					if (RandomInt(0, chance) == 0) {
 						BotAI.shoveCommon(target);

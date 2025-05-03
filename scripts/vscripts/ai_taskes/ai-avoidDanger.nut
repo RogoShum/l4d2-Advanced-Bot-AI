@@ -76,7 +76,13 @@ class::AITaskAvoidDanger extends AITaskSingle {
 				if (name in enumGround) {
 					local lastArea = player.GetLastKnownArea();
 					local function feelSafe() {
-						return !player.GetLastKnownArea().IsDamaging();
+						local area = player.GetLastKnownArea();
+						local safe = !area.IsDamaging();
+						if (safe) {
+							BotAI.botStayPos(player, area.GetCenter(), "avoidDanger", 5, 3)
+						}
+
+						return safe;
 					}
 
 					if (lastArea && lastArea.IsDamaging()) {
@@ -117,7 +123,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 
 						local nexDis = BotAI.nextTickDistance(player, danger);
 						local cansee = BotAI.VectorDotProduct(BotAI.normalize(danger.EyeAngles().Forward()), BotAI.normalize(player.GetOrigin() - danger.GetOrigin())) > 0.6
-						local innerCircle = 400;
+						local innerCircle = 300;
 						if (BotAI.BotDebugMode) {
 							DebugDrawCircle(player.GetCenter(), Vector(255, 25, 25), 0, innerCircle, true, 0.5);
 						}
@@ -127,15 +133,19 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							local tankHeight = danger.GetOrigin().z;
 							local randomHeight = random.z;
 
-							local heightTolerance = 50;
+							local heightTolerance = 45;
 							if (playerHeight < randomHeight) {
-								return (tankHeight > (playerHeight - heightTolerance)) && (tankHeight < (randomHeight + heightTolerance));
+								return (tankHeight > (playerHeight + heightTolerance)) && (tankHeight < (randomHeight - heightTolerance));
 							} else {
-								return (tankHeight < (playerHeight + heightTolerance)) && (tankHeight > (randomHeight - heightTolerance));
+								return (tankHeight < (playerHeight - heightTolerance)) && (tankHeight > (randomHeight + heightTolerance));
 							}
 						}
 
 						local function canHitTank(point) {
+							if (BotAI.BotCombatSkill > 2) {
+								return false;
+							}
+
 							local playerPos = player.GetCenter();
 							local tankPos = danger.GetCenter();
 							local tankRadius = 50;
@@ -161,9 +171,11 @@ class::AITaskAvoidDanger extends AITaskSingle {
 
 							local targetSpot = null;
 							for (local count = 0; count < 5; ++count) {
-								local randomSpot = player.TryGetPathableLocationWithin(270);
-
-								if (targetSpot == null && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 170
+								local randomSpot = player.TryGetPathableLocationWithin(200);
+								if (BotAI.BotDebugMode) {
+									DebugDrawCircle(randomSpot, Vector(255, 255, 25), 0, 10, true, 0.5);
+								}
+								if (targetSpot == null && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 150
 								&& !canHitTank(randomSpot)
 								&& !isTankBetweenHeights(randomSpot)) {
 									targetSpot = randomSpot - player.GetOrigin();
@@ -173,7 +185,13 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							if (targetSpot == null) {
 								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 80, 80, 80, 80);
 							} else {
-								vecList[vecList.len()] <- targetSpot;
+								if (BotAI.BotCombatSkill == 3 && nexDis < 70) {
+									player.SetOrigin(targetSpot + player.GetOrigin());
+								} else if (BotAI.BotCombatSkill == 4 && nexDis < 100) {
+									player.SetOrigin(targetSpot + player.GetOrigin());
+								} else {
+									vecList[vecList.len()] <- targetSpot;
+								}
 							}
 						} else {
 							local rock = null;
