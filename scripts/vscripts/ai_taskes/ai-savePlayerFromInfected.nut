@@ -116,6 +116,37 @@ class ::AITaskSavePlayer extends AITaskGroup
 		if(NetProps.GetPropInt(victim, "m_jockeyAttacker") > 0)
 			smoker = NetProps.GetPropEntity(victim, "m_jockeyAttacker");
 
+		local function teleport() {
+			if(!BotAI.UnStick) {
+				return;
+			}
+
+			if(!BotAI.IsAlive(player) || player.IsDominatedBySpecialInfected() || player.IsIncapacitated() || player.IsHangingFromLedge()) {
+				return;
+			}
+
+			if(!BotAI.IsAlive(victim) || BotAI.isPlayerBeingRevived(victim)) {
+				return;
+			}
+
+			if (BotAI.distanceof(player.GetOrigin(), victim.GetOrigin()) < 200) {
+				return;
+			}
+
+			if (victim.IsDominatedBySpecialInfected() || victim.IsIncapacitated() || victim.IsHangingFromLedge()) {
+				local lastArea = victim.GetLastKnownArea();
+				if (lastArea != null && !lastArea.IsDamaging() && !lastArea.IsBlocked(2, false) && !lastArea.IsBlocked(2, true)) {
+					for(local i = 0; i < 5; ++i) {
+						local findPos = lastArea.FindRandomSpot();
+						if (BotAI.distanceof(findPos, victim.GetOrigin()) < 200) {
+							player.SetOrigin(findPos);
+							return;
+						}
+					}
+				}
+			}
+		}
+
 		if(BotAI.IsEntityValid(smoker) && BotAI.CanSeeOtherEntityWithoutBarrier(player, smoker, 180)) {
 			local function needSave() {
 				if(!BotAI.IsAlive(smoker)) return true;
@@ -124,13 +155,22 @@ class ::AITaskSavePlayer extends AITaskGroup
 			}
 
 			BotAI.botRunPos(player, smoker, "savePlayer", 5, needSave);
+			
+			if (BotAI.SaveTeleport <= 99) {
+				BotAI.delayTimer(teleport, BotAI.SaveTeleport);
+			}
 		} else if (BotAI.distanceof(player.GetOrigin(), victim.GetOrigin()) > 125) {
 			local function needSave() {
 				if(!BotAI.IsAlive(victim) || BotAI.isPlayerBeingRevived(victim)) return true;
 
 				return !victim.IsDominatedBySpecialInfected() && !victim.IsIncapacitated() && !victim.IsHangingFromLedge();
 			}
+
 			BotAI.botRunPos(player, victim, "savePlayer", 5, needSave);
+
+			if (BotAI.SaveTeleport <= 99) {
+				BotAI.delayTimer(teleport, BotAI.SaveTeleport);
+			}
 		}
 		updating = false;
 	}

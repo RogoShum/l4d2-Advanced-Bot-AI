@@ -97,7 +97,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 
 		local navigator = BotAI.getNavigator(player);
 		if (navigator.moving()) {
-			awareAngle -= 0.5;
+			awareAngle = -1.0;
 		}
 
 		foreach(infected in BotAI.SpecialList) {

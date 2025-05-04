@@ -57,7 +57,30 @@
 }
 
 ::BotAI.Events.OnGameEvent_defibrillator_begin <- function(event) {
-	BotAI.setBotHealingTime(GetPlayerFromUserID(event.userid), Time());
+	local player = GetPlayerFromUserID(event.userid);
+	BotAI.setBotHealingTime(player, Time());
+	if(BotAI.IsPlayerEntityValid(player) && IsPlayerABot(player)) {
+		player.UseAdrenaline(2);
+		BotAI.UnforceButton(player, 1);
+		BotAI.ForceButton(player, 1 , 4, true);
+		BotAI.AddFlag(player, FL_FROZEN );
+	}
+}
+
+::BotAI.Events.OnGameEvent_defibrillator_used <- function(event) {
+	local player = GetPlayerFromUserID(event.userid);
+	if(BotAI.IsPlayerEntityValid(player) && IsPlayerABot(player)) {
+		BotAI.UnforceButton(player, 1);
+		BotAI.RemoveFlag(player, FL_FROZEN );
+	}
+}
+
+::BotAI.Events.OnGameEvent_defibrillator_used_fail <- function(event) {
+	local player = GetPlayerFromUserID(event.userid);
+	if(BotAI.IsPlayerEntityValid(player) && IsPlayerABot(player)) {
+		BotAI.UnforceButton(player, 1);
+		BotAI.RemoveFlag(player, FL_FROZEN );
+	}
 }
 
 //Fix a problem when bot using defibrillator
@@ -65,11 +88,16 @@
 	local player = GetPlayerFromUserID(event.userid);
 	local body = GetPlayerFromUserID(event.subject);
 
-	if(BotAI.IsPlayerEntityValid(player) && IsPlayerABot(player) && BotAI.IsPlayerEntityValid(body)) {
-		local lastTime = BotAI.getBotHealingTime(player);
-		if(Time() - lastTime >= 2) {
-			body.ReviveByDefib();
-			BotAI.removeItem(player, "defibrillator");
+	if(BotAI.IsPlayerEntityValid(player) && IsPlayerABot(player)) {
+		BotAI.UnforceButton(player, 1);
+		BotAI.RemoveFlag(player, FL_FROZEN );
+
+		if (BotAI.IsPlayerEntityValid(body)) {
+			local lastTime = BotAI.getBotHealingTime(player);
+			if(Time() - lastTime >= 2) {
+				body.ReviveByDefib();
+				BotAI.removeItem(player, "defibrillator");
+			}
 		}
 	}
 }
@@ -438,12 +466,54 @@
 	}
 }
 
-::BotAI.Events.OnGameEvent_charger_pummel_start <- function(event) {
-	if(!("victim" in event) || event.victim == null)
+::BotAI.Events.OnGameEvent_charger_carry_start <- function(event) {
+	if(!("victim" in event) || event.victim == null || !("userid" in event) || event.userid == null)
 		return;
 
-	victim <- GetPlayerFromUserID(event.victim);
+	if (BotAI.BotCombatSkill > 3) {
+		local victim = GetPlayerFromUserID(event.victim);
 
+		if (BotAI.IsEntitySurvivorBot(victim)) {
+			local inventory = BotAI.GetHeldItems(victim);
+		
+			if ("slot1" in inventory) {
+				local offhandItem = inventory["slot1"];
+				if (offhandItem.GetClassname() == "weapon_melee") {
+					local attacker = GetPlayerFromUserID(event.userid);
+					local damagePos = BotAI.getEntityHeadPos(victim);
+					damagePos = Vector(damagePos.x, damagePos.y, victim.EyePosition().z);
+					BotAI.applyDamage(victim, attacker, 300, BotAI.meleeDmg, damagePos);
+					BotAI.spawnParticle("blood_impact_infected_01", attacker.GetOrigin() + Vector(0, 0, 50), attacker);
+					BotAI.spawnParticle("blood_melee_slash_TP_swing", attacker.GetOrigin() + Vector(0, 0, 50), attacker);
+					BotAI.playSound(victim, BotAI.getMeleeSound(offhandItem.GetModelName()));
+				}
+			}
+		}
+	}
+}
+
+::BotAI.Events.OnGameEvent_charger_pummel_start <- function(event) {
+	if(!("victim" in event) || event.victim == null || !("userid" in event) || event.userid == null)
+		return;
+
+	local victim = GetPlayerFromUserID(event.victim);
+	if (BotAI.BotCombatSkill > 3 && BotAI.IsEntitySurvivorBot(victim)) {
+		local inventory = BotAI.GetHeldItems(victim);
+			
+		if ("slot1" in inventory) {
+			local offhandItem = inventory["slot1"];
+			if (offhandItem.GetClassname() == "weapon_melee") {
+				local attacker = GetPlayerFromUserID(event.userid);
+				local damagePos = BotAI.getEntityHeadPos(victim);
+				damagePos = Vector(damagePos.x, damagePos.y, victim.EyePosition().z);
+				BotAI.applyDamage(victim, attacker, 300, BotAI.meleeDmg, damagePos);
+				BotAI.spawnParticle("blood_impact_infected_01", attacker.GetOrigin() + Vector(0, 0, 50), attacker);
+				BotAI.spawnParticle("blood_melee_slash_TP_swing", attacker.GetOrigin() + Vector(0, 0, 50), attacker);
+				BotAI.playSound(victim, BotAI.getMeleeSound(offhandItem.GetModelName()));
+			}
+		}
+	}
+		
 	BotAI.SurvivorTrapped[victim.GetEntityIndex()] <- victim;
 	BotAI.SurvivorTrappedTimed[victim.GetEntityIndex()] <- victim;
 }
@@ -457,8 +527,7 @@
 	BotAI.SurvivorTrappedTimed[victim.GetEntityIndex()] <- null;
 }
 
-::BotAI.Events.OnGameEvent_choke_start <- function(event)
-{
+::BotAI.Events.OnGameEvent_choke_start <- function(event) {
 	if(!("victim" in event) || event.victim == null)
 		return;
 
@@ -468,8 +537,7 @@
 	BotAI.SurvivorTrappedTimed[victim.GetEntityIndex()] <- victim;
 }
 
-::BotAI.Events.OnGameEvent_choke_stopped <- function(event)
-{
+::BotAI.Events.OnGameEvent_choke_stopped <- function(event) {
 	if(!("victim" in event) || event.victim == null)
 		return;
 	victim <- GetPlayerFromUserID(event.victim);
@@ -496,6 +564,25 @@
 	BotAI.setContext(attacker, "BOTAI_BREAK", 1.5);
 
 	if (BotAI.BotCombatSkill > 2 && BotAI.IsEntitySurvivorBot(victim) && RandomInt(0, BotAI.BotCombatSkill - 1) > 0) {
+		NetProps.SetPropEntity(attacker, "m_tongueVictim", -1);
+		NetProps.SetPropEntity(victim, "m_tongueOwner", -1);
+		return;
+	}
+
+	local shouldShove = false;
+	local needShove = false;
+	local display = null;
+	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
+		if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") < NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal")) {
+			needShove = true;
+		}
+	}
+
+	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.UseTarget != null && BotAI.NeedGasFinding && needShove && RandomInt(0, 4) > 0) {
+		shouldShove = true;
+	}
+
+	if (shouldShove) {
 		NetProps.SetPropEntity(attacker, "m_tongueVictim", -1);
 		NetProps.SetPropEntity(victim, "m_tongueOwner", -1);
 		return;
@@ -550,7 +637,20 @@
 	local victim = GetPlayerFromUserID(event.victim);
 	local attacker = GetPlayerFromUserID(event.userid);
 
-	if (BotAI.BotCombatSkill > 2 && BotAI.IsEntitySurvivorBot(victim) && RandomInt(0, BotAI.BotCombatSkill * BotAI.BotCombatSkill - 6) > 0) {
+	local shouldShove = BotAI.BotCombatSkill > 2 && BotAI.IsEntitySurvivorBot(victim) && RandomInt(0, BotAI.BotCombatSkill * BotAI.BotCombatSkill) > 0;
+	local needShove = false;
+	local display = null;
+	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
+		if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") < NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal")) {
+			needShove = true;
+		}
+	}
+
+	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.UseTarget != null && BotAI.NeedGasFinding && needShove && RandomInt(0, 4) > 0) {
+		shouldShove = true;
+	}
+
+	if (shouldShove) {
 		BotAI.shoveSpecialInfected(attacker, victim);
 		return;
 	}
@@ -580,7 +680,20 @@
 	local victim = GetPlayerFromUserID(event.victim);
 	local attacker = GetPlayerFromUserID(event.userid);
 
-	if (BotAI.BotCombatSkill > 2 && BotAI.IsEntitySurvivorBot(victim) && RandomInt(0, BotAI.BotCombatSkill * BotAI.BotCombatSkill - 6) > 0) {
+	local shouldShove = BotAI.BotCombatSkill > 2 && BotAI.IsEntitySurvivorBot(victim) && RandomInt(0, BotAI.BotCombatSkill * BotAI.BotCombatSkill) > 0;
+	local needShove = false;
+	local display = null;
+	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
+		if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") < NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal")) {
+			needShove = true;
+		}
+	}
+
+	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.UseTarget != null && BotAI.NeedGasFinding && needShove && RandomInt(0, 4) > 0) {
+		shouldShove = true;
+	}
+
+	if (shouldShove) {
 		BotAI.shoveSpecialInfected(attacker, victim);
 		return;
 	}
@@ -940,6 +1053,10 @@ function ChatTriggers::botdefib( player, args, text ) {
 
 function ChatTriggers::botfollow( player, args, text ) {
 	BotFollowDistanceCmd( player, args, text );
+}
+
+function ChatTriggers::botsaveteleport( player, args, text ) {
+	BotSaveTeleportCmd( player, args, text );
 }
 
 function ChatTriggers::botwitchdamage( player, args, text ) {

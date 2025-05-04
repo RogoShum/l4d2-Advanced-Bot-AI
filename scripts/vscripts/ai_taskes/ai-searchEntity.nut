@@ -1,7 +1,6 @@
-class ::AITaskSearchEntity extends AITaskSingle
-{
-	constructor(orderIn, tickIn, compatibleIn, forceIn)
-    {
+class ::AITaskSearchEntity extends AITaskSingle {
+	
+	constructor(orderIn, tickIn, compatibleIn, forceIn) {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
 
 		enumUpgradePack["weapon_upgradepack_incendiary_spawn"] <- 1;

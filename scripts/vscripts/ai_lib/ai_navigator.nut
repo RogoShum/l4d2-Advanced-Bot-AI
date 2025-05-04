@@ -2,15 +2,11 @@
 
 class::Navigator {
 	pathCache = {};
-	seachingPath = {};
 	player = null;
 	movingID = null;
 	lastArea = null;
 	buildCoolDown = {};
-	faildTimes = {};
 	posCheck = null;
-	checkTime = Time();
-	timeOut = Time();
 	pathFlat = true;
 	SEARCH_LIMIT = 128;
 	TIME_OUT_LIMIT = 5;
@@ -20,22 +16,16 @@ class::Navigator {
 		player = playerIn;
 		movingID = null;
 		pathCache = {};
-		seachingPath = {};
 		lastArea = playerIn.GetLastKnownArea();
 		buildCoolDown = {};
-		faildTimes = {};
 		posCheck = playerIn.GetOrigin();
-		checkTime = Time();
-		timeOut = Time();
 	}
 
 	function _typeof() {
 		return "Navigator";
 	}
 
-	function buildPath(goal, id, priority = 0, discardFunc = BotAI.trueDude, previousPath = null, aStar = false, distance = 10000) {
-		if (timeOut > Time())
-			return false;
+	function buildPath(goal, id, priority = 0, discardFunc = BotAI.trueDude, distance = 10000) {
 		local goalArea = null;
 		local goalPos = null;
 		if (typeof goal == "Vector") {
@@ -44,8 +34,10 @@ class::Navigator {
 			if ("GetLastKnownArea" in goal)
 				goalArea = goal.GetLastKnownArea();
 			goalPos = goal.GetOrigin();
-		} else
+		} else {
+			navPrint("invalid goal: " + goal);
 			return false;
+		}
 
 		if (goalArea == null) {
 			goalArea = NavMesh.GetNavArea(goalPos, 150);
@@ -65,104 +57,36 @@ class::Navigator {
 			}
 		}
 
-		if (typeof previousPath == "table") {
-			local newPaths = [];
-			for (local i = 0; i < previousPath.len(); ++i) {
-				if (("area" + i.tostring()) in previousPath)
-					newPaths.append(previousPath["area" + i.tostring()]);
-			}
-			previousPath = newPaths;
-		}
-
-		local paths = {};
 		local build = false;
-		local buildAStar = false;
 		local goalInCoolDown = goal in buildCoolDown;
-		if (!goalInCoolDown)
+		if (!goalInCoolDown) {
 			foreach(object, cooldown in buildCoolDown) {
 				if (BotAI.isEntityEqual(object, goal))
 					goalInCoolDown = true;
 			}
-
-		local pathSearch = null;
-		local newPath = true;
-		if (id in seachingPath) {
-			newPath = false;
-			pathSearch = seachingPath[id];
-		} else {
-			pathSearch = PathSearch(goal);
-			pathSearch.allowDanger = id.find("%") != null;
-			pathSearch.dataPaths = paths;
-			pathSearch.dataGoal = goal;
-			pathSearch.dataPriority = priority;
-			pathSearch.dataDiscardFunc = discardFunc;
-			pathSearch.dataDistance = distance;
-			pathSearch.dataGoalPos = goalPos;
-			pathSearch.dataGoalArea = goalArea;
 		}
 
-		if (newPath && !goalInCoolDown) {
-			if (aStar) {
-				try {
-					build = createPath(pathSearch, goalPos, goalArea, distance, paths, previousPath);
-				} catch (e) {
-					timeOut = Time() + 1;
-					navPrint("Path build time out.");
-				}
-			} else {
-				try {
-					build = createPath(pathSearch, goalPos, goalArea, distance, paths);
-				} catch (e) {
-					timeOut = Time() + 1;
-					navPrint("Path build time out.");
-				}
+		if (!goalInCoolDown) {
+			try {
+				build = createPath(id, goalPos, goalArea, distance);
+			} catch (e) {
+				navPrint("Path build time out.");
 			}
 		}
 
 		if (!build) {
-			if (!(id in seachingPath)) {
-				seachingPath[id] <- pathSearch;
-			}
-
-			local faildBuild = false;
-			//if(navAPI)
-			//faildBuild = !createPath(goalPos, goalArea, paths);
-
-			/*
-			if(!faildBuild && navAPI) {
-			    paths = {};
-			    build = NavMesh.GetNavAreasFromBuildPath(player.GetLastKnownArea(), null, goalPos, 9999, 2, false, paths);
-			    navPrint("build: " + build);
-			}
-			*/
-		} else {
 			if (BotAI.BotDebugMode) {
-				navPrint("A-Star build success.");
+				DebugDrawBox(goalPos, Vector(-5, -5, -5), Vector(5, 5, 5), 255, 0, 255, 0.2, 1.0);
 			}
 
-			buildAStar = true;
-			if (goal in faildTimes)
-				delete faildTimes[goal];
-		}
-
-		/*
-		if(build && paths.len() > 0) {
-		    local firstArea = paths["area" + (paths.len() - 1)];
-		    if(firstArea.IsBlocked(2, true) || !firstArea.IsValid()) {
-		        return false;
-		    }
-		}
-		*/
-
-		if (build) {
+			return false;
+		} else {
 			if (BotAI.BotDebugMode) {
 				navPrint(id + " build complete.");
 			}
-
-			local data = PathData(paths, goal, priority, discardFunc, distance);
-
-			if (buildAStar)
-				data.aStar = true;
+	
+			local data = PathData(goal, priority, discardFunc, distance);
+	
 			pathCache[id] <- data;
 		}
 
@@ -340,72 +264,19 @@ class::Navigator {
 		return null;
 	}
 
-	function addLadder(ladderArea, adjacentAreas, dir) {
-		if (ladderArea == null) return;
-		local ladders = {};
-		ladderArea.GetLadders(dir, ladders);
-		foreach(ladder in ladders) {
-			if (ladder.IsValid() && ladder.IsUsableByTeam(2)) {
-				local areaIn = null;
-				local areaOut = null;
-				if ("GetID" in ladder.GetBottomArea() && ladder.GetBottomArea().GetID() == ladderArea.GetID() && ladder.GetTopArea() != null && ladder.GetTopArea().IsValid()) {
-					adjacentAreas[ladder.GetTopArea().GetID()] <- ladder.GetTopArea();
-					areaIn = ladder.GetBottomArea();
-					areaOut = ladder.GetTopArea();
-				} else if ("GetID" in ladder.GetTopArea() && ladder.GetTopArea().GetID() == ladderArea.GetID() && ladder.GetBottomArea() != null && ladder.GetBottomArea().IsValid()) {
-					adjacentAreas[ladder.GetBottomArea().GetID()] <- ladder.GetBottomArea();
-					areaIn = ladder.GetTopArea();
-					areaOut = ladder.GetBottomArea();
-				}
-				if (BotAI.BotDebugMode) {
-					local height = ladder.GetLength() / 2;
-					local width = ladder.GetWidth() / 2;
-					DebugDrawBox(ladder.GetBottomOrigin() + Vector(0, 0, height), Vector(-width, -width, -height), Vector(width, width, height), 0, 255, 255, 0.2, 5);
-					DebugDrawText(ladder.GetBottomOrigin() + Vector(0, 0, height), "ladder", true, 5);
-					if (areaIn != null) {
-						if (areaIn == ladder.GetBottomArea()) {
-							BotAI.drawArrow(ladder.GetBottomArea().GetCenter(), ladder.GetBottomOrigin(), Vector(0, 255, 255), 5);
-						} else if (areaIn == ladder.GetTopArea()) {
-							BotAI.drawArrow(ladder.GetTopArea().GetCenter(), ladder.GetTopOrigin(), Vector(0, 255, 255), 5);
-						}
-					}
-					if (areaOut != null) {
-						if (areaOut == ladder.GetBottomArea()) {
-							BotAI.drawArrow(ladder.GetBottomOrigin(), ladder.GetBottomArea().GetCenter(), Vector(0, 255, 255), 5);
-						} else if (areaOut == ladder.GetTopArea()) {
-							BotAI.drawArrow(ladder.GetTopOrigin(), ladder.GetTopArea().GetCenter(), Vector(0, 255, 255), 5);
-						}
-					}
-				}
-
-				local had = false;
-				foreach(idx, val in adjacentAreas) {
-					if (val == areaOut)
-						had = true;
-				}
-
-				if (!had && areaOut != null) {
-					for (local i = 0; i < 4; ++i) {
-						addLadder(areaOut, adjacentAreas, i);
-					}
-				}
-			}
+	function createPath(id, pos, endArea, distance) {
+		if (id.find("+") != null) {
+			return true;
 		}
-	}
 
-	function createPath(pathSearch, pos, endArea, distance, paths, previousPath = null, startPos = null, startArea = null) {
+		local startPos = null;
+		local startArea = null;
+
 		if (endArea == null)
 			endArea = NavMesh.GetNavArea(pos + Vector(0, 0, 50), 200);
 		if (endArea == null)
 			endArea = NavMesh.GetNearestNavArea(pos + Vector(0, 0, 50), 200, true, true);
 
-		if (endArea == null)
-			return false;
-
-
-		//endArea.DebugDrawFilled(0, 0, 255, 100, 10, true);
-		local checked = pathSearch.checked;
-		local needCheack = pathSearch.needCheack;
 		if (startPos == null && startArea == null) {
 			startPos = player.GetOrigin();
 			startArea = player.GetLastKnownArea();
@@ -413,6 +284,7 @@ class::Navigator {
 
 
 		if (startArea == null) {
+			navPrint("invalid startArea!");
 			return false;
 		}
 
@@ -420,134 +292,33 @@ class::Navigator {
 			return true;
 		}
 
-		if (BotAI.IsEntityValid(BotAI.UseTarget) && BotAI.validVector(BotAI.UseTargetOri) && BotAI.distanceof(BotAI.UseTargetOri, pos) < 50) {
-			return true;
+		local build = NavMesh.NavAreaBuildPath(startArea, null, pos, distance, 2, false);
+
+		if (!build) {
+			navPrint("NavMesh build failed!");
 		}
 
-		return NavMesh.NavAreaBuildPath(startArea, null, pos, distance, 2, false);
-
-		local playerArea = AreaData(startArea, null, 0, BotAI.distanceof(startPos, pos));
-		if (startArea != null)
-			needCheack[startArea.GetID()] <- playerArea;
-
-		local searchCount = 0;
-		local reachLimit = false;
-		while (needCheack.len() > 0) {
-			local mostSuitable = null;
-			foreach(idx, areaData in needCheack) {
-				if (mostSuitable == null || (areaData.exactCost + areaData.estimatedCost) < (mostSuitable.exactCost + mostSuitable.estimatedCost))
-					mostSuitable = areaData;
-			}
-
-			for (local i = 0; i < 4; ++i) {
-				local adjacentAreas = BotAI.areaAdjacent(mostSuitable.area, i);
-				local ladders = {};
-				addLadder(mostSuitable.area, ladders, i);
-				foreach(ladder in ladders) {
-					adjacentAreas["area" + adjacentAreas.len()] <- ladder;
-				}
-
-				foreach(adjacent in adjacentAreas) {
-					if (!adjacent.IsValid() || adjacent.IsBlocked(2, false) || (adjacent.IsDamaging() && !pathSearch.allowDanger)) continue;
-					local dir = 0;
-					if (i == 0)
-						dir = 2;
-					if (i == 1)
-						dir = 3;
-					if (i == 3)
-						dir = 1;
-					local lowCorner = BotAI.getLowOriginFromArea(adjacent, dir);
-					local highCorner = BotAI.getHighOriginFromArea(mostSuitable.area, i);
-					if (lowCorner.z - highCorner.z > JUMP_HIGHT && !(adjacent.GetID() in ladders)) {
-						continue;
-					}
-
-					local exactCost = mostSuitable.exactCost + BotAI.distanceof(adjacent.GetCenter(), mostSuitable.area.GetCenter());
-					if (exactCost > distance)
-						continue;
-
-					if (adjacent.GetID() in checked) {
-						if (mostSuitable.lastArea == null)
-							continue;
-						local checkedArea = checked[adjacent.GetID()];
-						if (checkedArea.exactCost < mostSuitable.lastArea.exactCost) {
-							local highLayer = BotAI.getHighOriginFromArea(checkedArea.area, dir);
-							local lowLayer = BotAI.getLowOriginFromArea(mostSuitable.area, i);
-							if (lowLayer.z - highLayer.z <= JUMP_HIGHT || adjacent in ladders) {
-								local updatePath = AreaData(mostSuitable.area, checkedArea, checkedArea.exactCost + BotAI.distanceof(mostSuitable.area.GetCenter(), checkedArea.area.GetCenter()), mostSuitable.estimatedCost);
-								mostSuitable = updatePath;
-								checked[mostSuitable.area.GetID()] <- updatePath;
-							}
-						}
-						continue;
-					}
-					if ((endArea != null && adjacent.GetID() == endArea.GetID()) || adjacent.ContainsOrigin(pos)) {
-						local pathBack = adjacent;
-						local areaData = mostSuitable;
-						while (areaData != null && areaData.area != player.GetLastKnownArea()) {
-							paths["area" + paths.len()] <- pathBack;
-							pathBack = areaData.area;
-							areaData = areaData.lastArea;
-						}
-
-						if (BotAI.BotDebugMode) {
-							navPrint("search area: " + checked.len());
-							navPrint("search distance: " + mostSuitable.exactCost + mostSuitable.estimatedCost);
-						}
-
-						pathSearch.done = true;
-						pathSearch.paths = paths;
-
-						return true;
-					}
-					local area = AreaData(adjacent, mostSuitable, exactCost, BotAI.distanceof(adjacent.GetCenter(), pos));
-					needCheack[adjacent.GetID()] <- area;
-					checked[adjacent.GetID()] <- area;
-					searchCount++;
-					if (searchCount >= SEARCH_LIMIT) {
-						reachLimit = true;
-					}
-				}
-			}
-
-			if (mostSuitable != null) {
-				delete needCheack[mostSuitable.area.GetID()];
-				//mostSuitable.area.DebugDrawFilled(255, 0, 0, 30, 10, true);
-			}
-
-			if (reachLimit) {
-				if (BotAI.BotDebugMode) {
-					navPrint("searching over " + SEARCH_LIMIT + " area, wait a tick...");
-					navPrint("searched area size: " + checked.len());
-					navPrint("searched distance: " + mostSuitable.exactCost + mostSuitable.estimatedCost);
-				}
-				return false;
-			}
-		}
-		pathSearch.fail = true;
-		return false;
+		return build;
 	}
 
 	function navPrint(str) {
-		printl("[Navigator - " + BotAI.getPlayerBaseName(player) + "] " + str);
+		if (BotAI.BotDebugMode) {
+			printl("[Navigator - " + BotAI.getPlayerBaseName(player) + "] " + str);
+		}
 	}
 }
 
 class::PathData {
-	paths = {};
 	pos = Vector(0, 0, 0);
 	priority = 0;
 	discard = {};
-	aStar = false;
 	distance = 1500;
 
-	constructor(pathsIn, posIn, priorityIn, discardFuncIn, distanceIn) {
-		paths = pathsIn;
+	constructor(posIn, priorityIn, discardFuncIn, distanceIn) {
 		pos = posIn;
 		priority = priorityIn;
 		discard = {};
 		discard["func"] <- discardFuncIn;
-		aStar = false;
 		distance = distanceIn;
 	}
 
@@ -571,79 +342,5 @@ class::PathData {
 
 	function _typeof() {
 		return "PathData";
-	}
-}
-
-class::PathSearch {
-	paths = {};
-	checked = {};
-	needCheack = {};
-	pos = Vector(0, 0, 0);
-	timeOut = Time();
-	allowDanger = false;
-	done = false;
-	fail = false;
-	dataPaths = {};
-	dataGoal = null;
-	dataPriority = 0;
-	dataDiscardFunc = null;
-	dataDistance = 1000;
-	dataGoalPos = null;
-	dataGoalArea = null;
-
-	constructor(posIn) {
-		paths = {};
-		checked = {};
-		needCheack = {};
-		pos = posIn;
-		timeOut = Time();
-		allowDanger = false;
-		done = false;
-		fail = false;
-		dataPaths = {};
-		dataGoal = null;
-		dataPriority = 0;
-		dataDiscardFunc = BotAI.trueDude;
-		dataDistance = 1000;
-		dataGoalPos = null;
-		dataGoalArea = null;
-	}
-
-	function isSamePath(posIn) {
-		if (posIn == pos) return true;
-
-		local realPos = null;
-		if (BotAI.validVector(pos))
-			realPos = pos;
-		if (BotAI.IsEntityValid(pos) && "GetOrigin" in pos)
-			realPos = pos.GetOrigin();
-
-		if (BotAI.validVector(posIn))
-			return posIn == realPos;
-		if (BotAI.IsEntityValid(posIn) && "GetOrigin" in posIn)
-			return posIn.GetOrigin() == realPos;
-		return false;
-	}
-
-	function _typeof() {
-		return "PathSearch";
-	}
-}
-
-class::AreaData {
-	area = null;
-	lastArea = null;
-	exactCost = 999999;
-	estimatedCost = 999999;
-
-	constructor(areaIn, lastAreaIn, exactCostIn, estimatedCostIn) {
-		area = areaIn;
-		lastArea = lastAreaIn;
-		exactCost = exactCostIn;
-		estimatedCost = estimatedCostIn;
-	}
-
-	function _typeof() {
-		return "AreaData";
 	}
 }

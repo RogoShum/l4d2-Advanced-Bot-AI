@@ -356,8 +356,7 @@ function BotAI::ForceButton(player, button, time = 999, force = false) {
 	if(force)
 		BotAI.forceButton[button] <- true;
 
-	local function RemoveButtonForece(args)
-	{
+	local function RemoveButtonForece(args) {
 		local buttons = NetProps.GetPropInt(args.ent_, "m_afButtonForced" );
 		local button = args.but;
 		NetProps.SetPropInt(args.ent_, "m_afButtonForced", ( buttons & ~button ) );
@@ -1271,6 +1270,9 @@ function BotAI::IsEntityValid(_ent) {
 
 function BotAI::shoveSpecialInfected(target, player) {
 	target.Stagger(player.GetOrigin());
+	if (BotAI.BotDebugMode) {
+		DebugDrawBox(target.GetCenter(), Vector(-10, -10, -35), Vector(10, 10, 35), 0, 0, 255, 0.2, 0.5);
+	}
 
 	local function resetMoveType() {
 		if(BotAI.getMoveType(target) == 2)
@@ -2655,6 +2657,11 @@ function BotAI::GetTarget(_ent) {
 
 function BotAI::shoveCommon(infected) {
 	if(!BotAI.IsAlive(infected)) return;
+
+	if (BotAI.BotDebugMode) {
+		DebugDrawBox(infected.GetCenter(), Vector(-10, -10, -35), Vector(10, 10, 35), 0, 0, 255, 0.2, 0.5);
+	}
+
 	if(infected.GetSequence() >= 122 && infected.GetSequence() <= 134)
 		infected.ResetSequence(infected.GetSequence());
 	else {
@@ -2879,13 +2886,10 @@ function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.tru
 	foreach(idx, path in navigator.pathCache) {
 		if(idx == id && BotAI.isEntityEqual(path.pos, pos)) {
 			navigator.run(id);
+			if(BotAI.BotDebugMode) {
+				printl("[Bot AI] rerun: " + id);
+			}
 			return true;
-		}
-	}
-
-	foreach(idx, path in navigator.seachingPath) {
-		if(idx == id && BotAI.isEntityEqual(path.dataGoal, pos)) {
-			return false;
 		}
 	}
 
@@ -2899,9 +2903,13 @@ function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.tru
 		discardFunc = change;
 	}
 
-	if(navigator.buildPath(pos, id, priority, discardFunc, null, false, distance)) {
+	if(navigator.buildPath(pos, id, priority, discardFunc, distance)) {
 		navigator.run(id);
 		return true;
+	}
+
+	if(BotAI.BotDebugMode) {
+		printl("[Bot AI] failed to build path: " + id);
 	}
 
 	return false;
@@ -2949,14 +2957,12 @@ function BotAI::getPlayerTotalHealth(player) {
 	return player.GetHealth() + player.GetHealthBuffer();
 }
 
-::BotAI.SetPlayerReviving <- function(player, boolean)
-{
+::BotAI.SetPlayerReviving <- function(player, boolean) {
 	if(!BotAI.IsEntityValid(player)) return;
 	BotAI.NeedRevive[player.GetEntityIndex()] <- boolean;
 }
 
-::BotAI.IsPlayerReviving <- function (player)
-{
+::BotAI.IsPlayerReviving <- function (player) {
 	if(!BotAI.IsEntityValid(player)) return false;
 	return player.GetEntityIndex() in BotAI.NeedRevive && BotAI.NeedRevive[player.GetEntityIndex()];
 }

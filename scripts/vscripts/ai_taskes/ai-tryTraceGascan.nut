@@ -1,7 +1,6 @@
-class ::AITaskTryTraceGascan extends AITaskGroup
-{
-	constructor(orderIn, tickIn, compatibleIn, forceIn)
-    {
+class ::AITaskTryTraceGascan extends AITaskGroup {
+	
+	constructor(orderIn, tickIn, compatibleIn, forceIn) {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
 
@@ -91,18 +90,34 @@ class ::AITaskTryTraceGascan extends AITaskGroup
 					BotAI.setBotLockTheard(player, -1);
 					updating = false;
 				} else {
+					local gas = gas_can;
+					local oilTable = cabal_oil;
+					local function needGasCan() {
+						foreach(link in BotAI.BotLinkGasCan) {
+							if(link == gas) {
+								if(player.GetEntityIndex() in oilTable) {
+									delete oilTable[player.GetEntityIndex()];
+								}
+
+								return true;
+							}
+						}
+
+						if (!BotAI.IsEntityValid(gas) || gas.GetOwnerEntity() != null) {
+							if(player.GetEntityIndex() in oilTable) {
+								delete oilTable[player.GetEntityIndex()];
+							}
+
+							return true;
+						}
+
+						return false;
+					}
+
 					if(BotAI.BotDebugMode) {
 						printl("[Bot AI] Try Retake gas can " + gas_can);
 					}
 
-					local gas = gas_can;
-					local function needGasCan() {
-						foreach(link in BotAI.BotLinkGasCan) {
-							if(link == gas)
-								return true;
-						}
-						return !BotAI.IsEntityValid(gas) || gas.GetOwnerEntity() != null;
-					}
 					BotAI.botRunPos(player, gas_can, "searchGascan+", 2, needGasCan);
 				}
 			} else {

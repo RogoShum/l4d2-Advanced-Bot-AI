@@ -99,6 +99,9 @@ function I18n::init() {
 		botai_common_damage = "Bot's damage multiplier to Common Infected set to: ",
 		botai_tank_damage = "Bot's damage multiplier to Tank set to: ",
 		botai_bot_follow_distance = "Bot max follow/teleport distance set to: ",
+		botai_bot_follow_distance_off = "Bot teleport-when-too-far function disabled!",
+		botai_bot_save_teleport = "Bot rescue teleport timeout: ",
+		botai_bot_save_teleport_off = "Bot rescue teleport function disabled!",
 		botai_use_command_notice = "Use command !botnotice to disable config notifications.",
 		botai_current_settings = "Current Settings:",
 		botai_notice_on = "Configuration notifications enabled.",
@@ -121,6 +124,7 @@ function I18n::init() {
 		menu_alive = "Continue after player death",
 		menu_upgrads = "Use Ammo Upgrades",
 		menu_follow = "Bot Teleport Range",
+		menu_save_teleport = "Rescue Teleport",
 		menu_fall_protect = "Lethal Damage Protection",
 		menu_defibrillator = "Use Defibrillator",
 		menu_next = "Next page",
@@ -182,6 +186,9 @@ function I18n::init() {
 		botai_admin_only = "该指令仅管理员可用。",
 		botai_bot_combat_skill = "Bot战斗能力设置为: ",
 		botai_bot_follow_distance = "Bot最大跟随、传送距离设置为："
+		botai_bot_follow_distance_off = "Bot过远传送功能已关闭！"
+		botai_bot_save_teleport = "Bot尝试救人的超时传送时间为："
+		botai_bot_save_teleport_off = "Bot尝试救人的超时传送功能已关闭！"
 		botai_use_command_notice = "使用指令!botnotice关闭配置提示",
 		botai_current_settings = "当前配置:",
 		botai_notice_on = "已开启配置提示",
@@ -198,6 +205,7 @@ function I18n::init() {
 		menu_pathfinding = "Bot寻路",
 		menu_immunity = "Bot免疫黑枪",
 		menu_carry = "Bot物资背包",
+		menu_save_teleport = "Bot救人超时传送",
 		menu_witch_damage = "女巫伤害倍率",
 		menu_special_damage = "特感伤害倍率",
 		menu_tank_damage = "Tank伤害倍率",
@@ -261,6 +269,9 @@ function I18n::init() {
 		botai_admin_only = "此指令僅限管理員使用。",
 		botai_bot_combat_skill = "Bot战斗能力设置为: ",
 		botai_bot_follow_distance = "Bot最大跟隨、傳送距離設置為：",
+		botai_bot_follow_distance_off = "Bot過遠傳送功能已關閉！",
+		botai_bot_save_teleport = "Bot救人超時傳送時間設置為：",
+		botai_bot_save_teleport_off = "Bot救人超時傳送功能已關閉！",
 		botai_witch_damage = "Bot對女巫傷害倍率已設置為: ",
 		botai_special_damage = "Bot對特感傷害倍率已設置為: ",
 		botai_tank_damage = "Bot對Tank傷害倍率已設置為: ",
@@ -287,6 +298,7 @@ function I18n::init() {
 		menu_tank_damage = "Tank傷害倍率",
 		menu_special_damage = "特感傷害倍率",
 		menu_common_damage = "普感傷害倍率",
+		menu_save_teleport = "救人超時傳送",
 		menu_follow = "Bot傳送距離",
 		menu_alive = "Bot玩家全滅後繼續",
 		menu_defibrillator = "使用電擊器",

@@ -173,6 +173,7 @@ if (!("VSLib" in getroottable())) {
 		UseUpgrades = true
 		UnStick = true
 		FollowDistance = 1000
+		SaveTeleport = 9
 		Melee = true
 		Defibrillator = true
 		BackPack = true
@@ -408,6 +409,7 @@ BotAI.meleeDmg <- DMG_MELEE | DMG_HEADSHOT;
     local settingList =
         "BotCombatSkill = " + BotAI.BotCombatSkill.tostring() +
 		"\nFollowDistance = " + BotAI.FollowDistance.tostring() +
+		"\nSaveTeleport = " + BotAI.SaveTeleport.tostring() +
         "\nBotDebugMode = " + BotAI.BotDebugMode.tostring() +
         "\nNeedGasFinding = " + BotAI.NeedGasFinding.tostring() +
         "\nNeedThrowGrenade = " + BotAI.NeedThrowGrenade.tostring() +
@@ -1082,9 +1084,9 @@ function BotAI::AdjustBotsUpdateRate(args) {
 	}
 
 	foreach(idx, gas in BotAI.BotLinkGasCan) {
-		if(!BotAI.IsEntityValid(gas))
+		if(!BotAI.IsEntityValid(gas)) {
 			delete BotAI.BotLinkGasCan[idx];
-		else if(gas.GetOwnerEntity() != null) {
+		} else if(gas.GetOwnerEntity() != null) {
 			delete BotAI.BotLinkGasCan[idx];
 		} else {
 			if(NetProps.HasProp(gas, "m_CollisionGroup"))
@@ -1339,7 +1341,46 @@ function BotAI::locateUseTarget(args) {
 
     BotAI.FollowDistance = distance;
     Convars.SetValue("sb_enforce_proximity_range", distance);
-    BotAI.SendPlayer(player, "botai_bot_follow_distance", 0.2, distance);
+    
+	if (distance > 999990) {
+		BotAI.SendPlayer(player, "botai_bot_follow_distance_off", 0.2);
+	} else {
+		BotAI.SendPlayer(player, "botai_bot_follow_distance", 0.2, distance);
+	}
+
+    BotExitMenuCmd(speaker, args, args1);
+    BotAI.SaveSetting();
+}
+
+::BotSaveTeleportCmd <- function (speaker, args, args1) {
+    local player = speaker;
+    if (typeof player == "VSLIB_PLAYER") {
+		player = player.GetBaseEntity();
+	}
+
+    local input = "";
+    foreach (idx, val in args) {
+        input += val + " ";
+    }
+
+    input = strip(input);
+
+    local time = null;
+    try {
+        time = input.tointeger();
+    } catch (ex) {
+        time = 9;
+    }
+
+    if (time < 0) time = 0;
+    if (time > 999) time = 999;
+
+    BotAI.SaveTeleport = time;
+	if (time > 99) {
+		BotAI.SendPlayer(player, "botai_bot_save_teleport_off", 0.2);
+	} else {
+		BotAI.SendPlayer(player, "botai_bot_save_teleport", 0.2, time);
+	}
 
     BotExitMenuCmd(speaker, args, args1);
     BotAI.SaveSetting();
@@ -2012,7 +2053,7 @@ function BotAI::displayOptionMenuNextNext(player, args, args1) {
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_tank_damage") + ": " + (BotAI.TankDamageMultiplier).tostring(), BotAI.displayOptionMenuBotTankDamage);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_common_damage") + ": " + (BotAI.CommonDamageMultiplier).tostring(), BotAI.displayOptionMenuBotCommonDamage);
 		menu.AddOption(BotAI.fromParams(BotAI.FallProtect, lang)+I18n.getTranslationKeyByLang(lang, "menu_fall_protect"), BotFallProtectCmd);
-		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_save_teleport") + ": " + (BotAI.SaveTeleport).tostring(), BotAI.displayOptionMenuBotTeleport);
 		menu.AddOption("emp_2", BotEmptyCmd);
 		menu.AddOption("emp_3", BotEmptyCmd);
 		menu.AddOption("emp_4", BotEmptyCmd);
@@ -2097,7 +2138,7 @@ function BotAI::displayOptionMenuBotDistance(player, args, args1) {
 		followDistance(3000);
 	}
 	local function pro__(player, args, args1) {
-		followDistance(99999);
+		followDistance(999999);
 	}
 
 	local function top(menu) {
@@ -2110,8 +2151,53 @@ function BotAI::displayOptionMenuBotDistance(player, args, args1) {
 
 	local function bot(menu) {
 		menu.AddOption("3000", pro_);
-		menu.AddOption("99999", pro__);
+		menu.AddOption("999999", pro__);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
+		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
+	}
+
+	BotAI.buildMenu(player, top, bot);
+}
+
+function BotAI::displayOptionMenuBotTeleport(player, args, args1) {
+	local lang = BotAI.language;
+	local function teleportDistance(value) {
+		local ability = [];
+		ability.append(value.tostring());
+		BotSaveTeleportCmd(player, ability, "");
+	}
+	local function normal(player, args, args1) {
+		teleportDistance(0);
+	}
+	local function high(player, args, args1) {
+		teleportDistance(5);
+	}
+	local function ultra(player, args, args1) {
+		teleportDistance(9);
+	}
+	local function extreme(player, args, args1) {
+		teleportDistance(15);
+	}
+	local function pro(player, args, args1) {
+		teleportDistance(20);
+	}
+	local function pro_(player, args, args1) {
+		teleportDistance(999);
+	}
+
+	local function top(menu) {
+		menu.AddOption("0", normal);
+		menu.AddOption("5", high);
+		menu.AddOption("9", ultra);
+		menu.AddOption("15", extreme);
+		menu.AddOption("20", pro);
+	}
+
+	local function bot(menu) {
+		menu.AddOption("999", pro_);
+		menu.AddOption("emp_1", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNextNext);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
 	}
@@ -2311,12 +2397,6 @@ function BotAI::resetBotMeleeAction() {
 
 function BotAI::ResetBotFireRate() {
 	BotAI.AdjustBotsUpdateRate(1);
-
-	local combatSpeed = 500;
-	local normalSpeed = 350;
-
-	combatSpeed += BotAI.BotCombatSkill * 1000;
-	normalSpeed += BotAI.BotCombatSkill * 50;
 
 	Convars.SetValue( "sb_combat_saccade_speed", 9999 );
 	Convars.SetValue( "sb_normal_saccade_speed", 9999 );
@@ -2601,7 +2681,7 @@ function BotAI::AdjustBotState(args) {
 
 				if (tpPoint != null && Director.IsAnySurvivorInExitCheckpoint() && BotAI.IsPlayerAtCheckPoint(tpPoint) && !BotAI.IsPlayerAtCheckPoint(bot)) {
 					local function changeAndUse() {
-						if(!BotAI.IsAlive(bot) || BotAI.IsPlayerAtCheckPoint(bot)) return true;
+						if(!BotAI.IsAlive(bot) || BotAI.IsPlayerAtCheckPoint(bot) || !Director.IsAnySurvivorInExitCheckpoint()) return true;
 
 						return false;
 					}
@@ -2685,7 +2765,11 @@ function BotAI::AdjustBotState(args) {
 						BotAI.UseTargetOriList[BotAI.MapName] <- player.GetOrigin();
 						printl("[Bot AI] Re-Located target at " + BotAI.UseTarget.GetOrigin());
 					} else {
+						player.UseAdrenaline(2);
+						BotAI.FullPress[player] <- 80;
+						BotAI.UnforceButton(player, 32);
 						BotAI.ForceButton(player, 32 , 8);
+						BotAI.AddFlag(player, FL_FROZEN );
 					}
 				}
 			}
@@ -2694,7 +2778,9 @@ function BotAI::AdjustBotState(args) {
 
 		local function allRelease() {
 			foreach(bot in BotAI.SurvivorBotList) {
+				BotAI.FullPress[bot] <- 0;
 				BotAI.UnforceButton(bot, 32);
+				BotAI.RemoveFlag(bot, FL_FROZEN );
 			}
 		}
 

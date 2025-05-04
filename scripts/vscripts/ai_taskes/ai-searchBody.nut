@@ -171,10 +171,10 @@ class ::AITaskSearchBody extends AITaskGroup
 				BotAI.SetTarget(player, ironBanner);
 				BotAI.lookAtEntity(player, ironBanner, true, 4);
 				local weapon = player.GetActiveWeapon();
-				if(weapon && weapon.GetClassname() != "weapon_defibrillator")
+				if(weapon && weapon.GetClassname() != "weapon_defibrillator") {
 					BotAI.ChangeItem(player, 3);
-				else if(NetProps.GetPropFloat(weapon, "m_flNextPrimaryAttack") <= Time() && !BotAI.HasForcedButton(player, 1 )) {
-					BotAI.ForceButton(player, 1 , 6, true);
+				} else if(NetProps.GetPropFloat(weapon, "m_flNextPrimaryAttack") <= Time() && !BotAI.HasForcedButton(player, 1 )) {
+					BotAI.ForceButton(player, 1 , 4, true);
 					BotAI.setBotLockTheard(player, -1);
 				}
 			}

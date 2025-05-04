@@ -79,7 +79,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 						local area = player.GetLastKnownArea();
 						local safe = !area.IsDamaging();
 						if (safe) {
-							BotAI.botStayPos(player, area.GetCenter(), "avoidDanger", 5, 3)
+							BotAI.botStayPos(player, area.GetCenter(), "avoidDanger", 5, 2)
 						}
 
 						return safe;
@@ -105,7 +105,11 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							}
 
 							if (safeArea != null) {
-								BotAI.botRunPos(player, safeArea.GetCenter(), "avoidDanger#%", 5, feelSafe);
+								if (BotAI.IsPlayerReviving(player)) {
+									player.SetOrigin(safeArea.GetCenter());
+								} else {
+									BotAI.botRunPos(player, safeArea.GetCenter(), "avoidDanger#%", 5, feelSafe);
+								}
 							}
 						}
 					}
@@ -122,13 +126,17 @@ class::AITaskAvoidDanger extends AITaskSingle {
 						BotAI.BotRetreatFrom(player, danger);
 
 						local nexDis = BotAI.nextTickDistance(player, danger);
-						local cansee = BotAI.VectorDotProduct(BotAI.normalize(danger.EyeAngles().Forward()), BotAI.normalize(player.GetOrigin() - danger.GetOrigin())) > 0.6
+						//local cansee = BotAI.VectorDotProduct(BotAI.normalize(danger.EyeAngles().Forward()), BotAI.normalize(player.GetOrigin() - danger.GetOrigin())) > 0.6
 						local innerCircle = 300;
 						if (BotAI.BotDebugMode) {
 							DebugDrawCircle(player.GetCenter(), Vector(255, 25, 25), 0, innerCircle, true, 0.5);
 						}
 
 						local function isTankBetweenHeights(random) {
+							if (BotAI.BotCombatSkill > 2) {
+								return false;
+							}
+
 							local playerHeight = player.GetOrigin().z;
 							local tankHeight = danger.GetOrigin().z;
 							local randomHeight = random.z;
@@ -170,11 +178,17 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							player.UseAdrenaline(1.0);
 
 							local targetSpot = null;
+							local tpRadius = 200;
+							if (BotAI.BotCombatSkill > 3) {
+								tpRadius = 350;
+							}
+
 							for (local count = 0; count < 5; ++count) {
-								local randomSpot = player.TryGetPathableLocationWithin(200);
+								local randomSpot = player.TryGetPathableLocationWithin(tpRadius);
 								if (BotAI.BotDebugMode) {
 									DebugDrawCircle(randomSpot, Vector(255, 255, 25), 0, 10, true, 0.5);
 								}
+
 								if (targetSpot == null && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 150
 								&& !canHitTank(randomSpot)
 								&& !isTankBetweenHeights(randomSpot)) {

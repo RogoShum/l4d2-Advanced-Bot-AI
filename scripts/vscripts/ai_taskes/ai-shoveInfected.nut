@@ -105,8 +105,9 @@ class ::AITaskShoveInfected extends AITaskSingle {
 
 				NetProps.SetPropInt(player, "m_iShovePenalty", 0);
 				local wep = player.GetActiveWeapon();
-				if (wep)
+				if (wep) {
 					NetProps.SetPropFloat(wep, "m_flNextSecondaryAttack", Time() - 1);
+				}
 
 				BotAI.ForceButton(player, 2048 , 0.1);
 				local playerIn = player;
