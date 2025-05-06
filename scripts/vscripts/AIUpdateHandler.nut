@@ -16,6 +16,7 @@ if (!("VSLib" in getroottable())) {
 //if (!("BotAI" in getroottable()))
 {
 	::BotAI <- {
+		_testNullEntity = SpawnEntityFromTable("info_target", { targetname = "botai_test_invalid_entity" })
 		timerTick = 0
 		timerTick_2 = 0
 		debugTick = 0
@@ -195,6 +196,13 @@ if (!("VSLib" in getroottable())) {
 	}
 }
 ::BotAI.MapName = SessionState.MapName.tolower();
+
+if (BotAI._testNullEntity != null) {
+	printl("_testNullEntity: " + BotAI._testNullEntity)
+	BotAI._testNullEntity.Kill();
+} else {
+	printl("_testNullEntity is Null")
+}
 
 function BotAI::trueDude() {
 	return true;
@@ -648,8 +656,7 @@ function BotAI::removeNullString(array) {
 	return null;
 }
 
-::BotAI.setBotShoveTarget <- function(player, shove_target)
-{
+::BotAI.setBotShoveTarget <- function(player, shove_target) {
 	local map = BotAI.getBotPropertyMap(player);
 	if(map != null)
 		map.shove_target = shove_target;
@@ -1341,7 +1348,7 @@ function BotAI::locateUseTarget(args) {
 
     BotAI.FollowDistance = distance;
     Convars.SetValue("sb_enforce_proximity_range", distance);
-    
+
 	if (distance > 999990) {
 		BotAI.SendPlayer(player, "botai_bot_follow_distance_off", 0.2);
 	} else {
@@ -1934,8 +1941,9 @@ function BotAI::registerMenu() {
 				return false;
 			}
 
-			if(BotAI.botRunPos(player, traceTable.pos, "buildTest", 0, build, 9999, true))
+			if(BotAI.botRunPos(player, traceTable.pos, "buildTest", 0, build, 9999, true)) {
 				DebugDrawCircle(traceTable.pos, Vector(0, 255, 0), 1.0, 50, true, 5);
+			}
 		}
 	}
 	testMenu.registerPressEvent(test);
@@ -2437,10 +2445,36 @@ function BotAI::ResetBotFireRate() {
     return List;
 }
 
+function BotAI::showAABB(entity) {
+	if (BotAI.IsEntityValid(entity)) {
+		local radius = NetProps.GetPropFloat(entity, "m_Collision.m_flRadius");
+		local m_vecMins = NetProps.GetPropVector(entity, "m_Collision.m_vecMins");
+		local m_vecMaxs = NetProps.GetPropVector(entity, "m_Collision.m_vecMaxs");
+
+		DebugDrawBox(entity.GetOrigin(), m_vecMins, m_vecMaxs, 0, 0, 255, 0.2, 0.2);
+		DebugDrawCircle(entity.GetCenter(), Vector(0, 0, 255), 0.2, radius, true, 0.2);
+	}
+}
+
 function BotAI::DebugFunction( args ) {
 	local leader = null;
+
+	if(BotAI.BotDebugMode) {
+		foreach(player in BotAI.SpecialList) {
+			BotAI.showAABB(player);
+		}
+	}
+
 	foreach(player in BotAI.SurvivorList) {
 		if(!BotAI.IsPlayerEntityValid(player)) continue;
+
+		if(BotAI.BotDebugMode) {
+			BotAI.showAABB(player);
+
+			if (player.IsIncapacitated()) {
+				printl("[Bot AI DEBUG] movecollide: " + NetProps.GetPropInt(player, "movecollide"));
+			}
+		}
 
 		if(!IsPlayerABot(player)) {
 			/*
@@ -2454,6 +2488,7 @@ function BotAI::DebugFunction( args ) {
 
 			if(BotAI.BotDebugMode) {
 				local target = BotAI.CanSeeOtherEntityPrintName(player, 9999, 1, g_MapScript.TRACE_MASK_ALL);
+				BotAI.showAABB(target);
 			/*
 					local function kill(mob) {
 					local wep = player.GetActiveWeapon();

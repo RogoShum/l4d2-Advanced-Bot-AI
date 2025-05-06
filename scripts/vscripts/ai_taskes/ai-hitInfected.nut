@@ -216,6 +216,10 @@ class ::AITaskHitInfected extends AITaskSingle {
 			return true;
 		}
 
+		BotAI.setBotShoveTarget(player, null);
+		infectedList[player] <- null;
+		BotAI.botAim[player] <- null;
+		CommandABot( { cmd = 0, target = player, bot = player } );
 		return false;
 	}
 
@@ -223,17 +227,19 @@ class ::AITaskHitInfected extends AITaskSingle {
 		if(player in infectedList && infectedList[player] != null) {
 			local val = infectedList[player];
 			if(BotAI.IsAlive(val)) {// && BotAI.CanShotOtherEntityInSight(player, val)
-
 				if(danger[player]) {
 					BotAI.setBotShoveTarget(player, val);
 				}
+
 				BotAI.BotAttack(player, val);
+
 				if(BotAI.IsEntityValid(val) && !IsPlayerABot(player)) {
 					BotAI.lookAtEntity(player, val);
 				}
 			} else {
 				infectedList[player] <- null;
 				BotAI.botAim[player] <- null;
+				CommandABot( { cmd = 0, target = player, bot = player } );
 			}
 		}
 

@@ -84,9 +84,9 @@ class::Navigator {
 			if (BotAI.BotDebugMode) {
 				navPrint(id + " build complete.");
 			}
-	
+
 			local data = PathData(goal, priority, discardFunc, distance);
-	
+
 			pathCache[id] <- data;
 		}
 

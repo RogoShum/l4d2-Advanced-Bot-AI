@@ -3,76 +3,435 @@
 "AddonInfo"
 {
 	addonSteamAppID		550							// 500 is the app ID for Left 4 Dead, 550 for Left 4 Dead 2
-	addontitle		"[Advanced Bot AI]给bot加智"						// Add-on title that shows up in Add-ons list. ~20 chars max
-	addonversion		3.2						// Add-on version.
+	addontitle		"[Advanced Bot AI]更多生还者Bot功能"						// Add-on title that shows up in Add-ons list. ~20 chars max
+	addonversion		4.0						// Add-on version.
 	addonauthor		"RogoShum"						// Name/alias of the author
 	addonauthorSteamID	"RogoShum"						// (Optional) Steam ID of author. We use this to construct a URL to the author's page.
 
-	addonDescription	"[仅在本地服务器有效]
-[当bot的行为卡住，不知道他在发什么呆，一直不走的时候，同时下蹲和跳再推一下bot可以让bot传送到自己位置上，并重置bot的状态]
+	addonDescription	"[h1] [仅在服务器为本地服务器时有效] [/h1]
+[h1]旧版本百度网盘链接：[/h1]pan点baidu点com删除/s/13WDxhJBG-yxVmY277BdoGA?pwd=m0bz
 
-各种奇怪的功能：
-1. Bot的战斗方式有整体的提升，提升清特感和清小僵尸能力(优化一部分被包围后处理小僵尸能力)。
-2. 更快的救人速度。
-3. Bot能够丢一部分的投掷物。
-4. Bot能够使用除颤器。
-5. Bot能够使用弹药升级包。
-6. 手持投掷物右键Bot可以交换Bot身上的投掷物。
-7. 如果玩家没药没包的时候，Bot还会主动把自己的资源递给玩家，不管是药，包，或是投掷物。
-8. 避免一些Bot踩痰救人的情况。
-9. 更快的反应速度。
-10. 玩家死了之后又没有包，Bot就会plan b（会自己按一部分的按钮）。
+[h1]各种奇怪的功能[/h1]
+[list]
+    [*]优化Bot战斗意识，提升协作作战能力。
+    [*]Bot能够捡起投掷物资，并在遇到Tank时主动丢火。
+    [*]如果玩家没药没包的时候，Bot还会主动把自己的资源递给玩家。
+    [*]手持投掷物右键Bot可以交换Bot身上的投掷物。
+    [*]Bot能够使用除颤器。
+    [*]Bot能够使用弹药升级包。
+    [*]避免一些Bot踩痰救人的情况。
+    [*]在某些地图会帮助玩家寻油，把油带到灌油机器。
+    [*]在玩家被Smoker控住，且Bot看不到Smoker时，Bot会优先打断舌头解救玩家。
+[/list]
 
-11. 在某些地图会帮助玩家寻油，把油带到灌油机器（基于原版四人考虑，当人类玩家小于两人时触发，另外两个bot负责防守，如果都去找油有可能被控翻车，所以这里设置为两个人去找油就好）。
+[h1]Bot强度配置[/h1]
+目前的版本对Bot的战斗行为进行了重新调整，现在他们能更好的划分目标优先级，进行自我保护和解救玩家，团队协作能力有了较大提升。
+目前有5档战斗能力选项，从1到5会逐步提升视野范围、瞄准能力、反应速度、反推特感的成功率等。战斗能力档位不会影响Bot的行为决策，仅对清理尸潮、特感、集火Tank的输出能力有影响。
 
-↑ 因为当bot处于战斗状态时不会去找油 ↑
+[table]
+    [tr]
+        [th]档位[/th]
+        [th]描述[/th]
+    [/tr]
+    [tr]
+        [td]1[/td]
+        [td]最接近原版的战斗能力，但团队协作能力优于原版，适合没有强度要求，但需要提升Bot行为决策的玩家。适合高级模式玩家。[/td]
+    [/tr]
+    [tr]
+        [td]2[/td]
+        [td]强于原版战斗能力，视野范围得到了提升，可以意识到侧身有小僵尸，反应速度得到提升，整体表现更优，半只脚踏入专家模式。[/td]
+    [/tr]
+    [tr]
+        [td]3[/td]
+        [td]视野范围再次得到提升，能够意识到身后的小僵尸，Bot的个人能力得到提升，自保和输出能力更为优秀。可以较为流畅的应对专家模式。[/td]
+    [/tr]
+        [tr]
+        [td]4[/td]
+        [td]开始具备作弊/娱乐意味的档位，防控、输出能力远超原版，如果你在尝试游玩一些高压力的地图，可以尝试此档位。[/td]
+    [/tr]
+        [tr]
+        [td]5[/td]
+        [td]单人输出能力约等于3个普通玩家合体，可以尝试应对多特感的模式。[/td]
+    [/tr]
+[/table]
 
 
-小指令:
-指令不带冒号
+[h1]用于设置模组功能的菜单[/h1]
+本模组的功能可以通过菜单来控制开关，在按Y呼出的聊天窗口输入!botmenu来开启菜单。
+也可以绑定一个快捷键，例如: 在控制台输入bind "j" "+grenade1" 之后回车，就可以把菜单键绑定到j键上。
+或是绑定快捷键来发言打开菜单，例如：bind "j" "say !botmenu"
 
-1. 聊天窗输入 "!morebot" 可以原地生成一只佐伊，因为l4d1的战役无法拥有多个佐伊，所以会把原有佐伊变为比尔，然后再生成新的佐伊。 注：别弄太多bot，不然会卡，还容易崩溃。
+[b]在专用服务器中会出现菜单按键无响应的问题，需要使用指令来进行配置。[/b]
 
-2. 当所有玩家阵亡，而bot自身无法自己完成战役时（刁钻的第三方图），可以输入 "!botstop" 去强行伤血bot重开这局。
+菜单可以开关的设置：
+[list]
+    [*]Bot能力强度配置。---管理员模式下仅管理员可以使用。
+    [*]Bot过远传送范围。
+    [*]开关Bot在灌油局找油。
+    [*]开关Bot丢弃投掷物。
+    [*]开关Bot使用近战能力。
+    [*]开关Bot是否免疫玩家黑枪。 ---管理员模式下仅管理员可以使用。
+    [*]开关Bot是否自动寻路。
+    [*]开关Bot是否卡住传送。
+    [*]开关Bot是否背起油罐、煤气罐等资源。
+    [*]开关Bot是否在玩家死后继续跑图。
+    [*]开关Bot是否拾取和使用燃烧弹、高爆弹。
+    [*]Bot对Witch伤害比例。 ---管理员模式下仅管理员可以使用。
+    [*]Bot对特感伤害比例。 ---管理员模式下仅管理员可以使用。
+    [*]Bot对Tank伤害比例。 ---管理员模式下仅管理员可以使用。
+    [*]Bot对小僵尸伤害比例。 ---管理员模式下仅管理员可以使用。
+[/list]
 
-3. 自用玩耍用指令，输入两次 "!botaitest" 可以开启bot暴躁老哥模式，再次输入关闭。（仅玩耍用0-0
+[h1]功能指令[/h1]
+本模组除了菜单之外还提供指令，以便无法使用菜单的客户端修改配置。所有指令均在聊天窗口输入。
 
-其他：
-增加后备加载方式，应该不会被其他vscript模组覆盖掉了，也兼容管理员系统和CSS武器解锁
+[table]
+    [tr]
+        [th]功能[/th]
+        [th]指令[/th]
+        [th]额外参数[/th]
+        [th]示例[/th]
+    [/tr]
+    [tr]
+        [td]调整Bot技能等级[/td]
+        [td]!botskill[/td]
+        [td][1, 5]范围数字[/td]
+        [td]!botskill 5[/td]
+    [/tr]
+    [tr]
+        [td]调整Bot过远时传送范围[/td]
+        [td]!botfollow[/td]
+        [td][100, 999999]范围数字[/td]
+        [td]!botfollow 1000[/td]
+    [/tr]
+    [tr]
+        [td]开关Bot免疫秒杀[/td]
+        [td]!botprotect[/td]
+        [td]无[/td]
+        [td]!botprotect[/td]
+    [/tr]
+    [tr]
+        [td]开关Bot寻油[/td]
+        [td]!botfindgas[/td]
+        [td]无[/td]
+        [td]!botfindgas[/td]
+    [/tr]
+    [tr]
+        [td]开关Bot投掷物[/td]
+        [td]!botthrow[/td]
+        [td]无[/td]
+        [td]!botthrow[/td]
+    [/tr]
+    [tr]
+        [td]开关Bot近战[/td]
+        [td]!botmelee[/td]
+        [td]无[/td]
+        [td]!botmelee[/td]
+    [/tr]
+    [tr]
+        [td]开关Bot免疫黑枪[/td]
+        [td]!botimmunity[/td]
+        [td]无[/td]
+        [td]!botimmunity[/td]
+    [/tr]
+    [tr]
+        [td]开关Bot寻路[/td]
+        [td]!botpathfinding[/td]
+        [td]无[/td]
+        [td]!botpathfinding[/td]
+    [/tr]
+    [tr]
+        [td]开关Bot卡住传送[/td]
+        [td]!botunstick[/td]
+        [td]无[/td]
+        [td]!botunstick[/td]
+    [/tr]
+    [tr]
+        [td]开关Bot使用升级包[/td]
+        [td]!botupgrades[/td]
+        [td]无[/td]
+        [td]!botupgrades[/td]
+    [/tr]
+    [tr]
+        [td]允许玩家死亡时，bot自动跑图[/td]
+        [td]!botkeepalive[/td]
+        [td]无[/td]
+        [td]!botkeepalive[/td]
+    [/tr]
+    [tr]
+        [td]开关Bot背起物资[/td]
+        [td]!botbackpack[/td]
+        [td]无[/td]
+        [td]!botbackpack[/td]
+    [/tr]
+    [tr]
+        [td]开关Bot使用电击器[/td]
+        [td]!botdefib[/td]
+        [td]无[/td]
+        [td]!botdefib[/td]
+    [/tr]
+    [tr]
+        [td]场上仅剩bot时强制结束本局[/td]
+        [td]!botstop[/td]
+        [td]无[/td]
+        [td]!botstop[/td]
+    [/tr]
+    [tr]
+        [td]调整Bot对Witch伤害比例[/td]
+        [td]!botwitchdamage[/td]
+        [td][-16, 16]范围数字[/td]
+        [td]!botwitchdamage 1.0[/td]
+    [/tr]
+    [tr]
+        [td]调整Bot对特感伤害（不含Tank）[/td]
+        [td]!botspecialdamage[/td]
+        [td][-16, 16]范围数字[/td]
+        [td]!botspecialdamage 1.0[/td]
+    [/tr]
+    [tr]
+        [td]调整Bot对Tank伤害[/td]
+        [td]!bottankdamage[/td]
+        [td][-16, 16]范围数字[/td]
+        [td]!bottankdamage 1.0[/td]
+    [/tr]
+    [tr]
+        [td]调整Bot对小僵尸伤害[/td]
+        [td]!botcommondamage[/td]
+        [td][-16, 16]范围数字[/td]
+        [td]!botcommondamage 1.0[/td]
+    [/tr]
+[/table]
 
-他们处于战斗状态时不太会跑路（尤其是无限尸潮+需要快速跑图的关卡），所以需要玩家带着他们浪。
+[h1]标点系统[/h1]
+本模组还有标点功能，用于指挥Bot。
+需要绑定一个快捷键，例如: 在控制台输入bind "i" "+alt2" 之后回车，就可以把标点键绑定到i键上。
 
-以及解放双手让bot自己打的操作是不存在的（虽然我测试的时候经常抱着吃的看他们自己打，挺好玩的2333）主要是官方的寻路系统就不是让bot自己打图的，是让bot能跟上玩家的，所以说好好带他们打就行了，他们也会尽可能帮你的
+对准Bot单击标点键可以选择Bot（穿墙也可以选择），之后再单击物品、感染者或者地板，会有以下操作：
+对准玩家或感染者使用，可以选择让Bot跟随目标、攻击目标等...
+对准物体使用，可以选择在物品处等待、让Bot使用物品等...
+对准地上使用，可以让Bot在目标点等待、移动到目的地、跟随玩家自己等...
 
-以及我timer方法用的很多，所以后台会报一堆SCRIPT PERF WARNING，可以直接忽略掉。
+[h1]给服务器用的管理员配置[/h1]
+https://steamcommunity.com/workshop/filedetails/discussion/1968764163/3126038700442540342/
 
-具体效果就看自己测试了，如果喜欢的话就用用吧
+[h1]其他：[/h1]
+[url=https://github.com/RogoShum/l4d2-Advanced-Bot-AI/tree/main] Github开源地址 [/url]
 
 
-[Only works on local server]
-[when bot is in a daze, if player shove bot and duck and jump at same time, bot will teleport to player and reset it's state.]
 
-Feature:
-1. Improved bot combat skill.
-2. Improve the speed of save player.
-3. And bots can throw grenade when they need(all three kinds.
-4. Bots can use defib.
-5. Bots can use upgrade pack, useless function.
-6. Bots can give the player their first aid kit、 grenade、 pills、 etc.
-7. You can exchange the grenade you are holding by shove bots(if they have one .
-8. They can continue the game when you dead(if no defib here).
-9. In certain map, when the number of players is less than two, bots will try to find gas can by its own, and take gas can back to machine.
+english:
+Advanced Bot AI
 
-↑ bot will not try to finding gas can while he was combat. ↑
+[h1] [Only works when the server is a local server] [/h1]
 
-Command:
-!morebot Input to the chat box, then send it to use. Will spawn a new zoey to the player team. If it's l4d1 campaign, will trans old zoey to bill, then spawn a new zoey. ps: Do NOT spawn too much bot.
+[h1]Various Unique Features[/h1]
+[list]
+[*]Optimized Bot combat awareness and improved teamwork capabilities. (See Bot Combat Skill Settings for details.)
+[*]Bots can pick up throwable items and actively throw Molotovs when encountering a Tank.
+[*]If a player has no pills or medkits, Bots will voluntarily offer their resources, whether it's pills, medkits, or throwables.
+[*]Right-clicking a Bot while holding a throwable allows swapping throwables with the Bot.
+[*]Bots can use defibrillators.
+[*]Bots can use ammo upgrades.
+[*]Prevents situations where Bots step on Spitter acid while reviving.
+[*]On certain maps, Bots will help players find gas cans and bring them to the fuel machine.
+[*]If a player is grabbed by a Smoker and the Bot cannot see the Smoker, the Bot will prioritize freeing the player by breaking the tongue.
+[/list]
 
-!botstop When all human players are dead, and bots can't finished this campaign by their own, will force to make all bots falling down.
+[h1]Bot Combat Skill Settings[/h1]
+The current version has readjusted Bot combat behavior. They now better prioritize targets, protect themselves, and rescue players, with significantly improved teamwork.
+There are five skill levels, with increasing improvements to vision range, aiming ability, reaction speed, success rate of shoving Special Infected, etc. The skill level does not affect Bot decision-making but only impacts their combat effectiveness against hordes, Special Infected, and focus-firing Tanks.
 
-!botaitest Fun command, only for play fun, input twice to switch on BOT ANGRY MODE. more once to switch off.
+[table]
+[tr]
+[th]Level[/th]
+[th]Description[/th]
+[/tr]
+[tr]
+[td]1[/td]
+[td]Closest to vanilla combat ability but with better teamwork. Suitable for players who don't want increased difficulty but desire improved Bot decision-making. Ideal for Advanced mode players.[/td]
+[/tr]
+[tr]
+[td]2[/td]
+[td]Stronger than vanilla, with improved vision range (can detect zombies at their sides) and faster reaction speed. Overall better performance, bordering on Expert mode.[/td]
+[/tr]
+[tr]
+[td]3[/td]
+[td]Further improved vision range (can detect zombies behind them). Enhanced individual combat ability, with better self-preservation and damage output. Can handle Expert mode smoothly.[/td]
+[/tr]
+[tr]
+[td]4[/td]
+[td]Begins to introduce cheaty/fun elements. Anti-Special Infected and damage output far exceed vanilla. Recommended for high-difficulty custom maps.[/td]
+[/tr]
+[tr]
+[td]5[/td]
+[td]Single Bot's damage output is roughly equal to three average players combined. Can handle modes with increased Special Infected spawns.[/td]
+[/tr]
+[/table]
 
-This is a vscript addon, and I use repeat scripts heavily, the console will show a lot of SCRIPT PERF WARNING, just ignore it.
+[h1]Mod Configuration Menu[/h1]
+Some features of this mod can be toggled via an hud menu. Open the chat (press Y) and type !botmenu to access it.
+Alternatively, bind a key to +grenade1 (e.g., enter bind "j" "+grenade1" in the console) or bind a key to open the menu directly (e.g., bind "j" "say !botmenu").
+
+[b]Note: The menu may not respond on dedicated servers—use commands instead.[/b]
+
+Toggleable menu options:
+[list]
+[*]Bot skill level. (Admin-only if server mode is enabled.)
+[*]Bot teleportation range when too far away.
+[*]Toggle Bot gas can fetching in fuel missions.
+[*]Toggle Bot throwable usage.
+[*]Toggle Bot melee combat.
+[*]Toggle Bot immunity to friendly fire. (Admin-only if server mode is enabled.)
+[*]Toggle Bot auto-pathfinding.
+[*]Toggle Bot teleport when stuck.
+[*]Toggle Bot carrying resources (gas cans, propane tanks, etc.).
+[*]Toggle Bot continuing to progress after player death.
+[*]Toggle Bot defibrillator usage.
+[*]Toggle Bot picking up and using Molotovs and pipe bombs.
+[*]Bot damage multiplier against Witches. (Admin-only if server mode is enabled.)
+[*]Bot damage multiplier against Special Infected. (Admin-only if server mode is enabled.)
+[*]Bot damage multiplier against Tanks. (Admin-only if server mode is enabled.)
+[*]Bot damage multiplier against common infected. (Admin-only if server mode is enabled.)
+[*]Toggle Bot immunity to instant death (e.g., falling off cliffs).
+[/list]
+
+[h1]Commands[/h1]
+For clients unable to use the menu, the mod provides commands. Enter these in the chat window.
+
+[table]
+[tr]
+[th]Function[/th]
+[th]Command[/th]
+[th]Parameters[/th]
+[th]Example[/th]
+[/tr]
+[tr]
+[td]Adjust Bot skill level[/td]
+[td]!botskill[/td]
+[td]Number [1–5][/td]
+[td]!botskill 5[/td]
+[/tr]
+[tr]
+[td]Adjust Bot teleportation range when too far[/td]
+[td]!botfollow[/td]
+[td]Number [100, 999999][/td]
+[td]!botfollow 1000[/td]
+[/tr]
+[tr]
+[td]Toggle Bot instant death immunity[/td]
+[td]!botprotect[/td]
+[td]None[/td]
+[td]!botprotect[/td]
+[/tr]
+[tr]
+[td]Toggle Bot gas can fetching[/td]
+[td]!botfindgas[/td]
+[td]None[/td]
+[td]!botfindgas[/td]
+[/tr]
+[tr]
+[td]Toggle Bot throwables[/td]
+[td]!botthrow[/td]
+[td]None[/td]
+[td]!botthrow[/td]
+[/tr]
+[tr]
+[td]Toggle Bot melee[/td]
+[td]!botmelee[/td]
+[td]None[/td]
+[td]!botmelee[/td]
+[/tr]
+[tr]
+[td]Toggle Bot friendly fire immunity[/td]
+[td]!botimmunity[/td]
+[td]None[/td]
+[td]!botimmunity[/td]
+[/tr]
+[tr]
+[td]Toggle Bot pathfinding[/td]
+[td]!botpathfinding[/td]
+[td]None[/td]
+[td]!botpathfinding[/td]
+[/tr]
+[tr]
+[td]Toggle Bot unstuck teleport[/td]
+[td]!botunstick[/td]
+[td]None[/td]
+[td]!botunstick[/td]
+[/tr]
+[tr]
+[td]Toggle Bot upgrade usage[/td]
+[td]!botupgrades[/td]
+[td]None[/td]
+[td]!botupgrades[/td]
+[/tr]
+[tr]
+[td]Toggle Bot progress after player death[/td]
+[td]!botkeepalive[/td]
+[td]None[/td]
+[td]!botkeepalive[/td]
+[/tr]
+[tr]
+[td]Toggle Bot carrying resources[/td]
+[td]!botbackpack[/td]
+[td]None[/td]
+[td]!botbackpack[/td]
+[/tr]
+[tr]
+[td]Toggle Bot defibrillator usage[/td]
+[td]!botdefib[/td]
+[td]None[/td]
+[td]!botdefib[/td]
+[/tr]
+[tr]  
+    [td]Force end the round when only Bots remain[/td]  
+    [td]!botstop[/td]  
+    [td]None[/td]  
+    [td]!botstop[/td]  
+[/tr]
+[tr]
+[td]Adjust Bot damage multiplier vs Witches[/td]
+[td]!botwitchdamage[/td]
+[td]Number [-16, 16][/td]
+[td]!botwitchdamage 1.0[/td]
+[/tr]
+[tr]
+[td]Adjust Bot damage vs Special Infected (excluding Tank)[/td]
+[td]!botspecialdamage[/td]
+[td]Number [-16, 16][/td]
+[td]!botspecialdamage 1.0[/td]
+[/tr]
+[tr]
+[td]Adjust Bot damage multiplier vs Tanks[/td]
+[td]!bottankdamage[/td]
+[td]Number [-16, 16][/td]
+[td]!bottankdamage 1.0[/td]
+[/tr]
+[tr]
+[td]Adjust Bot damage multiplier vs common infected[/td]
+[td]!botcommondamage[/td]
+[td]Number [-16, 16][/td]
+[td]!botcommondamage 1.0[/td]
+[/tr]
+[/table]
+
+[h1]Ping System[/h1]
+This mod includes a ping feature to command Bots.
+Bind a key to +alt2 (e.g., enter bind "i" "+alt2" in the console).
+
+Click ping while aiming at a Bot to select it (works through walls). Then:
+
+Click an item to make the Bot use it.
+Click the ground to make the Bot move there.
+Click an Infected to make the Bot attack it.
+
+
+[h1]Admin Configuration for Servers[/h1]
+https://steamcommunity.com/workshop/filedetails/discussion/1968764163/3126038700442540342/
+
+[h1]Notes:[/h1]
+This is a script mod, so expect frequent SCRIPT PERF WARNING logs—these can be ignored.
+[url=https://github.com/RogoShum/l4d2-Advanced-Bot-AI/tree/main] GitHub [/url]
 
 If you think this addon is suitable for you, enjoy it."
 

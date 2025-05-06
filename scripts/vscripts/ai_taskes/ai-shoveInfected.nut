@@ -25,8 +25,10 @@ class ::AITaskShoveInfected extends AITaskSingle {
 
 	function playerUpdate(player) {
 		local target = BotAI.getBotShoveTarget(player);
-		if(!BotAI.IsAlive(target))
+
+		if(!BotAI.IsAlive(target)) {
 			target = BotAI.getBotTarget(player);
+		}
 
 		if(BotAI.IsAlive(target)) {
 			local shove = false;

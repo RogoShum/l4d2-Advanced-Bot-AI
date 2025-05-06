@@ -1504,8 +1504,7 @@ function BotAI::IsPressingReload(_ent)
 	return (_ent.GetButtonMask() & (1 << 13)) > 0;
 }
 
-function BotAI::IsPressingShove(_ent)
-{
+function BotAI::IsPressingShove(_ent) {
 	if(!BotAI.IsAlive(_ent)) return false;
 	return (_ent.GetButtonMask() & (1 << 11)) > 0;
 }
@@ -2054,7 +2053,7 @@ function BotAI::xyDotProduct(v1, v2) {
 	return Vector(vector.x, vector.y, 0);
 }
 
-::BotAI.rotateVector <- function(vector, angle){
+::BotAI.rotateVector <- function(vector, angle) {
 	if(!validVector(vector)) return Vector(0, 0, 0);
 
 	/*
@@ -2068,10 +2067,10 @@ function BotAI::xyDotProduct(v1, v2) {
 	//return Vector(x, y, vector.z);
 }
 
-function BotAI::printCollision(entity){
-	printl("[Bot AI DEBUG] m_vecMins " + NetProps.GetPropVector(entity, "m_vecMins"));
-	printl("[Bot AI DEBUG] m_vecMaxs " + NetProps.GetPropVector(entity, "m_vecMaxs"));
-	printl("[Bot AI DEBUG] vecScale " + (NetProps.GetPropVector(entity, "m_vecMaxs") - NetProps.GetPropVector(entity, "m_vecMins")).Length());
+function BotAI::printCollision(entity) {
+	printl("[Bot AI DEBUG] m_vecMins " + NetProps.GetPropVector(entity, "m_Collision.m_vecMins"));
+	printl("[Bot AI DEBUG] m_vecMaxs " + NetProps.GetPropVector(entity, "m_Collision.m_vecMaxs"));
+	printl("[Bot AI DEBUG] m_flRadius " + NetProps.GetPropFloat(entity, "m_Collision.m_flRadius"));
 }
 
 function BotAI::GetDistanceToTop(entity)
@@ -2333,7 +2332,7 @@ function BotAI::isEdge(entity, vec) {
 	if("GetCenter" in entity)
 		startPt = entity.GetCenter();
 
-	vec = BotAI.normalize(vec).Scale(150);
+	vec = BotAI.normalize(vec).Scale(100);
 	startPt += vec;
 
 	local endPt = startPt + Vector(0, 0, -200);
@@ -2659,7 +2658,7 @@ function BotAI::shoveCommon(infected) {
 	if(!BotAI.IsAlive(infected)) return;
 
 	if (BotAI.BotDebugMode) {
-		DebugDrawBox(infected.GetCenter(), Vector(-10, -10, -35), Vector(10, 10, 35), 0, 0, 255, 0.2, 0.5);
+		BotAI.showAABB(infected);
 	}
 
 	if(infected.GetSequence() >= 122 && infected.GetSequence() <= 134)
@@ -2748,6 +2747,7 @@ function BotAI::BotReset(boto) {
 	}
 
 	NetProps.SetPropFloat(boto, "m_flLaggedMovementValue", 1.0);
+
 	return CommandABot( { cmd = 3, bot = boto } );
 }
 

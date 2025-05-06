@@ -167,7 +167,7 @@ class ::AITaskSearchBody extends AITaskGroup
 			} else if (distance <= 50) {
 				BotAI.getNavigator(player).stop();
 				BotAI.botMoveMap[player] <- Vector(0, 0, 0);
-				NetProps.SetPropVector(player, "m_vecBaseVelocity", Vector(0, 0, 0));
+
 				BotAI.SetTarget(player, ironBanner);
 				BotAI.lookAtEntity(player, ironBanner, true, 4);
 				local weapon = player.GetActiveWeapon();

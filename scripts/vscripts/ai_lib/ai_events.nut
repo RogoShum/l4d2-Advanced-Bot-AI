@@ -475,7 +475,7 @@
 
 		if (BotAI.IsEntitySurvivorBot(victim)) {
 			local inventory = BotAI.GetHeldItems(victim);
-		
+
 			if ("slot1" in inventory) {
 				local offhandItem = inventory["slot1"];
 				if (offhandItem.GetClassname() == "weapon_melee") {
@@ -499,7 +499,7 @@
 	local victim = GetPlayerFromUserID(event.victim);
 	if (BotAI.BotCombatSkill > 3 && BotAI.IsEntitySurvivorBot(victim)) {
 		local inventory = BotAI.GetHeldItems(victim);
-			
+
 		if ("slot1" in inventory) {
 			local offhandItem = inventory["slot1"];
 			if (offhandItem.GetClassname() == "weapon_melee") {
@@ -513,7 +513,7 @@
 			}
 		}
 	}
-		
+
 	BotAI.SurvivorTrapped[victim.GetEntityIndex()] <- victim;
 	BotAI.SurvivorTrappedTimed[victim.GetEntityIndex()] <- victim;
 }
@@ -1120,10 +1120,39 @@ function ChatTriggers::botupgrades( player, args, text ) {
 }
 
 function ChatTriggers::botreset( player, args, text ) {
-	foreach(bot in BotAI.SurvivorBotList) {
-		BotAI.BotReset(bot);
-		BotAI.BotAttack(bot, bot);
-		BotAI.setBotLockTheard(bot, -1);
+	foreach(_bot in BotAI.SurvivorBotList) {
+		BotAI.BotReset(_bot);
+		BotAI.setBotLockTheard(_bot, -1);
+	}
+}
+
+function ChatTriggers::botstagger( player, args, text ) {
+	foreach(_bot in BotAI.SurvivorBotList) {
+		_bot.Stagger(_bot.GetOrigin());
+	}
+}
+
+function ChatTriggers::botattacknull( player, args, text ) {
+	foreach(_bot in BotAI.SurvivorBotList) {
+		CommandABot( { cmd = 0, target = null, bot = _bot } );
+	}
+}
+
+function ChatTriggers::botattackself( player, args, text ) {
+	foreach(_bot in BotAI.SurvivorBotList) {
+		CommandABot( { cmd = 0, target = _bot, bot = _bot } );
+	}
+}
+
+function ChatTriggers::botattackkey( player, args, text ) {
+	foreach(_bot in BotAI.SurvivorBotList) {
+		_bot.__KeyValueFromString("target", "");
+	}
+}
+
+function ChatTriggers::botattackinvalid( player, args, text ) {
+	foreach(_bot in BotAI.SurvivorBotList) {
+		CommandABot( { cmd = 0, target = BotAI._testNullEntity, bot = _bot } );
 	}
 }
 

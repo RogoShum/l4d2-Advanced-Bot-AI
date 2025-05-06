@@ -30,20 +30,19 @@ function BotAI::moveFunc() {
 
 				if(!BotAI.isEdge(player, vec)) {
 					NetProps.SetPropVector(player, "m_vecBaseVelocity", vec);
-
-					local function feelingSafe() {
-						local dangerous = BotAI.getBotAvoid(player);
-
-						if(dangerous.len() > 0) {
-							return false;
-						} else {
-							return true;
-						}
-					}
-
-					BotAI.botRunPos(player, player.GetOrigin() + vec, "botMove^+", 7, feelingSafe);
 				}
 
+				local function feelingSafe() {
+					local dangerous = BotAI.getBotAvoid(player);
+
+					if(dangerous.len() > 0) {
+						return false;
+					} else {
+						return true;
+					}
+				}
+
+				BotAI.botRunPos(player, player.GetOrigin() + vec, "botMove^+", 7, feelingSafe);
 				BotAI.botMoveMap[player] = vec * 0.8;
 			} else if (BotAI.getNavigator(player).hasPath("botMove^+")) {
 				NetProps.SetPropVector(player, "m_vecBaseVelocity", Vector(0, 0, 0));
@@ -365,12 +364,18 @@ function BotAI::createPlayerTargetTimer(player) {
 
 		local isShove = BotAI.IsPressingShove(player);
 		local isHealing = BotAI.IsBotHealing(player);
-
 		local com = null;
 
+		if (isShove) {
+			local weapon = player.GetActiveWeapon();
+			if(weapon && weapon.GetClassname() == "weapon_first_aid_kit") {
+				isShove = false;
+			}
+		}
+
 		if(BotAI.BotDebugMode) {
-			DebugDrawCircle(player.GetCenter(), Vector(255, 25, 25), 0, selectedDis, true, 0.2);
-			DebugDrawCircle(player.GetCenter(), Vector(25, 255, 25), 0, closestDis, true, 0.2);
+			DebugDrawCircle(player.GetCenter(), Vector(255, 25, 25), 0, selectedDis, false, 0.2);
+			DebugDrawCircle(player.GetCenter(), Vector(25, 255, 25), 0, closestDis, false, 0.2);
 		}
 
 		while(com = Entities.FindByClassnameWithin(com, "infected", player.GetCenter(), closestDis)) {
