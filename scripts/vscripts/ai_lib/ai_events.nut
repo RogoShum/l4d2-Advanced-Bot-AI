@@ -570,13 +570,8 @@
 	}
 
 	local shouldShove = false;
-	local needShove = false;
+	local needShove = BotAI.needOil;
 	local display = null;
-	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
-		if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") < NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal")) {
-			needShove = true;
-		}
-	}
 
 	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.UseTarget != null && BotAI.NeedGasFinding && needShove && RandomInt(0, 4) > 0) {
 		shouldShove = true;
@@ -638,13 +633,7 @@
 	local attacker = GetPlayerFromUserID(event.userid);
 
 	local shouldShove = BotAI.BotCombatSkill > 2 && BotAI.IsEntitySurvivorBot(victim) && RandomInt(0, BotAI.BotCombatSkill * BotAI.BotCombatSkill) > 0;
-	local needShove = false;
-	local display = null;
-	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
-		if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") < NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal")) {
-			needShove = true;
-		}
-	}
+	local needShove = BotAI.needOil;
 
 	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.UseTarget != null && BotAI.NeedGasFinding && needShove && RandomInt(0, 4) > 0) {
 		shouldShove = true;
@@ -681,13 +670,7 @@
 	local attacker = GetPlayerFromUserID(event.userid);
 
 	local shouldShove = BotAI.BotCombatSkill > 2 && BotAI.IsEntitySurvivorBot(victim) && RandomInt(0, BotAI.BotCombatSkill * BotAI.BotCombatSkill) > 0;
-	local needShove = false;
-	local display = null;
-	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
-		if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") < NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal")) {
-			needShove = true;
-		}
-	}
+	local needShove = BotAI.needOil;
 
 	if(BotAI.IsEntitySurvivorBot(victim) && BotAI.UseTarget != null && BotAI.NeedGasFinding && needShove && RandomInt(0, 4) > 0) {
 		shouldShove = true;
@@ -1123,36 +1106,6 @@ function ChatTriggers::botreset( player, args, text ) {
 	foreach(_bot in BotAI.SurvivorBotList) {
 		BotAI.BotReset(_bot);
 		BotAI.setBotLockTheard(_bot, -1);
-	}
-}
-
-function ChatTriggers::botstagger( player, args, text ) {
-	foreach(_bot in BotAI.SurvivorBotList) {
-		_bot.Stagger(_bot.GetOrigin());
-	}
-}
-
-function ChatTriggers::botattacknull( player, args, text ) {
-	foreach(_bot in BotAI.SurvivorBotList) {
-		CommandABot( { cmd = 0, target = null, bot = _bot } );
-	}
-}
-
-function ChatTriggers::botattackself( player, args, text ) {
-	foreach(_bot in BotAI.SurvivorBotList) {
-		CommandABot( { cmd = 0, target = _bot, bot = _bot } );
-	}
-}
-
-function ChatTriggers::botattackkey( player, args, text ) {
-	foreach(_bot in BotAI.SurvivorBotList) {
-		_bot.__KeyValueFromString("target", "");
-	}
-}
-
-function ChatTriggers::botattackinvalid( player, args, text ) {
-	foreach(_bot in BotAI.SurvivorBotList) {
-		CommandABot( { cmd = 0, target = BotAI._testNullEntity, bot = _bot } );
 	}
 }
 

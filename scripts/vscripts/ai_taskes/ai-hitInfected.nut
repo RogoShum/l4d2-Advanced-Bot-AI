@@ -98,6 +98,11 @@ class ::AITaskHitInfected extends AITaskSingle {
 		local navigator = BotAI.getNavigator(player);
 		if (navigator.moving()) {
 			awareAngle = -1.0;
+			dist -= 100;
+		}
+
+		if(BotAI.BotDebugMode) {
+			DebugDrawCircle(player.GetCenter(), Vector(25, 25, 255), 0, dist, false, 0.2);
 		}
 
 		foreach(infected in BotAI.SpecialList) {
@@ -140,7 +145,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 
 		if (entS != null && BotAI.nextTickDistance(player, entS, 5.0) < 400 && BotAI.GetTarget(entS) == player) {
 			dangerTarget = entS;
-		} else if (selected != null && BotAI.GetTarget(selected) == player && BotAI.nextTickDistance(player, selected, 5.0) < 200) {
+		} else if (selected != null && BotAI.GetTarget(selected) == player && BotAI.nextTickDistance(player, selected, 5.0) < 150) {
 			dangerTarget = selected;
 		}
 

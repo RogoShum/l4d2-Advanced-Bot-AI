@@ -119,6 +119,7 @@ if (!("VSLib" in getroottable())) {
 		pingPoint = {}
 		pingEntity = {}
 		dangerPlace = {}
+		preNeedOil = false
 		needOil = false
 
 		BotPosition = {}
@@ -355,12 +356,16 @@ getconsttable()["DMG_HEADSHOT"] <- (1 << 30);
 getconsttable()["DMG_CRUSH"] <- (1 << 0);
 getconsttable()["DMG_BULLET"] <- (1 << 1);
 getconsttable()["DMG_BLAST"] <- (1 << 6);
+getconsttable()["DMG_PREVENT_PHYSICS_FORCE"] <- (1 << 11);
 getconsttable()["DMG_DROWN"] <- (1 << 14);
+getconsttable()["DMG_STUMBLE"] <- (1 << 25);
+getconsttable()["DMG_PLASMA"] <- (1 << 24);
+getconsttable()["DMG_BUCKSHOT"] <- (1 << 29);
 
 getconsttable()["BOT_CANT_SEE"] <- (1 << 0);
 
-BotAI.headshotDmg <- DMG_BULLET | DMG_HEADSHOT;
-BotAI.meleeDmg <- DMG_MELEE | DMG_HEADSHOT;
+BotAI.headshotDmg <- DMG_BULLET | DMG_HEADSHOT | (1 << 31);
+BotAI.meleeDmg <- DMG_MELEE | DMG_HEADSHOT | (1 << 25) | (1 << 6) | (1 << 29) | (1 << 31);
 
 ::BotAI.SaveUseTarget <- function() {
 	local UseTargetList = "";
@@ -2431,6 +2436,7 @@ function BotAI::ResetBotFireRate() {
 }
 
 ::BotAI.Sort <- function(List) {
+
     for (local i = 0; i < List.len(); i++) {
         local minIndex = i;
         for (local j = i; j < List.len(); j++) {
@@ -2576,23 +2582,23 @@ function BotAI::AdjustBotState(args) {
 		Convars.SetValue( "sb_unstick", 0 );
 	}
 
-	/*
-		local obstacles = {};
-		NavMesh.GetObstructingEntities(obstacles);
-		local areaObstacle = {};
-		foreach(obstacle in obstacles) {
-			local pos = obstacle.GetOrigin();
-			local areaString = (pos.x / 500).tostring() + (pos.y / 500).tostring() + (pos.z / 500).tostring();
-			if(!(areaString in areaObstacle))
-				areaObstacle[areaString] <- {};
+	if (BotAI.needOil && !BotAI.preNeedOil) {
+		BotAI.preNeedOil = BotAI.needOil;
+		printl("----------------------------------")
+		printl("----------------------------------")
+		printl("[Bot AI]: Start finding gascan.")
+		printl("----------------------------------")
+		printl("----------------------------------")
+	}
 
-			local area = areaObstacle[areaString];
-			area[area.len()] <- obstacle;
-			areaObstacle[areaString] = area;
-		}
-
-		BotAI.obstacles = areaObstacle;
-	*/
+	if (!BotAI.needOil && BotAI.preNeedOil) {
+		BotAI.preNeedOil = BotAI.needOil;
+		printl("----------------------------------")
+		printl("----------------------------------")
+		printl("[Bot AI]: Finish finding gascan.")
+		printl("----------------------------------")
+		printl("----------------------------------")
+	}
 
 	if(!("DoorList" in BotAI))
 		BotAI.DoorList <- {}

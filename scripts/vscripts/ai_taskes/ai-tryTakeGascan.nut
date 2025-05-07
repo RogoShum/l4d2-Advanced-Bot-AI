@@ -18,10 +18,13 @@ class ::AITaskTryTakeGascan extends AITaskGroup
 				needOil = true;
 		}
 
-		if(BotAI.UseTarget == null || !BotAI.NeedGasFinding)
-			needOil = false;
-		else
-			needOil = true;
+		if (needOil) {
+			if(BotAI.UseTarget == null || !BotAI.NeedGasFinding) {
+				needOil = false;
+			} else {
+				needOil = true;
+			}
+		}
 
 		BotAI.needOil = needOil;
 		return true;
@@ -69,7 +72,19 @@ class ::AITaskTryTakeGascan extends AITaskGroup
 			}
 			BotAI.setBotLockTheard(player, -1);
 		} else {
-			BotAI.botRunPos(player, Posi, "useTarget+", 2, "change");
+			local function changeOrNoNeed() {
+				if (!BotAI.needOil) {
+					return true;
+				}
+
+				local navigator = BotAI.getNavigator(player);
+				if(!navigator.isMoving("useTarget+"))
+					return true;
+
+				return false;
+			}
+
+			BotAI.botRunPos(player, Posi, "useTarget+", 2, changeOrNoNeed);
 		}
 	}
 

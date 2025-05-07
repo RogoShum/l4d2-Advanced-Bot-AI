@@ -168,12 +168,13 @@ function BotAI::BotTakeGasCan(bot, gascan) {
 
 	if(gascan.GetOwnerEntity() == null && BotAI.backpack(bot) != gascan && (!(gascan in BotAI.waitingToPick) || BotAI.waitingToPick[gascan] < 0)) {
 		DoEntFire("!self", "SetParent", "!activator", 0.0, bot, gascan);
-		DoEntFire("!self", "SetParentAttachment", "medkit", 0.0, bot, gascan);
+		DoEntFire("!self", "SetParentAttachment", "medkit", 0.02, bot, gascan);
 		BotAI.BotLinkGasCan[bot] <- gascan;
 		if(!(gascan in BotAI.waitingToPick))
 			BotAI.waitingToPick[gascan] <- -1;
 		return true;
 	}
+
 	return false;
 }
 
@@ -1450,8 +1451,7 @@ function BotAI::applyDamage(owner, target, amount, damageType, damagepos = null)
 			inflictor = owner.GetActiveWeapon();
 		}
 
-		target.TakeDamageEx(inflictor, owner, owner.GetActiveWeapon(), Vector(0, 0, 0),
-			damagepos, amount, damageType);
+		target.TakeDamageEx(inflictor, owner, owner.GetActiveWeapon(), Vector(0, 0, 0), damagepos, amount, damageType);
 	}
 }
 
@@ -1951,6 +1951,15 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 	}
 
 	return m_trace.enthit;
+}
+
+function BotAI::printVelocity(entity) {
+	printl("[Bot AI DEBUG] Position: " + entity.GetOrigin());
+	printl("[Bot AI DEBUG] LocalVelocity: " + entity.GetLocalVelocity());
+	printl("[Bot AI DEBUG] Velocity: " + entity.GetVelocity());
+	printl("[Bot AI DEBUG] m_vecBaseVelocity: " + NetProps.GetPropVector(entity, "m_vecBaseVelocity"));
+	printl("[Bot AI DEBUG] GetBaseVelocity: " + entity.GetBaseVelocity());
+	printl("[Bot AI DEBUG] m_vecAbsVelocity: " + NetProps.GetPropVector(entity, "m_vecAbsVelocity"));
 }
 
 ::BotAI.GetEntitySpeedVector <- function(entity) {
@@ -2900,6 +2909,7 @@ function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.tru
 				return true;
 			return false;
 		}
+
 		discardFunc = change;
 	}
 

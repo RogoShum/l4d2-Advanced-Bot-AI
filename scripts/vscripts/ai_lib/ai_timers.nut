@@ -16,10 +16,12 @@ function BotAI::bestAim() {
 function BotAI::moveFunc() {
 	foreach(player in BotAI.SurvivorBotList) {
 		if(player in BotAI.botMoveMap) {
+
 			if(player.IsIncapacitated() || player.IsDominatedBySpecialInfected() || BotAI.isPlayerBeingRevived(player) || BotAI.IsPlayerReviving(player)) {
 				BotAI.botMoveMap[player] = Vector(0, 0, 0);
 				continue;
 			}
+
 			BotAI.DisableButton(player, BUTTON_WALK, 1.0);
 
 			local vec = BotAI.botMoveMap[player];
@@ -28,8 +30,14 @@ function BotAI::moveFunc() {
 					vec = BotAI.normalize(vec).Scale(300);
 				}
 
-				if(!BotAI.isEdge(player, vec)) {
-					NetProps.SetPropVector(player, "m_vecBaseVelocity", vec);
+				local appliedVec = vec;
+
+				if (!BotAI.IsOnGround(player)) {
+					appliedVec = appliedVec.Scale(0.05);
+				}
+
+				if(!BotAI.isEdge(player, appliedVec)) {
+					NetProps.SetPropVector(player, "m_vecBaseVelocity", appliedVec);
 				}
 
 				local function feelingSafe() {
@@ -42,7 +50,7 @@ function BotAI::moveFunc() {
 					}
 				}
 
-				BotAI.botRunPos(player, player.GetOrigin() + vec, "botMove^+", 7, feelingSafe);
+				BotAI.botRunPos(player, player.GetOrigin() + appliedVec, "botMove^+", 7, feelingSafe);
 				BotAI.botMoveMap[player] = vec * 0.8;
 			} else if (BotAI.getNavigator(player).hasPath("botMove^+")) {
 				NetProps.SetPropVector(player, "m_vecBaseVelocity", Vector(0, 0, 0));
@@ -359,7 +367,8 @@ function BotAI::createPlayerTargetTimer(player) {
 		local navigator = BotAI.getNavigator(player);
 		if (navigator.moving()) {
 			awareAngle -= 2.0;
-			selectedDis += 15;
+			selectedDis -= BotAI.BotCombatSkill * 10 + 10;
+			closestDis -= 65;
 		}
 
 		local isShove = BotAI.IsPressingShove(player);
@@ -620,11 +629,14 @@ function BotAI::pingSystem() {
 							return 0.01;
 				}
 			}
+
 			return 1;
 		}
+
 		if(!BotAI.BackPack) {
 			return 3;
 		}
+
 		foreach(player in BotAI.SurvivorBotList) {
 			if(!BotAI.IsAlive(player)) continue;
 			local thing = null;
@@ -657,6 +669,7 @@ function BotAI::pingSystem() {
 				}
 			}
 		}
+
 		return 1;
 	}
 

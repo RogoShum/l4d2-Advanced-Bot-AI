@@ -1,5 +1,5 @@
 class ::AITaskTryTraceGascan extends AITaskGroup {
-	
+
 	constructor(orderIn, tickIn, compatibleIn, forceIn) {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
@@ -9,10 +9,8 @@ class ::AITaskTryTraceGascan extends AITaskGroup {
 	cabal_oil = {};
 
 	function preCheck() {
-		local display = null;
-		while(display = Entities.FindByClassname(display, "terror_gamerules")) {
-			if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") >= NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal"))
-				return false;
+		if (!BotAI.needOil) {
+			return false;
 		}
 
 		if(BotAI.UseTarget == null || !BotAI.NeedGasFinding)
@@ -93,6 +91,10 @@ class ::AITaskTryTraceGascan extends AITaskGroup {
 					local gas = gas_can;
 					local oilTable = cabal_oil;
 					local function needGasCan() {
+						if (!BotAI.needOil) {
+							return true;
+						}
+
 						foreach(link in BotAI.BotLinkGasCan) {
 							if(link == gas) {
 								if(player.GetEntityIndex() in oilTable) {
