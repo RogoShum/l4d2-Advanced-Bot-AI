@@ -139,25 +139,29 @@ class::Navigator {
 			return;
 		}
 
+		local friction = 1.0;
+
 		if (BotAI.BotCombatSkill > 2 || BotAI.HasTank) {
-			local friction = 1.2;
+			friction += 0.2;
 
 			foreach(danger in BotAI.SpecialList) {
 				if (danger.GetClassname() == "player" && danger.GetZombieType() == 8) {
 					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 310) {
-						player.OverrideFriction(0.5, friction);
+						player.OverrideFriction(0.5, 0.9);
 					}
 
 					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 200) {
-						friction = 1.5 + BotAI.BotCombatSkill * 0.2;
+						friction += 0.5 + BotAI.BotCombatSkill * 0.2;
 					}
 				}
 			}
-
-			NetProps.SetPropFloat(player, "m_flLaggedMovementValue", friction);
-		} else {
-			NetProps.SetPropFloat(player, "m_flLaggedMovementValue", 1.0);
 		}
+
+		if (movingID.find("$") != null) {
+			friction += 0.2;
+		}
+
+		NetProps.SetPropFloat(player, "m_flLaggedMovementValue", friction);
 
 		local offset = 15;
 
@@ -292,7 +296,7 @@ class::Navigator {
 			return true;
 		}
 
-		local build = NavMesh.NavAreaBuildPath(startArea, null, pos, distance, 2, false);
+		local build = NavMesh.NavAreaBuildPath(startArea, endArea, pos, distance, 2, false);
 
 		if (!build) {
 			navPrint("NavMesh build failed!");

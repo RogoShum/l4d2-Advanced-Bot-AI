@@ -219,7 +219,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 		BotAI.setBotShoveTarget(player, null);
 		infectedList[player] <- null;
 		BotAI.botAim[player] <- null;
-		CommandABot( { cmd = 0, target = player, bot = player } );
+
 		return false;
 	}
 
@@ -239,7 +239,6 @@ class ::AITaskHitInfected extends AITaskSingle {
 			} else {
 				infectedList[player] <- null;
 				BotAI.botAim[player] <- null;
-				CommandABot( { cmd = 0, target = player, bot = player } );
 			}
 		}
 

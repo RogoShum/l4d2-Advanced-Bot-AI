@@ -39,7 +39,7 @@ class ::AITaskSavePlayer extends AITaskGroup
 		if(!BotAI.IsAlive(player) || BotAI.IsPlayerClimb(player) || player.IsDominatedBySpecialInfected() || player.IsStaggering() || player.IsIncapacitated() || player.IsHangingFromLedge()) return false;
 
 		local navigator = BotAI.getNavigator(player);
-		if(navigator.isMoving("savePlayer"))
+		if(navigator.isMoving("savePlayer$"))
 			return false;
 
 		if(player in rescuers) {
@@ -154,10 +154,10 @@ class ::AITaskSavePlayer extends AITaskGroup
 				return false;
 			}
 
-			BotAI.botRunPos(player, smoker, "savePlayer", 5, needSave);
-			
+			BotAI.botRunPos(player, smoker, "savePlayer$", 5, needSave);
+
 			if (BotAI.SaveTeleport <= 99) {
-				BotAI.delayTimer(teleport, BotAI.SaveTeleport);
+				BotAI.delayTimer(teleport, BotAI.SaveTeleport, player.tostring() + "saving");
 			}
 		} else if (BotAI.distanceof(player.GetOrigin(), victim.GetOrigin()) > 125) {
 			local function needSave() {
@@ -166,12 +166,13 @@ class ::AITaskSavePlayer extends AITaskGroup
 				return !victim.IsDominatedBySpecialInfected() && !victim.IsIncapacitated() && !victim.IsHangingFromLedge();
 			}
 
-			BotAI.botRunPos(player, victim, "savePlayer", 5, needSave);
+			BotAI.botRunPos(player, victim, "savePlayer$", 5, needSave);
 
 			if (BotAI.SaveTeleport <= 99) {
-				BotAI.delayTimer(teleport, BotAI.SaveTeleport);
+				BotAI.delayTimer(teleport, BotAI.SaveTeleport, player.tostring() + "saving");
 			}
 		}
+
 		updating = false;
 	}
 

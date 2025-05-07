@@ -149,7 +149,7 @@ class ::AITaskSearchBody extends AITaskGroup
 
 	function playerUpdate(player) {
 		if(ironBanner != null && player != null) {
-			local distance = BotAI.distanceof(ironBanner.GetOrigin(), player.GetOrigin());
+			local distance = BotAI.distanceof(ironBanner.GetCenter(), player.GetCenter());
 			if (distance > 8000) {
 				ironBanner = null;
 				GUY = null;
@@ -164,7 +164,7 @@ class ::AITaskSearchBody extends AITaskGroup
 				}
 
 				BotAI.botRunPos(player, ironBanner, "searchBody", 3, needSearch, 15000);
-			} else if (distance <= 50) {
+			} else if (distance <= 75) {
 				BotAI.getNavigator(player).stop();
 				BotAI.botMoveMap[player] <- Vector(0, 0, 0);
 

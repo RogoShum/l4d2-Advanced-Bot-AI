@@ -119,6 +119,7 @@ class ::AITaskShoveInfected extends AITaskSingle {
 						BotAI.breakTongue(target.GetSpecialInfectedDominatingMe());
 					}
 				}
+
 				BotAI.delayTimer(breakTongue, 1.2);
 			} else
 				BotAI.UnforceButton(player, 2048 );

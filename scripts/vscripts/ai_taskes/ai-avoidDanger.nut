@@ -79,7 +79,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 						local area = player.GetLastKnownArea();
 						local safe = !area.IsDamaging();
 						if (safe) {
-							BotAI.botStayPos(player, area.GetCenter(), "avoidDanger", 5, 2)
+							BotAI.botStayPos(player, area.GetCenter(), "avoidDanger", 6, 2)
 						}
 
 						return safe;

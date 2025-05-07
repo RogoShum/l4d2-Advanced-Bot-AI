@@ -2470,10 +2470,6 @@ function BotAI::DebugFunction( args ) {
 
 		if(BotAI.BotDebugMode) {
 			BotAI.showAABB(player);
-
-			if (player.IsIncapacitated()) {
-				printl("[Bot AI DEBUG] movecollide: " + NetProps.GetPropInt(player, "movecollide"));
-			}
 		}
 
 		if(!IsPlayerABot(player)) {

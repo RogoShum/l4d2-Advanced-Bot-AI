@@ -496,8 +496,14 @@ function BotAI::conditionTimer(func, delay) {
 	}
 }
 
-function BotAI::delayTimer(func, delay) {
-    local _targetTimer = SpawnEntityFromTable("info_target", { targetname = "botai_delay_timer_" + UniqueString()});
+function BotAI::delayTimer(func, delay, uuid = UniqueString()) {
+	local timerName = "botai_delay_timer_" + uuid;
+
+	if (Entities.FindByName(null, timerName) != null) {
+		return;
+	}
+
+    local _targetTimer = SpawnEntityFromTable("info_target", { targetname = timerName});
 	local _time = Time() + delay;
     local function doFunction() {
         if(Time() >= _time) {

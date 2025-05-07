@@ -1,5 +1,5 @@
 class ::AITaskSearchEntity extends AITaskSingle {
-	
+
 	constructor(orderIn, tickIn, compatibleIn, forceIn) {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
 
@@ -40,7 +40,7 @@ class ::AITaskSearchEntity extends AITaskSingle {
 	searched = [];
 
 	function singleUpdateChecker(player) {
-		if(player.IsDominatedBySpecialInfected() || player.IsStaggering() || player.IsIncapacitated() || player.IsHangingFromLedge()) return;
+		if(player.IsDominatedBySpecialInfected() || BotAI.IsInCombat(player) || player.IsStaggering() || player.IsIncapacitated() || player.IsHangingFromLedge()) return;
 		local invPlayer = BotAI.GetHeldItems(player);
 
 		if(player.GetEntityIndex() in BotAI.searchedEntity) {
@@ -140,6 +140,10 @@ class ::AITaskSearchEntity extends AITaskSingle {
 				if(NetProps.GetPropInt(entity, "m_spawnflags") >= 8) {
 					DoEntFire("!self", "Use", "", 0, player, entity);
 				} else if(distance < 100) {
+					if (BotAI.BotDebugMode) {
+						printl("try sightseeing take")
+					}
+
 					BotAI.SetTarget(player, entity);
 					BotAI.lookAtEntity(player, entity, true, 3);
 					BotAI.ForceButton(player, 32 , 0.5);
@@ -149,7 +153,7 @@ class ::AITaskSearchEntity extends AITaskSingle {
 							NetProps.SetPropEntity(entity, "m_hOwnerEntity", player);
 						}
 					}
-					BotAI.delayTimer(setOwner, 0.5);
+					BotAI.delayTimer(setOwner, 0.5, player.tostring() + "setOwner");
 
 					local function forceTake() {
 						local invPlayer = BotAI.GetHeldItems(player);
@@ -157,8 +161,13 @@ class ::AITaskSearchEntity extends AITaskSingle {
 							DoEntFire("!self", "Use", "", 0, player, entity);
 							NetProps.SetPropEntity(entity, "m_hOwnerEntity", player);
 						}
+
+						if (BotAI.BotDebugMode) {
+							printl("try force take")
+						}
 					}
-					BotAI.delayTimer(forceTake, 4.0);
+
+					BotAI.delayTimer(forceTake, 4.0, player.tostring() + "forceTake");
 				}
 			} else {
 				DoEntFire("!self", "Use", "", 0, player, entity);
