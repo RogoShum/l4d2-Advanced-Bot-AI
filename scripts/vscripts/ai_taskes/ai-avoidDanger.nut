@@ -30,12 +30,14 @@ class::AITaskAvoidDanger extends AITaskSingle {
 		}
 
 		foreach(special in BotAI.SpecialList) {
-			if (BotAI.IsAlive(special) && !special.IsGhost() && BotAI.distanceof(special.GetOrigin(), player.GetOrigin()) <= 600 &&
-				(special.GetZombieType() == 3 || special.GetZombieType() == 5 || special.GetZombieType() == 6 || special.GetZombieType() == 8) &&
-				!BotAI.IsEntityValid(BotAI.getSiVictim(special)) &&
-				(BotAI.GetTarget(special) == player) &&
-				BotAI.CanShotOtherEntityInSight(player, special, -1, MASK_UNTHROUGHABLE)) {
-				dangerous[dangerous.len()] <- special;
+			if (BotAI.IsAlive(special) && !special.IsGhost()) {
+				local distance = BotAI.distanceof(special.GetOrigin(), player.GetOrigin());
+
+				if (distance <= 600 && (special.GetZombieType() == 3 || special.GetZombieType() == 5 || special.GetZombieType() == 6 || special.GetZombieType() == 8) &&
+					!BotAI.IsEntityValid(BotAI.getSiVictim(special)) && (BotAI.GetTarget(special) == player || (special.GetZombieType() == 8 && distance < 200)) &&
+					BotAI.CanShotOtherEntityInSight(player, special, -1, MASK_UNTHROUGHABLE)) {
+						dangerous[dangerous.len()] <- special;
+				}
 			}
 		}
 
@@ -175,35 +177,65 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							navigator.clearPath("followPlayer");
 							player.UseAdrenaline(1.0);
 
-							local targetSpot = null;
+							local targetDirection = null;
 							local tpRadius = 200;
 							if (BotAI.BotCombatSkill > 3) {
-								tpRadius = 350;
+								tpRadius = 200;
 							}
 
 							for (local count = 0; count < 5; ++count) {
 								local randomSpot = player.TryGetPathableLocationWithin(tpRadius);
-								if (BotAI.BotDebugMode) {
-									DebugDrawCircle(randomSpot, Vector(255, 255, 25), 0, 10, true, 0.5);
+								local spotColor = Vector(255, 255, 25);
+
+								if (targetDirection == null && ((BotAI.distanceof(danger.GetOrigin(), randomSpot) > 180
+								&& !isTankBetweenHeights(randomSpot)) || (BotAI.BotCombatSkill >= 3 && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 140))) {
+									local spotDirection = randomSpot - player.GetOrigin();
+									local maxWallDist = 170;
+
+									local currentDist = BotAI.GetDistanceToWall(player, spotDirection);
+									if (currentDist <= maxWallDist) {
+										local bestDir = null;
+										local bestDot = -2;
+
+										for(local i = 0; i < 12; ++i) {
+											local angleVec = BotAI.rotateVector(spotDirection, i * 30);
+											local dist = BotAI.GetDistanceToWall(player, angleVec);
+
+											if(dist > maxWallDist) {
+												local dot = spotDirection.Dot(angleVec);
+												if (dot > bestDot) {
+													bestDot = dot;
+													bestDir = angleVec;
+												}
+											}
+										}
+
+										if (bestDir != null) {
+											targetDirection = bestDir;
+										} else {
+											targetDirection = spotDirection;
+										}
+									} else {
+										targetDirection = spotDirection;
+									}
+								} else {
+									spotColor = Vector(255, 25, 25);
 								}
 
-								if (targetSpot == null && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 150
-								&& !canHitTank(randomSpot)
-								&& !isTankBetweenHeights(randomSpot)) {
-									targetSpot = randomSpot - player.GetOrigin();
+								if (BotAI.BotDebugMode) {
+									DebugDrawCircle(randomSpot, spotColor, 0, 10, true, 0.5);
 								}
 							}
 
-							if (targetSpot == null) {
+							if (targetDirection == null) {
 								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 80, 80, 80, 80);
 							} else {
-								local possibleStuck = BotAI.PossibleBotStuck(player, 200);
-								if (possibleStuck && BotAI.BotCombatSkill == 3 && nexDis < 70) {
-									player.SetOrigin(targetSpot + player.GetOrigin());
-								} else if (possibleStuck && BotAI.BotCombatSkill == 4 && nexDis < 100) {
-									player.SetOrigin(targetSpot + player.GetOrigin());
+								if (BotAI.BotCombatSkill == 3 && nexDis < 70) {
+									player.SetOrigin(targetDirection + player.GetOrigin());
+								} else if (BotAI.BotCombatSkill == 4 && nexDis < 100) {
+									player.SetOrigin(targetDirection + player.GetOrigin());
 								} else {
-									vecList[vecList.len()] <- targetSpot;
+									vecList[vecList.len()] <- targetDirection;
 								}
 							}
 						} else {
@@ -309,10 +341,6 @@ class::AITaskAvoidDanger extends AITaskSingle {
 			if (vecList.len() > 1)
 				vec3d = vec3d.Scale(1 / vecList.len());
 
-			if (vecList.len() > 0 && (!BotAI.validVector(vec3d) || vec3d.Length() < 10)) {
-				vec3d = player.EyeAngles().Forward().Scale(-500);
-			}
-
 			local wep = player.GetActiveWeapon();
 			local ename = " ";
 			if (BotAI.IsEntityValid(wep))
@@ -320,19 +348,12 @@ class::AITaskAvoidDanger extends AITaskSingle {
 			if (ename != "weapon_pipe_bomb" && ename != "weapon_molotov" && ename != "weapon_vomitjar")
 				BotAI.RemoveFlag(player, FL_FROZEN);
 
-			local velocity = player.GetVelocity();
-			local vecScale = 0.75;
-			if (BotAI.HasTank || BotAI.getIsMelee(player))
-				vecScale = 1;
-
-			local velocityScale = 1 - vecScale;
-
-			local finalVec = Vector(vec3d.x * vecScale + velocity.x * velocityScale, vec3d.y * vecScale + velocity.y * velocityScale, velocity.z);
-			if (finalVec.Length() < length)
-				finalVec = BotAI.fakeTwoD(BotAI.normalize(finalVec).Scale(length));
-			if (vecList.len() > 0 && (!BotAI.validVector(finalVec) || finalVec.Length() < 10)) {
-				finalVec = player.EyeAngles().Forward().Scale(-500);
+			if (vecList.len() > 0 && (!BotAI.validVector(vec3d) || vec3d.Length() < 10)) {
+				BotAI.setBotDedgeVector(player, null);
+				return;
 			}
+
+			local finalVec = vec3d;
 
 			if (BotAI.validVector(finalVec) && !BotAI.isPlayerNearLadder(player)) {
 				BotAI.botRun(player, player.GetOrigin() + finalVec);

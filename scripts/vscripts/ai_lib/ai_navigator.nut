@@ -144,7 +144,7 @@ class::Navigator {
 
 		if (BotAI.BotCombatSkill > 2 || BotAI.HasTank) {
 			speed += 0.2;
-			
+
 			foreach(danger in BotAI.SpecialList) {
 				if (danger.GetClassname() == "player" && danger.GetZombieType() == 8) {
 					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 310) {

@@ -220,6 +220,10 @@
 			local range = Convars.GetFloat("melee_range") + skillFactor;
 			local TD = 300;
 			local additionAngle = BotAI.BotCombatSkill * 0.2;
+			if (additionAngle < 0.2) {
+				additionAngle = 0.2;
+			}
+
 			local damagePos = BotAI.getEntityHeadPos(p);
 			damagePos = Vector(damagePos.x, damagePos.y, p.EyePosition().z);
 			if(ename == "weapon_chainsaw") {
