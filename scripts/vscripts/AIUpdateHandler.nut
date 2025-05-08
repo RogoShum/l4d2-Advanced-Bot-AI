@@ -2553,7 +2553,7 @@ function BotAI::CheckBotPosition(args) {
 		BotAI.BotPositionCycle = 0;
 }
 
-function BotAI::PossibleBotStuck(bot) {
+function BotAI::PossibleBotStuck(bot, maxDistance = 70) {
 	if(!(bot in BotAI.BotPosition) || BotAI.BotPosition[bot].len() < 10)
 		return false;
 
@@ -2564,7 +2564,7 @@ function BotAI::PossibleBotStuck(bot) {
 	}
 	total = total * 0.1;
 
-	if(total <= 70) {
+	if(total <= maxDistance) {
 		return true;
 	}
 
@@ -3022,7 +3022,7 @@ function resetAllBots() {
 
 	printl("[Bot AI] Loading timers...");
 
-	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("CheckBotPosition", 0.5, true, BotAI.CheckBotPosition));
+	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("CheckBotPosition", 0.2, true, BotAI.CheckBotPosition));
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("AdjustBotState", 1.5, true, BotAI.AdjustBotState));
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("TriggerHandler", 20, true, BotAI.TriggerHandler));
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("ModifyMolotovVector", 0.1, true, BotAI.ModifyMolotovVector));

@@ -139,29 +139,32 @@ class::Navigator {
 			return;
 		}
 
+		local speed = 1.0;
 		local friction = 1.0;
 
 		if (BotAI.BotCombatSkill > 2 || BotAI.HasTank) {
-			friction += 0.2;
-
+			speed += 0.2;
+			
 			foreach(danger in BotAI.SpecialList) {
 				if (danger.GetClassname() == "player" && danger.GetZombieType() == 8) {
 					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 310) {
-						player.OverrideFriction(0.5, 0.9);
+						friction -= 0.1;
 					}
 
 					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 200) {
-						friction += 0.5 + BotAI.BotCombatSkill * 0.2;
+						speed += 0.5 + BotAI.BotCombatSkill * 0.3;
+						friction -= 0.2 * BotAI.BotCombatSkill;
 					}
 				}
 			}
 		}
 
 		if (movingID.find("$") != null) {
-			friction += 0.2;
+			speed += 0.2;
 		}
 
-		NetProps.SetPropFloat(player, "m_flLaggedMovementValue", friction);
+		NetProps.SetPropFloat(player, "m_flLaggedMovementValue", speed);
+		player.SetFriction(friction);
 
 		local offset = 15;
 

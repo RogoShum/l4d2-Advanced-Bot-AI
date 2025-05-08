@@ -452,7 +452,7 @@ function BotAI::createNavigatorTimer(player) {
         }
 		local navigator = BotAI.getNavigator(player);
 		navigator.onUpdate();
-		return 0.2;
+		return 0.1;
     }
 
 	if (_targetTimer != null) {

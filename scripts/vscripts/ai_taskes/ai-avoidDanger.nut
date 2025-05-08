@@ -33,7 +33,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 			if (BotAI.IsAlive(special) && !special.IsGhost() && BotAI.distanceof(special.GetOrigin(), player.GetOrigin()) <= 600 &&
 				(special.GetZombieType() == 3 || special.GetZombieType() == 5 || special.GetZombieType() == 6 || special.GetZombieType() == 8) &&
 				!BotAI.IsEntityValid(BotAI.getSiVictim(special)) &&
-				BotAI.GetTarget(special) == player &&
+				(BotAI.GetTarget(special) == player) &&
 				BotAI.CanShotOtherEntityInSight(player, special, -1, MASK_UNTHROUGHABLE)) {
 				dangerous[dangerous.len()] <- special;
 			}
@@ -123,8 +123,6 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 420, 120, 420, 800);
 						}
 					} else if (danger.GetZombieType() == 8) {
-						BotAI.BotRetreatFrom(player, danger);
-
 						local nexDis = BotAI.nextTickDistance(player, danger);
 						//local cansee = BotAI.VectorDotProduct(BotAI.normalize(danger.EyeAngles().Forward()), BotAI.normalize(player.GetOrigin() - danger.GetOrigin())) > 0.6
 						local innerCircle = 300;
@@ -172,7 +170,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 
 						local isTarget = BotAI.IsTarget(player, danger);
 
-						if (nexDis < innerCircle && isTarget) {
+						if (nexDis < innerCircle) {
 							local navigator = BotAI.getNavigator(player);
 							navigator.clearPath("followPlayer");
 							player.UseAdrenaline(1.0);
@@ -199,9 +197,10 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							if (targetSpot == null) {
 								vecList[vecList.len()] <- BotAI.getDodgeVec(player, danger, 80, 80, 80, 80);
 							} else {
-								if (BotAI.BotCombatSkill == 3 && nexDis < 70) {
+								local possibleStuck = BotAI.PossibleBotStuck(player, 200);
+								if (possibleStuck && BotAI.BotCombatSkill == 3 && nexDis < 70) {
 									player.SetOrigin(targetSpot + player.GetOrigin());
-								} else if (BotAI.BotCombatSkill == 4 && nexDis < 100) {
+								} else if (possibleStuck && BotAI.BotCombatSkill == 4 && nexDis < 100) {
 									player.SetOrigin(targetSpot + player.GetOrigin());
 								} else {
 									vecList[vecList.len()] <- targetSpot;

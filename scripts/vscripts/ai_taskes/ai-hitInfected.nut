@@ -58,7 +58,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 
 		foreach(savePlayer in BotAI.SurvivorList) {
 			if(BotAI.IsAlive(savePlayer) && savePlayer != player) {
-				local dis = BotAI.nextTickDistance(player, savePlayer) < dist;
+				local dis = BotAI.distanceof(player.GetOrigin(), savePlayer.GetCenter()) < dist;
 				if (savePlayer.IsDominatedBySpecialInfected() && dis) {
 					local bad = savePlayer.GetSpecialInfectedDominatingMe();
 					if (BotAI.IsEntitySI(bad) && (bad.GetZombieType() == 1 || bad.GetZombieType() == 2 || bad.GetZombieType() == 3 || bad.GetZombieType() == 5)) {
@@ -110,6 +110,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 				if (infected.GetZombieType() == 1) {
 					dist = BotAI.tongueRange*1.2;
 				} else if (infected.GetZombieType() == 8) {
+					BotAI.BotRetreatFrom(player, infected);
 					dist = 800;
 				} else {
 					dist = 300 + BotAI.BotCombatSkill * 120;
