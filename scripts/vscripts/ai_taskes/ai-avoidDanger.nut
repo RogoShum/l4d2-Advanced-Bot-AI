@@ -172,7 +172,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 
 						local isTarget = BotAI.IsTarget(player, danger);
 
-						if (nexDis < innerCircle) {
+						if (nexDis < innerCircle && isTarget) {
 							local navigator = BotAI.getNavigator(player);
 							navigator.clearPath("followPlayer");
 							player.UseAdrenaline(1.0);
@@ -307,6 +307,8 @@ class::AITaskAvoidDanger extends AITaskSingle {
 						if (!BotAI.IsEntityValid(danger) || !BotAI.IsAlive(danger)) return true;
 						if (BotAI.witchRetreat(danger)) return true;
 						if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) > 600) return true;
+						if (!BotAI.IsEntityValid(helper) || !BotAI.IsAlive(helper)) return true;
+						if (BotAI.distanceof(helper.GetOrigin(), player.GetOrigin()) < 100) return true;
 						return false;
 					}
 

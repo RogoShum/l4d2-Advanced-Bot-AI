@@ -147,11 +147,12 @@ class ::AITaskSavePlayer extends AITaskGroup
 			}
 		}
 
-		if(BotAI.IsEntityValid(smoker) && BotAI.CanSeeOtherEntityWithoutBarrier(player, smoker, 180)) {
+		if(BotAI.IsEntityValid(smoker) && BotAI.CanSeeOtherEntityWithoutBarrier(player, smoker, 180) && !BotAI.getIsMelee(player)) {
 			local function needSave() {
 				if(!BotAI.IsAlive(smoker)) return true;
+				if(!BotAI.IsAlive(victim) || BotAI.isPlayerBeingRevived(victim)) return true;
 
-				return false;
+				return !victim.IsDominatedBySpecialInfected();
 			}
 
 			BotAI.botRunPos(player, smoker, "savePlayer$", 5, needSave);
