@@ -351,7 +351,7 @@ function BotAI::createPlayerTargetTimer(player) {
 		local closestDis = 150 + BotAI.BotCombatSkill * 15;
 
 		local awareAngle = 0.996;
-		local dangerAwareAngle = 0.707;
+		local dangerAwareAngle = 0.94;
 
 		if (BotAI.BotCombatSkill == 1) {
 			awareAngle = 0.707;
@@ -368,7 +368,7 @@ function BotAI::createPlayerTargetTimer(player) {
 		if (navigator.moving()) {
 			awareAngle -= 2.0;
 			selectedDis -= BotAI.BotCombatSkill * 10 + 10;
-			closestDis -= 65;
+			closestDis -= 75;
 		}
 
 		local isShove = BotAI.IsPressingShove(player);

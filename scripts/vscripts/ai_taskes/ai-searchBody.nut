@@ -24,10 +24,21 @@ class ::AITaskSearchBody extends AITaskGroup
 		if(BotAI.IsEntityValid(ironBanner) && ironBanner.GetClassname() == "survivor_death_model") {
 			if(BotAI.isDeathStillAlive(ironBanner)) {
 				ironBanner = null;
+				if (BotAI.IsEntityValid(GUY)) {
+					BotAI.setBotLockTheard(GUY, -1);
+				}
+
+				GUY = null;
 			} else
 				return true;
-		} else
+		} else {
 			ironBanner = null;
+			if (BotAI.IsEntityValid(GUY)) {
+				BotAI.setBotLockTheard(GUY, -1);
+			}
+
+			GUY = null;
+		}
 
 		local deathBody = null;
 		local bodys = {};
@@ -45,20 +56,16 @@ class ::AITaskSearchBody extends AITaskGroup
 		if(bodys.len() < 1) {
 			taskReset(1);
 			local store = {};
-			foreach(player in BotAI.SurvivorBotList)
-			{
+			foreach(player in BotAI.SurvivorBotList) {
 				if(!BotAI.IsEntityValid(player)) continue;
 
 				local item = null;
-				while (Entities.FindInSphere(item, player.GetOrigin(), 150) != null)
-				{
+				while (Entities.FindInSphere(item, player.GetOrigin(), 150) != null) {
 					item = Entities.FindInSphere(item, player.GetOrigin(), 150);
 					local name = item.GetClassname();
 
-					if(BotAI.IsEntityValid(item) && item.GetOwnerEntity() == null && !(item in store))
-					{
-						if (name == "first_aid_kit_spawn" || name == "first_aid_kit" || name == "weapon_first_aid_kit_spawn" || name == "weapon_first_aid_kit" )
-						{
+					if(BotAI.IsEntityValid(item) && item.GetOwnerEntity() == null && !(item in store)) {
+						if (name == "first_aid_kit_spawn" || name == "first_aid_kit" || name == "weapon_first_aid_kit_spawn" || name == "weapon_first_aid_kit" ) {
 							store[item] <- 1;
 							BotAI.doAmmoUpgrades(player);
 							DoEntFire("!self", "Use", "", 0, player, item);
@@ -68,9 +75,7 @@ class ::AITaskSearchBody extends AITaskGroup
 			}
 
 			return false;
-		}
-		else
-		{
+		} else {
 			fallen = bodys;
 			return true;
 		}
@@ -92,8 +97,7 @@ class ::AITaskSearchBody extends AITaskGroup
 			findBody = body;
 		}
 
-		if(findBody != null)
-		{
+		if(findBody != null) {
 			ironBanner = findBody;
 		} else if(ironBanner == null)
 			return false;

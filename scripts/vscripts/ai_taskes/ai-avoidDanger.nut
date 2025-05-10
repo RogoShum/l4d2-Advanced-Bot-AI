@@ -2,17 +2,12 @@ class::AITaskAvoidDanger extends AITaskSingle {
 
 	constructor(orderIn, tickIn, compatibleIn, forceIn) {
 		base.constructor(orderIn, tickIn, compatibleIn, forceIn);
-		enumGround["env_entity_igniter"] <- "env_entity_igniter"
-		enumGround["entityflame"] <- "entityflame"
-		enumGround["inferno"] <- "inferno"
-		enumGround["insect_swarm"] <- "insect_swarm"
 	}
 
 	name = "avoidDanger";
 	single = true;
 	updating = {};
 	playerTick = {};
-	enumGround = {};
 
 	function singleUpdateChecker(player) {
 		local dangerous = {};
@@ -25,7 +20,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 		local isHealing = BotAI.IsBotHealing(player);
 
 		foreach(danger in BotAI.groundList) {
-			if (BotAI.IsEntityValid(danger) && BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 250)
+			if (BotAI.IsEntityValid(danger) && BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 270)
 				dangerous[dangerous.len()] <- danger;
 		}
 
@@ -75,7 +70,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 					height += 10;
 				}
 
-				if (name in enumGround) {
+				if (name in BotAI.enumGround) {
 					local lastArea = player.GetLastKnownArea();
 					local function feelSafe() {
 						local area = player.GetLastKnownArea();
@@ -88,6 +83,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 					}
 
 					if (lastArea && lastArea.IsDamaging()) {
+						local doSomethingDangerous = BotAI.IsPlayerReviving(player);
 						local follow = false;
 						foreach(humanPlayer in BotAI.SurvivorHumanList) {
 							if (!follow && BotAI.distanceof(player.GetOrigin(), humanPlayer.GetOrigin()) < 300) {
@@ -96,7 +92,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							}
 						}
 
-						if (!follow) {
+						if (!follow || doSomethingDangerous) {
 							local areas = {};
 							NavMesh.GetNavAreasInRadius(player.GetOrigin(), 400, areas);
 							local safeArea = null;
@@ -107,7 +103,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							}
 
 							if (safeArea != null) {
-								if (BotAI.IsPlayerReviving(player)) {
+								if (doSomethingDangerous) {
 									player.SetOrigin(safeArea.GetCenter());
 								} else {
 									BotAI.botRunPos(player, safeArea.GetCenter(), "avoidDanger#%", 5, feelSafe);

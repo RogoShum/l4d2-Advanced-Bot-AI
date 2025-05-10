@@ -694,9 +694,8 @@ function BotAI::getDirectionOriginFromArea(area, dir) {
 	return Time();
 }
 
-function BotAI::HasSpecialInfectedAlive()
-{
-	player <- null;
+function BotAI::HasSpecialInfectedAlive() {
+	local player = null;
 	while(player = Entities.FindByClassname(player, "player"))
 	{
 		if(!player.IsSurvivor() && BotAI.IsAlive(player))
@@ -1438,12 +1437,32 @@ function BotAI::CanHumanSeePlace(posIn) {
 	return false;
 }
 
-function BotAI::applyDamage(owner, target, amount, damageType, damagepos = null) {
+function BotAI::applyDamage(owner, target, amount) {
+	if (BotAI.IsAlive(target) || amount <= 0) {
+		local inflictor = owner;
+		local weaponType = owner.GetActiveWeapon().GetClassname();
+		local damagepos = null;
+		local damageType = BotAI.headshotDmg;
+
+		if(weaponType == "weapon_chainsaw" || weaponType == "weapon_melee") {
+			inflictor = owner.GetActiveWeapon();
+			damageType = BotAI.meleeDmg;
+			damagepos = BotAI.getEntityHeadPos(owner);
+			damagepos = Vector(damagepos.x, damagepos.y, owner.EyePosition().z);
+		} else {
+			damagepos = BotAI.getEntityHeadPos(target);
+		}
+
+		target.TakeDamageEx(inflictor, owner, owner.GetActiveWeapon(), Vector(0, 0, 0), damagepos, amount, damageType);
+	}
+}
+
+function BotAI::applyDamageEx(owner, target, amount, damageType, damagepos = null) {
 	if (damagepos == null) {
 		damagepos = BotAI.getEntityHeadPos(target);
 	}
 
-	if (BotAI.IsAlive(target)) {
+	if (BotAI.IsAlive(target) || amount <= 0) {
 		local inflictor = owner;
 		local weaponType = owner.GetActiveWeapon().GetClassname();
 
@@ -2580,12 +2599,12 @@ function BotAI::setLastStrike(player) {
 }
 
 function BotAI::getIsMelee(player) {
-	weaponN <- player.GetActiveWeapon();
+	local weaponN = player.GetActiveWeapon();
 
 	if(weaponN == null || !weaponN.IsValid())
 		return false;
 
-	wname <- weaponN.GetClassname();
+	local wname = weaponN.GetClassname();
 
 	if(wname == "weapon_chainsaw" || wname == "weapon_melee")
 		return true;

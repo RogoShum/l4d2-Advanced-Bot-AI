@@ -87,6 +87,12 @@ if (!("VSLib" in getroottable())) {
 			propanecanister001a = "weapon_propanetank"
 			explosive_box001 = "weapon_fireworkcrate"
 		}
+		enumGround = {
+			env_entity_igniter = "env_entity_igniter"
+			entityflame = "entityflame"
+			inferno = "inferno"
+			insect_swarm = "insect_swarm"
+		}
 		mapTransPack = {}
 		scavenge_start = false
 		HasTank = false
@@ -364,8 +370,9 @@ getconsttable()["DMG_BUCKSHOT"] <- (1 << 29);
 
 getconsttable()["BOT_CANT_SEE"] <- (1 << 0);
 
-BotAI.headshotDmg <- DMG_BULLET | DMG_HEADSHOT | (1 << 31);
-BotAI.meleeDmg <- DMG_MELEE | DMG_HEADSHOT | (1 << 25) | (1 << 6) | (1 << 29) | (1 << 31);
+BotAI.headshotDmg <- DMG_BULLET | DMG_HEADSHOT | (1 << 13);
+BotAI.meleeDmg <- DMG_MELEE | DMG_HEADSHOT | (1 << 13) | (1 << 25) | (1 << 6) | (1 << 29) | (1 << 31);
+BotAI.witchMeleeDmg <- -2145386492;
 
 ::BotAI.SaveUseTarget <- function() {
 	local UseTargetList = "";
@@ -1201,7 +1208,7 @@ function BotAI::locateUseTarget(args) {
 	if(!BotAI.NeedGasFinding)
 		return;
 
-	notBotPlayerBoolean <- true;
+	local notBotPlayerBoolean = true;
 
 	if(BotAI.UseTarget == null && BotAI.MapName in BotAI.UseTargetList && BotAI.MapName in BotAI.UseTargetOriList && BotAI.MapName in BotAI.UseTargetVecList) {
 		if(Entities.FindByName( null, BotAI.UseTargetList[BotAI.MapName])) {
@@ -1209,7 +1216,7 @@ function BotAI::locateUseTarget(args) {
 			local UseTargetOri = BotAI.UseTargetOriList[BotAI.MapName];
 			local UseTargetVec = BotAI.UseTargetVecList[BotAI.MapName];
 
-			playerSet <- null;
+			local playerSet = null;
 
 			while(playerSet = Entities.FindByClassname(playerSet, "player")) {
 				if(BotAI.IsEntityValid(UseTarget) && BotAI.IsPlayerEntityValid(playerSet) && playerSet.IsSurvivor() && (BotAI.distanceof(playerSet.GetOrigin(), UseTargetOri) < 301 || BotAI.scavenge_start)) {
@@ -1224,12 +1231,12 @@ function BotAI::locateUseTarget(args) {
 	}
 
 	if(BotAI.UseTarget == null) {
-		notBotPlayer <- null;
+		local notBotPlayer = null;
 		while(notBotPlayer = Entities.FindByClassname(notBotPlayer, "player")) {
 			if(BotAI.IsPlayerEntityValid(notBotPlayer) && notBotPlayer.IsSurvivor() && !IsPlayerABot(notBotPlayer) && NetProps.GetPropInt(notBotPlayer, "m_iTeamNum") != 1 && !notBotPlayer.IsDead()) {
 				notBotPlayerBoolean = false;
 				if((BotAI.IsPressingUse(notBotPlayer) || BotAI.IsPressingAttack(notBotPlayer)) && BotAI.HasItem(notBotPlayer, BotAI.BotsNeedToFind)) {
-					target <- null;
+					local target = null;
 					while (target = Entities.FindByClassnameWithin(target, "point_prop_use_target", notBotPlayer.GetOrigin() + Vector(0, 0, 40), 150)) {
 						if(NetProps.GetPropInt(target, "m_spawnflags") == 1) {
 							BotAI.UseTarget = target;
@@ -1246,11 +1253,11 @@ function BotAI::locateUseTarget(args) {
 		}
 
 		if(notBotPlayerBoolean) {
-			playerSet <- null;
+			local playerSet = null;
 
 			while(playerSet = Entities.FindByClassname(playerSet, "player")) {
 				if(BotAI.IsPlayerEntityValid(playerSet) && playerSet.IsSurvivor() && IsPlayerABot(playerSet)) {
-					target <- null;
+					local target = null;
 					while (target = Entities.FindByClassnameWithin(target, "point_prop_use_target", playerSet.GetOrigin() + Vector(0, 0, 40), 300)) {
 						if(NetProps.GetPropInt(target, "m_spawnflags") == 1) {
 							if(!(BotAI.MapName in BotAI.UseTargetList))
@@ -1274,14 +1281,14 @@ function BotAI::locateUseTarget(args) {
 }
 
 ::BotStopCmd <- function ( speaker, args , args1) {
-	notBotPlayer <- null;
+	local notBotPlayer = null;
 	while(notBotPlayer = Entities.FindByClassname(notBotPlayer, "player")) {
 		if(BotAI.IsPlayerEntityValid(notBotPlayer) && notBotPlayer.IsSurvivor() && !IsPlayerABot(notBotPlayer) && NetProps.GetPropInt(notBotPlayer, "m_iTeamNum") != 1 && !notBotPlayer.IsDead()) {
 			return;
 		}
 	}
 
-	player <- null;
+	local player = null;
 	while(player = Entities.FindByClassname(player, "player")) {
 		if(BotAI.IsPlayerEntityValid(player) && player.IsSurvivor() && IsPlayerABot(player)) {
 			BotAI.setLastStrike(player);
@@ -1546,9 +1553,9 @@ function BotAI::locateUseTarget(args) {
 		BotAI.PathFinding = true;
 		Convars.SetValue( "sb_allow_leading", 1 );
 		Convars.SetValue( "sb_separation_range", 2000 );
-		Convars.SetValue( "sb_separation_danger_min_range", 500 );
-		Convars.SetValue( "sb_separation_danger_max_range", 2000 );
-		Convars.SetValue( "sb_neighbor_range", 1000 );
+		Convars.SetValue( "sb_separation_danger_min_range", 1300 );
+		Convars.SetValue( "sb_separation_danger_max_range", 2500 );
+		Convars.SetValue( "sb_neighbor_range", 1500 );
 		//Convars.SetValue( "sb_escort", 0 );
 		BotAI.SendPlayer(player, "botai_path_finding_on");
 		if(BotAI.PathFinding) {
@@ -1866,6 +1873,7 @@ function BotAI::registerMenu() {
 		local bot = BotAI.pingPoint[player];
 		local function changeAndUse() {
 			if(!BotAI.IsAlive(bot)) return true;
+			if(!BotAI.IsAlive(entity)) return true;
 			local navigator = BotAI.getNavigator(bot);
 			if(BotAI.distanceof(entity.GetOrigin(), bot.GetOrigin()) <= 100) {
 				DoEntFire("!self", "Use", "", 0, bot, entity);
@@ -2133,37 +2141,37 @@ function BotAI::displayOptionMenuBotDistance(player, args, args1) {
 		BotFollowDistanceCmd(player, ability, "");
 	}
 	local function normal(player, args, args1) {
-		followDistance(200);
+		followDistance(100);
 	}
 	local function high(player, args, args1) {
-		followDistance(700);
+		followDistance(350);
 	}
 	local function ultra(player, args, args1) {
-		followDistance(1000);
+		followDistance(700);
 	}
 	local function extreme(player, args, args1) {
-		followDistance(1500);
+		followDistance(1000);
 	}
 	local function pro(player, args, args1) {
-		followDistance(2000);
+		followDistance(1500);
 	}
 	local function pro_(player, args, args1) {
-		followDistance(3000);
+		followDistance(2000);
 	}
 	local function pro__(player, args, args1) {
 		followDistance(999999);
 	}
 
 	local function top(menu) {
-		menu.AddOption("200", normal);
-		menu.AddOption("700", high);
-		menu.AddOption("1000", ultra);
-		menu.AddOption("1500", extreme);
-		menu.AddOption("2000", pro);
+		menu.AddOption("100", normal);
+		menu.AddOption("350", high);
+		menu.AddOption("700", ultra);
+		menu.AddOption("1000", extreme);
+		menu.AddOption("1500", pro);
 	}
 
 	local function bot(menu) {
-		menu.AddOption("3000", pro_);
+		menu.AddOption("2000", pro_);
 		menu.AddOption("999999", pro__);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
 		menu.AddOption("emp_0", BotEmptyCmd);
@@ -2190,10 +2198,10 @@ function BotAI::displayOptionMenuBotTeleport(player, args, args1) {
 		teleportDistance(9);
 	}
 	local function extreme(player, args, args1) {
-		teleportDistance(15);
+		teleportDistance(12);
 	}
 	local function pro(player, args, args1) {
-		teleportDistance(20);
+		teleportDistance(17);
 	}
 	local function pro_(player, args, args1) {
 		teleportDistance(999);
@@ -2203,8 +2211,8 @@ function BotAI::displayOptionMenuBotTeleport(player, args, args1) {
 		menu.AddOption("0", normal);
 		menu.AddOption("5", high);
 		menu.AddOption("9", ultra);
-		menu.AddOption("15", extreme);
-		menu.AddOption("20", pro);
+		menu.AddOption("12", extreme);
+		menu.AddOption("17", pro);
 	}
 
 	local function bot(menu) {
@@ -2230,29 +2238,35 @@ function BotAI::displayOptionMenuBotWitchDamage(player, args, args1) {
 		damageMultiplier(0.2);
 	}
 	local function high(player, args, args1) {
-		damageMultiplier(0.5);
+		damageMultiplier(0.4);
 	}
 	local function ultra(player, args, args1) {
-		damageMultiplier(1.0);
+		damageMultiplier(0.6);
 	}
 	local function extreme(player, args, args1) {
-		damageMultiplier(1.5);
+		damageMultiplier(0.8);
 	}
 	local function pro(player, args, args1) {
+		damageMultiplier(1.0);
+	}
+	local function pro_(player, args, args1) {
+		damageMultiplier(1.5);
+	}
+	local function pro__(player, args, args1) {
 		damageMultiplier(2.0);
 	}
 
 	local function top(menu) {
 		menu.AddOption("0.2", normal);
-		menu.AddOption("0.5", high);
-		menu.AddOption("1.0", ultra);
-		menu.AddOption("1.5", extreme);
-		menu.AddOption("2.0", pro);
+		menu.AddOption("0.4", high);
+		menu.AddOption("0.6", ultra);
+		menu.AddOption("0.8", extreme);
+		menu.AddOption("1.0", pro);
 	}
 
 	local function bot(menu) {
-		menu.AddOption("emp_1", BotEmptyCmd);
-		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption("1.5", pro_);
+		menu.AddOption("2.0", pro__);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNext);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
@@ -2273,29 +2287,35 @@ function BotAI::displayOptionMenuBotSpecialDamage(player, args, args1) {
 		damageMultiplier(0.2);
 	}
 	local function high(player, args, args1) {
-		damageMultiplier(0.5);
+		damageMultiplier(0.4);
 	}
 	local function ultra(player, args, args1) {
-		damageMultiplier(1.0);
+		damageMultiplier(0.6);
 	}
 	local function extreme(player, args, args1) {
-		damageMultiplier(1.5);
+		damageMultiplier(0.8);
 	}
 	local function pro(player, args, args1) {
+		damageMultiplier(1.0);
+	}
+	local function pro_(player, args, args1) {
+		damageMultiplier(1.5);
+	}
+	local function pro__(player, args, args1) {
 		damageMultiplier(2.0);
 	}
 
 	local function top(menu) {
 		menu.AddOption("0.2", normal);
-		menu.AddOption("0.5", high);
-		menu.AddOption("1.0", ultra);
-		menu.AddOption("1.5", extreme);
-		menu.AddOption("2.0", pro);
+		menu.AddOption("0.4", high);
+		menu.AddOption("0.6", ultra);
+		menu.AddOption("0.8", extreme);
+		menu.AddOption("1.0", pro);
 	}
 
 	local function bot(menu) {
-		menu.AddOption("emp_1", BotEmptyCmd);
-		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption("1.5", pro_);
+		menu.AddOption("2.0", pro__);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNext);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
@@ -2316,29 +2336,35 @@ function BotAI::displayOptionMenuBotTankDamage(player, args, args1) {
 		damageMultiplier(0.2);
 	}
 	local function high(player, args, args1) {
-		damageMultiplier(0.5);
+		damageMultiplier(0.4);
 	}
 	local function ultra(player, args, args1) {
-		damageMultiplier(1.0);
+		damageMultiplier(0.6);
 	}
 	local function extreme(player, args, args1) {
-		damageMultiplier(1.5);
+		damageMultiplier(0.8);
 	}
 	local function pro(player, args, args1) {
+		damageMultiplier(1.0);
+	}
+	local function pro_(player, args, args1) {
+		damageMultiplier(1.5);
+	}
+	local function pro__(player, args, args1) {
 		damageMultiplier(2.0);
 	}
 
 	local function top(menu) {
 		menu.AddOption("0.2", normal);
-		menu.AddOption("0.5", high);
-		menu.AddOption("1.0", ultra);
-		menu.AddOption("1.5", extreme);
-		menu.AddOption("2.0", pro);
+		menu.AddOption("0.4", high);
+		menu.AddOption("0.6", ultra);
+		menu.AddOption("0.8", extreme);
+		menu.AddOption("1.0", pro);
 	}
 
 	local function bot(menu) {
-		menu.AddOption("emp_1", BotEmptyCmd);
-		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption("1.5", pro_);
+		menu.AddOption("2.0", pro__);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNextNext);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
@@ -2359,29 +2385,35 @@ function BotAI::displayOptionMenuBotCommonDamage(player, args, args1) {
 		damageMultiplier(0.2);
 	}
 	local function high(player, args, args1) {
-		damageMultiplier(0.5);
+		damageMultiplier(0.4);
 	}
 	local function ultra(player, args, args1) {
-		damageMultiplier(1.0);
+		damageMultiplier(0.6);
 	}
 	local function extreme(player, args, args1) {
-		damageMultiplier(1.5);
+		damageMultiplier(0.8);
 	}
 	local function pro(player, args, args1) {
+		damageMultiplier(1.0);
+	}
+	local function pro_(player, args, args1) {
+		damageMultiplier(1.5);
+	}
+	local function pro__(player, args, args1) {
 		damageMultiplier(2.0);
 	}
 
 	local function top(menu) {
 		menu.AddOption("0.2", normal);
-		menu.AddOption("0.5", high);
-		menu.AddOption("1.0", ultra);
-		menu.AddOption("1.5", extreme);
-		menu.AddOption("2.0", pro);
+		menu.AddOption("0.4", high);
+		menu.AddOption("0.6", ultra);
+		menu.AddOption("0.8", extreme);
+		menu.AddOption("1.0", pro);
 	}
 
 	local function bot(menu) {
-		menu.AddOption("emp_1", BotEmptyCmd);
-		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption("1.5", pro_);
+		menu.AddOption("2.0", pro__);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNextNext);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
@@ -2411,8 +2443,16 @@ function BotAI::resetBotMeleeAction() {
 function BotAI::ResetBotFireRate() {
 	BotAI.AdjustBotsUpdateRate(1);
 
-	Convars.SetValue( "sb_combat_saccade_speed", 9999 );
-	Convars.SetValue( "sb_normal_saccade_speed", 9999 );
+	if (BotAI.BotCombatSkill == 0) {
+		Convars.SetValue( "sb_combat_saccade_speed", 2000 );
+		Convars.SetValue( "sb_normal_saccade_speed", 350 );
+	} else if (BotAI.BotCombatSkill == 1) {
+		Convars.SetValue( "sb_combat_saccade_speed", 4000 );
+		Convars.SetValue( "sb_normal_saccade_speed", 600 );
+	} else {
+		Convars.SetValue( "sb_combat_saccade_speed", 9999 );
+		Convars.SetValue( "sb_normal_saccade_speed", 4000 );
+	}
 }
 
 ::NavigatorPause.fall <- function(player) {
@@ -2436,7 +2476,6 @@ function BotAI::ResetBotFireRate() {
 }
 
 ::BotAI.Sort <- function(List) {
-
     for (local i = 0; i < List.len(); i++) {
         local minIndex = i;
         for (local j = i; j < List.len(); j++) {
@@ -2491,7 +2530,8 @@ function BotAI::DebugFunction( args ) {
 			if(BotAI.BotDebugMode) {
 				local target = BotAI.CanSeeOtherEntityPrintName(player, 9999, 1, g_MapScript.TRACE_MASK_ALL);
 				BotAI.showAABB(target);
-			/*
+
+				/*
 					local function kill(mob) {
 					local wep = player.GetActiveWeapon();
 					local ename = " ";
@@ -2503,15 +2543,7 @@ function BotAI::DebugFunction( args ) {
 
 					local isMelee = ename == "weapon_melee" || ename == "weapon_chainsaw";
 
-					if (!isMelee) {
-						BotAI.applyDamage(player, mob, dama, BotAI.headshotDmg);
-					} else {
-						local damagePos = BotAI.getEntityHeadPos(player);
-						damagePos = Vector(damagePos.x, damagePos.y, player.EyePosition().z);
-						BotAI.applyDamage(player, mob, dama, BotAI.meleeDmg, damagePos);
-						//BotAI.spawnParticle("blood_impact_infected_01", mob.GetOrigin() + Vector(0, 0, 50), mob);
-						//BotAI.spawnParticle("blood_melee_slash_TP_swing", mob.GetOrigin() + Vector(0, 0, 50), mob);
-					}
+					BotAI.applyDamage(player, mob, dama);
 				}
 				local infected = null;
 				while(infected = Entities.FindByClassnameWithin(infected, "infected", player.GetCenter(), 300)) {
@@ -2529,7 +2561,7 @@ function BotAI::DebugFunction( args ) {
 				while(witch = Entities.FindByClassnameWithin(witch, "witch", player.GetCenter(), 300)) {
 					kill(witch);
 				}
-*/
+				*/
 			}
 		} else if (leader == null || GetFlowDistanceForPosition(player.GetOrigin()) > GetFlowDistanceForPosition(leader.GetOrigin())) {
 			leader = player;
@@ -2663,6 +2695,44 @@ function BotAI::AdjustBotState(args) {
 		Convars.SetValue( "sb_allow_leading", 1 );
 	}
 
+	foreach(bot in BotAI.SurvivorBotList) {
+		if(!BotAI.IsPlayerEntityValid(bot) || bot.IsIncapacitated() || bot.IsHangingFromLedge() || bot.IsDominatedBySpecialInfected()) continue;
+		local vehicleDis = 300;
+		local vehicleTarget = null;
+
+		foreach(sur in BotAI.SurvivorHumanList) {
+			if(!BotAI.IsAlive(sur)) continue;
+
+			local disToHuman = BotAI.distanceof(sur.GetOrigin(), bot.GetOrigin());
+
+			if (disToHuman <= vehicleDis) {
+				vehicleTarget = sur;
+				vehicleDis = disToHuman;
+			}
+		}
+
+		if (vehicleTarget != null && Director.IsFinaleVehicleReady()) {
+			if (vehicleDis < 300) {
+				if (vehicleDis > 40) {
+					local humanLastMesh = vehicleTarget.GetLastKnownArea();
+					//                                                                                                 RESCUE_VEHICLE
+					if (humanLastMesh != null && "HasSpawnAttributes" in humanLastMesh && humanLastMesh.HasSpawnAttributes(1 << 15)) {
+						bot.SetOrigin(vehicleTarget.GetOrigin());
+					}
+				}
+			} else {
+				local function changeAndUse() {
+					if(!BotAI.IsAlive(bot)) return true;
+					if(!BotAI.IsAlive(vehicleTarget)) return true;
+
+					return false;
+				}
+
+				BotAI.botRunPos(bot, vehicleTarget, "finalVehicle", 4, changeAndUse);
+			}
+		}
+	}
+
 	local needRecall = true;
 	local display = null;
 	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
@@ -2724,17 +2794,6 @@ function BotAI::AdjustBotState(args) {
 					}
 
 					BotAI.botRunPos(bot, tpPoint, "checkpoint", 4, changeAndUse);
-				}
-
-				if (BotAI.UnStick) {
-					if (tpPoint != null && Director.IsFinaleVehicleReady()) {
-						local function changeAndUse() {
-							if(!BotAI.IsAlive(bot)) return true;
-							return false;
-						}
-
-						BotAI.botRunPos(bot, tpPoint, "checkpoint", 4, changeAndUse);
-					}
 				}
 
 				if(tpPoint != null && dis > (BotAI.FollowDistance + 200)) {
@@ -2969,7 +3028,7 @@ function BotAI::resetAITask() {
 }
 
 function resetAllBots() {
-	playerSet <- null;
+	local playerSet = null;
 
 	while(playerSet = Entities.FindByClassname(playerSet, "player")) {
 		if(BotAI.IsPlayerEntityValid(playerSet) && playerSet.IsSurvivor() && IsPlayerABot(playerSet)) {
@@ -2987,23 +3046,17 @@ function resetAllBots() {
 	}
 
 	local enumProjectile = {};
-	local enumGround = {};
 
 	enumProjectile["spitter_projectile"] <- "spitter_projectile";
 	enumProjectile["prop_car_alarm"] <- "prop_car_alarm";
 	enumProjectile["prop_physics"] <- "prop_physics";
 	enumProjectile["prop_physics_multiplayer"] <- "prop_physics_multiplayer";
 
-	enumGround["env_entity_igniter"] <- "env_entity_igniter"
-	enumGround["entityflame"] <- "entityflame"
-	enumGround["inferno"] <- "inferno"
-	enumGround["insect_swarm"] <- "insect_swarm"
-
 	foreach(projectile in enumProjectile) {
 		BotAI.createProjectileTargetTimer(projectile);
 	}
 
-	foreach(ground in enumGround) {
+	foreach(ground in BotAI.enumGround) {
 		BotAI.createGroundTargetTimer(ground);
 	}
 
@@ -3046,9 +3099,9 @@ function resetAllBots() {
 	if(BotAI.PathFinding) {
 		Convars.SetValue( "sb_allow_leading", 1 );
 		Convars.SetValue( "sb_separation_range", 2000 );
-		Convars.SetValue( "sb_separation_danger_min_range", 500 );
-		Convars.SetValue( "sb_separation_danger_max_range", 2000 );
-		Convars.SetValue( "sb_neighbor_range", 1000 );
+		Convars.SetValue( "sb_separation_danger_min_range", 1300 );
+		Convars.SetValue( "sb_separation_danger_max_range", 2500 );
+		Convars.SetValue( "sb_neighbor_range", 1500 );
 	} else {
 		Convars.SetValue( "sb_separation_range", 100 );
 		Convars.SetValue( "sb_separation_danger_min_range", 100 );
