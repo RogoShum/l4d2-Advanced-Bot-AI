@@ -13,10 +13,17 @@ class ::AITaskHeal extends AITaskSingle
 		if(BotAI.playerDominated > 0) return false;
 		local needHealing = BotAI.getPlayerTotalHealth(player) <= 35 || player.IsOnThirdStrike();
 		local hasTreatmentItems = BotAI.HasItem(player, "weapon_first_aid_kit");
-		local safeCheck = !BotAI.IsInCombat(player) && !BotAI.validVector(BotAI.getBotDedgeVector(player)) && !BotAI.IsPlayerClimb(player);
+		local canRest = !BotAI.IsInCombat(player) && !player.GetLastKnownArea().IsDamaging();
+		local safeCheck = canRest && !BotAI.validVector(BotAI.getBotDedgeVector(player)) && !BotAI.IsPlayerClimb(player);
 
 		if(needHealing && safeCheck && hasTreatmentItems) {
+			printl(BotAI.getPlayerBaseName(player) + " try to heal");
 			return true;
+		}
+
+		if (!canRest && BotAI.IsBotHealingSelf(player)) {
+			BotAI.RemoveFlag(player, FL_FROZEN);
+			BotAI.UnforceButton(player, 1);
 		}
 
 		return false;
@@ -46,7 +53,7 @@ class ::AITaskHeal extends AITaskSingle
 	function taskReset(player = null) {
 		base.taskReset(player);
 
-		if(BotAI.HasFlag(player, FL_FROZEN) && BotAI.IsBotHealing(player)) {
+		if(BotAI.HasFlag(player, FL_FROZEN) && BotAI.IsBotHealingSelf(player)) {
 			BotAI.RemoveFlag(player, FL_FROZEN );
 			BotAI.UnforceButton(player, 1 );
 			BotAI.ChangeItem(player, 1);

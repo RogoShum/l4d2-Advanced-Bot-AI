@@ -120,7 +120,7 @@
 		}
 	}
 
-	BotAI.SetBotHealing(bot, false);
+	BotAI.SetBotHealing(bot, player);
 }
 
 ::BotAI.Events.OnGameEvent_player_jump <- function(event) {
@@ -194,12 +194,12 @@
 				if(realTarget.GetZombieType() == 5) {
 					realTarget.TakeDamage(BotAI.getDamage(ename)*0.7, BotAI.headshotDmg, p);
 					pass = true;
-				} else if(realTarget.GetZombieType() == 1 && RandomInt(0, abs(BotAI.BotCombatSkill - 4)) == 0) {
+				} else if(realTarget.GetZombieType() == 1 && RandomInt(0, abs(BotAI.BotCombatSkill - 4) * 1.8) == 0) {
 					BotAI.breakTongue(realTarget);
 				}
 			}
 
-			if(sight && RandomInt(0, abs(BotAI.BotCombatSkill - 4)) == 0 && BotAI.IsEntitySI(target) && target.GetZombieType() == 1) {
+			if(sight && RandomInt(0, abs(BotAI.BotCombatSkill - 4) * 1.5) == 0 && BotAI.IsEntitySI(target) && target.GetZombieType() == 1) {
 				BotAI.breakTongue(target);
 			}
 
@@ -454,17 +454,11 @@
 
 ::BotAI.Events.OnGameEvent_heal_begin <- function(event) {
 	BotAI.setBotHealingTime(GetPlayerFromUserID(event.userid), Time());
-	if(event.userid == event.subject)
-		return;
-
-	BotAI.SetBotHealing(GetPlayerFromUserID(event.userid), true);
+	BotAI.SetBotHealing(GetPlayerFromUserID(event.userid), GetPlayerFromUserID(event.subject));
 }
 
 ::BotAI.Events.OnGameEvent_heal_end <- function(event) {
-	if(event.userid == event.subject)
-		return;
-
-	BotAI.SetBotHealing(GetPlayerFromUserID(event.userid), false);
+	BotAI.SetBotHealing(GetPlayerFromUserID(event.userid), GetPlayerFromUserID(event.subject));
 }
 
 ::BotAI.Events.OnGameEvent_witch_harasser_set <- function(event) {
@@ -1078,6 +1072,15 @@ function ChatTriggers::botcommondamage( player, args, text ) {
 }
 
 function ChatTriggers::botdebug( player, args, text ) {
+	local speaker = player;
+	if (typeof player == "VSLIB_PLAYER")
+        player = player.GetBaseEntity();
+
+	if(!ABA_IsAdmin(speaker)) {
+		BotAI.SendPlayer(player, "botai_admin_only");
+		return;
+	}
+
 	if(BotAI.BotDebugMode) {
 		BotAI.BotDebugMode = false;
 	} else {
@@ -1085,16 +1088,6 @@ function ChatTriggers::botdebug( player, args, text ) {
 	}
 
 	BotAI.SaveSetting();
-}
-
-function ChatTriggers::imbot( player, args, text ) {
-	if (typeof player == "VSLIB_PLAYER")
-		player = player.GetBaseEntity();
-
-	if(player in BotAI.humanBot)
-		delete BotAI.humanBot[player];
-	else
-		BotAI.humanBot[player] <- player;
 }
 
 function ChatTriggers::botnotice( player, args, text ) {
@@ -1121,6 +1114,7 @@ function ChatTriggers::botupgrades( player, args, text ) {
 	BotUseUpgradesCmd( player, args, text );
 }
 
+/*
 function ChatTriggers::botreset( player, args, text ) {
 	foreach(_bot in BotAI.SurvivorBotList) {
 		BotAI.BotReset(_bot);
@@ -1136,6 +1130,7 @@ function ChatTriggers::bottask( player, args, text ) {
 			BotAI.disabledTask[args[0]] <- 0;
 	}
 }
+*/
 
 function VSLib::EasyLogic::Notifications::CanPickupObject::BotAIPickUp(vEntity, className) {
 	local entity = vEntity.GetBaseEntity();

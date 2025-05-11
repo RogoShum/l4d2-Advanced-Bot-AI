@@ -17,8 +17,6 @@ class::AITaskAvoidDanger extends AITaskSingle {
 			return false;
 		}
 
-		local isHealing = BotAI.IsBotHealing(player);
-
 		foreach(danger in BotAI.groundList) {
 			if (BotAI.IsEntityValid(danger) && BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 270)
 				dangerous[dangerous.len()] <- danger;
@@ -29,7 +27,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 				local distance = BotAI.distanceof(special.GetOrigin(), player.GetOrigin());
 
 				if (distance <= 600 && (special.GetZombieType() == 3 || special.GetZombieType() == 5 || special.GetZombieType() == 6 || special.GetZombieType() == 8) &&
-					!BotAI.IsEntityValid(BotAI.getSiVictim(special)) && (BotAI.GetTarget(special) == player || (special.GetZombieType() == 8 && distance < 200)) &&
+					!BotAI.IsEntityValid(BotAI.getSiVictim(special)) && (BotAI.GetTarget(special) == player || (special.GetZombieType() == 8)) &&
 					BotAI.CanShotOtherEntityInSight(player, special, -1, MASK_UNTHROUGHABLE)) {
 						dangerous[dangerous.len()] <- special;
 				}
@@ -168,7 +166,32 @@ class::AITaskAvoidDanger extends AITaskSingle {
 
 						local isTarget = BotAI.IsTarget(player, danger);
 
-						if (nexDis < innerCircle && isTarget) {
+						local closest = null;
+						local closestDistance = 2000;
+						foreach(humanPlayer in BotAI.SurvivorHumanList) {
+							if (humanPlayer.IsIncapacitated() || humanPlayer.IsHangingFromLedge()) continue;
+							local humanDis = BotAI.distanceof(player.GetOrigin(), humanPlayer.GetOrigin());
+							if (closest == null || closestDistance > humanDis) {
+								closest = humanPlayer;
+								closestDistance = humanDis;
+							}
+						}
+
+						if (BotAI.IsEntityValid(closest) && closestDistance <= 250) {
+							local function changeOrDieOrRun() {
+								if (!BotAI.IsEntityValid(danger) || !BotAI.IsAlive(danger)) return true;
+								if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 100) return true;
+								local navigator = BotAI.getNavigator(player);
+								if (!navigator.isMoving("followPlayer"))
+									return true;
+								if (!BotAI.IsEntityValid(closest) || !BotAI.IsAlive(closest)) return true;
+								if (BotAI.distanceof(closest.GetOrigin(), player.GetOrigin()) < 100) return true;
+
+								return false;
+							}
+
+							BotAI.botRunPos(player, closest, "followPlayer", 4, changeOrDieOrRun);
+						} else if (nexDis < innerCircle && isTarget) {
 							local navigator = BotAI.getNavigator(player);
 							navigator.clearPath("followPlayer");
 							player.UseAdrenaline(1.0);
@@ -243,19 +266,16 @@ class::AITaskAvoidDanger extends AITaskSingle {
 								}
 							}
 
-							local closest = null;
-							foreach(humanPlayer in BotAI.SurvivorHumanList) {
-								if (humanPlayer.IsIncapacitated() || humanPlayer.IsHangingFromLedge()) continue;
-								if (closest == null || BotAI.distanceof(player.GetOrigin(), closest.GetOrigin()) > BotAI.distanceof(player.GetOrigin(), humanPlayer.GetOrigin()))
-									closest = humanPlayer;
-							}
-
 							if (BotAI.IsEntityValid(closest)) {
 								local function changeOrDieOrRun() {
 									if (!BotAI.IsEntityValid(danger) || !BotAI.IsAlive(danger)) return true;
+									if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 100) return true;
 									local navigator = BotAI.getNavigator(player);
 									if (!navigator.isMoving("followPlayer"))
 										return true;
+
+									if (!BotAI.IsEntityValid(closest) || !BotAI.IsAlive(closest)) return true;
+									if (BotAI.distanceof(closest.GetOrigin(), player.GetOrigin()) < 100) return true;
 
 									return false;
 								}

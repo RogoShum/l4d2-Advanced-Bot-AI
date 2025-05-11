@@ -8,8 +8,7 @@ class ::AITaskSingle extends AITask
 	updating = {};
 	playerTick = {};
 
-	function shouldTick(player)
-	{
+	function shouldTick(player) {
 		if(!BotAI.IsPlayerEntityValid(player)) return false;
 		if(!(player in playerTick))
 			playerTick[player] <- BotAI.tickExisted;

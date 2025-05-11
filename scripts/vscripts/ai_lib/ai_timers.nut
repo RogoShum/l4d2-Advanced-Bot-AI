@@ -347,8 +347,8 @@ function BotAI::createPlayerTargetTimer(player) {
 
 		local selected = null;
 		local closestCom = null;
-		local selectedDis = 75 + BotAI.BotCombatSkill * 15;
-		local closestDis = 150 + BotAI.BotCombatSkill * 15;
+		local selectedDis = 70 + BotAI.BotCombatSkill * 17;
+		local closestDis = 140 + BotAI.BotCombatSkill * 19;
 
 		local awareAngle = 0.996;
 		local dangerAwareAngle = 0.94;
@@ -365,21 +365,18 @@ function BotAI::createPlayerTargetTimer(player) {
 		}
 
 		local navigator = BotAI.getNavigator(player);
-		if (navigator.moving()) {
+		if (navigator.moving() || BotAI.IsBotHealing(player)) {
 			awareAngle -= 2.0;
 			selectedDis -= BotAI.BotCombatSkill * 10 + 10;
 			closestDis -= 75;
 		}
 
 		local isShove = BotAI.IsPressingShove(player);
-		local isHealing = BotAI.IsBotHealing(player);
+		local isHealing = BotAI.IsBotHealingOthers(player);
 		local com = null;
 
-		if (isShove) {
-			local weapon = player.GetActiveWeapon();
-			if(weapon && weapon.GetClassname() == "weapon_first_aid_kit") {
-				isShove = false;
-			}
+		if (isShove && isHealing) {
+			isShove = false;
 		}
 
 		if(BotAI.BotDebugMode) {

@@ -1,7 +1,5 @@
-class ::AITaskTransItem extends AITaskSingle
-{
-	constructor(orderIn, tickIn, compatibleIn, forceIn)
-    {
+class ::AITaskTransItem extends AITaskSingle {
+	constructor(orderIn, tickIn, compatibleIn, forceIn) {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
 
@@ -9,13 +7,11 @@ class ::AITaskTransItem extends AITaskSingle
 	updating = {};
 	playerTick = {};
 
-	function singleUpdateChecker(player)
-	{
+	function singleUpdateChecker(player) {
 		local survivor = null;
-		while(survivor = Entities.FindByClassnameWithin(survivor, "player", player.GetOrigin(), 150))
-		{
-			if(BotAI.IsPlayerEntityValid(survivor) && survivor.IsSurvivor() && !IsPlayerABot(survivor) && BotAI.IsAlive(survivor))
-			{
+
+		while(survivor = Entities.FindByClassnameWithin(survivor, "player", player.GetOrigin(), 150)) {
+			if(BotAI.IsPlayerEntityValid(survivor) && survivor.IsSurvivor() && !IsPlayerABot(survivor) && BotAI.IsAlive(survivor) && BotAI.PassingItems) {
 				local invPlayer = BotAI.GetHeldItems(player);
 				local inv = BotAI.GetHeldItems(survivor);
 				local weapon = player.GetActiveWeapon();
@@ -25,18 +21,14 @@ class ::AITaskTransItem extends AITaskSingle
 					local it = invPlayer["slot3"];
 					local name = it.GetClassname();
 
-					if(name == "weapon_first_aid_kit")
-					{
-						if(BotAI.getPlayerTotalHealth(player) > 35 && !("slot3" in inv) && weapon != null && weapon.GetClassname() != "weapon_first_aid_kit")
-						{
+					if(name == "weapon_first_aid_kit") {
+						if(BotAI.getPlayerTotalHealth(player) > 35 && !("slot3" in inv) && weapon != null && weapon.GetClassname() != "weapon_first_aid_kit") {
 							it.Kill();
 							local item = name.slice(7);
 							survivor.GiveItem(item);
 							return true;
 						}
-					}
-					else
-					{
+					} else {
 						it.Kill();
 						local item = name.slice(7);
 						survivor.GiveItem(item);
@@ -69,8 +61,7 @@ class ::AITaskTransItem extends AITaskSingle
 		return false;
 	}
 
-	function playerUpdate(player)
-	{
+	function playerUpdate(player) {
 		updating[player] <- false;
 	}
 
