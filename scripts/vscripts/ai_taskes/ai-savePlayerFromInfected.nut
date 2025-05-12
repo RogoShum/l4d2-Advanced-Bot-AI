@@ -117,10 +117,6 @@ class ::AITaskSavePlayer extends AITaskGroup
 			smoker = NetProps.GetPropEntity(victim, "m_jockeyAttacker");
 
 		local function teleport() {
-			if(!BotAI.UnStick) {
-				return;
-			}
-
 			if(!BotAI.IsAlive(player) || player.IsDominatedBySpecialInfected() || player.IsIncapacitated() || player.IsHangingFromLedge()) {
 				return;
 			}

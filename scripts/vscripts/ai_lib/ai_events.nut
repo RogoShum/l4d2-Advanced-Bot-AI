@@ -1273,12 +1273,8 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 				damageTable.DamageDone *= BotAI.SpecialDamageMultiplier;
 
 				//nerf skill 1
-				if (BotAI.BotCombatSkill <= 0) {
-					if (BotAI.IsEntityValid(BotAI.getSiVictim(victim))) {
-						damageTable.DamageDone *= 0.95;
-					} else {
-						damageTable.DamageDone *= 0.8;
-					}
+				if (BotAI.BotCombatSkill <= 0 && !BotAI.IsEntityValid(BotAI.getSiVictim(victim))) {
+					damageTable.DamageDone *= 0.8;
 				}
 			}
 

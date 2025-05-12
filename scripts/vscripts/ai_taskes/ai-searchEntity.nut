@@ -25,6 +25,9 @@ class ::AITaskSearchEntity extends AITaskSingle {
 
 		enumDefibrillator["weapon_defibrillator_spawn"] <- 1;
 		enumDefibrillator["weapon_defibrillator"] <- 1;
+
+		enumAidKit["weapon_first_aid_kit_spawn"] <- 1;
+		enumAidKit["weapon_first_aid_kit"] <- 1;
     }
 
 	single = true;
@@ -35,6 +38,7 @@ class ::AITaskSearchEntity extends AITaskSingle {
 	enumPills = {};
 	enumBombSpawn = {};
 	enumDefibrillator = {};
+	enumAidKit = {};
 
 	items = {};
 	searched = [];
@@ -46,7 +50,10 @@ class ::AITaskSearchEntity extends AITaskSingle {
 		if(player.GetEntityIndex() in BotAI.searchedEntity) {
 			foreach(entity in BotAI.searchedEntity[player.GetEntityIndex()]) {
 				if(!BotAI.IsEntityValid(entity) || entity.GetOwnerEntity() != null) continue;
+				local navigator = BotAI.getNavigator(player);
+				local searchBody = navigator.isMoving("searchBody");
 				local name = entity.GetClassname();
+
 				if(name in enumBombSpawn && !("slot2" in invPlayer)) {
 					items[player] <- entity;
 					searched.append(entity);
@@ -71,6 +78,12 @@ class ::AITaskSearchEntity extends AITaskSingle {
 					return true;
 				}
 
+				if(!searchBody && name in enumAidKit) {
+					items[player] <- entity;
+					searched.append(entity);
+					return true;
+				}
+
 				if(!BotAI.HasItem(player, "weapon_melee") && !BotAI.HasItem(player, "weapon_pistol_magnum") && name in enumWeaponSpawn) {
 					items[player] <- entity;
 					searched.append(entity);
@@ -81,6 +94,8 @@ class ::AITaskSearchEntity extends AITaskSingle {
 
 		foreach(entity in BotAI.humanSearchedEntity) {
 			if(!BotAI.IsEntityValid(entity) || entity.GetOwnerEntity() != null) continue;
+			local navigator = BotAI.getNavigator(player);
+			local searchBody = navigator.isMoving("searchBody");
 			local name = entity.GetClassname();
 			if(name in enumBombSpawn && !("slot2" in invPlayer)) {
 				items[player] <- entity;
@@ -101,6 +116,12 @@ class ::AITaskSearchEntity extends AITaskSingle {
 			}
 
 			if(!BotAI.HasItem(player, "first_aid_kit") && name in enumDefibrillator) {
+				items[player] <- entity;
+				searched.append(entity);
+				return true;
+			}
+
+			if(!searchBody && name in enumAidKit) {
 				items[player] <- entity;
 				searched.append(entity);
 				return true;

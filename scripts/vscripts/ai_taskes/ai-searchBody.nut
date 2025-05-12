@@ -161,19 +161,34 @@ class ::AITaskSearchBody extends AITaskGroup
 				return;
 			}
 
-			if (distance > 50) {
+			if (distance > 70) {
 				local bo = ironBanner;
 				local function needSearch() {
 					return !BotAI.Defibrillator || !BotAI.IsEntityValid(bo) || BotAI.isDeathStillAlive(bo);
 				}
 
-				BotAI.botRunPos(player, ironBanner, "searchBody", 3, needSearch, 15000);
+				local function teleport() {
+					if(!BotAI.IsAlive(player) || player.IsIncapacitated() || player.IsHangingFromLedge() || !BotAI.HasItem(player, "defibrillator")) {
+						return;
+					}
+
+					if(!BotAI.Defibrillator || !BotAI.IsEntityValid(bo) || BotAI.isDeathStillAlive(bo)) {
+						return;
+					}
+
+					player.SetOrigin(bo.GetOrigin());
+				}
+
+				if (BotAI.botRunPos(player, ironBanner, "searchBody", 3, needSearch, 15000)) {
+					BotAI.delayTimer(teleport, 30, player.tostring() + "searchBody");
+				}
 			} else if (distance <= 75) {
 				BotAI.getNavigator(player).stop();
 				BotAI.botMoveMap[player] <- Vector(0, 0, 0);
 
 				BotAI.SetTarget(player, ironBanner);
 				BotAI.lookAtEntity(player, ironBanner, true, 4);
+				BotAI.AddFlag(player, FL_FROZEN );
 				local weapon = player.GetActiveWeapon();
 				if(weapon && weapon.GetClassname() != "weapon_defibrillator") {
 					BotAI.ChangeItem(player, 3);
