@@ -1964,7 +1964,7 @@ function resetAllBots() {
 	if(BotAI.PathFinding) {
 		Convars.SetValue( "sb_allow_leading", 1 );
 		Convars.SetValue( "sb_separation_range", 2000 );
-		Convars.SetValue( "sb_separation_danger_min_range", 1300 );
+		Convars.SetValue( "sb_separation_danger_min_range", 300 );
 		Convars.SetValue( "sb_separation_danger_max_range", 2500 );
 		Convars.SetValue( "sb_neighbor_range", 1500 );
 	} else {

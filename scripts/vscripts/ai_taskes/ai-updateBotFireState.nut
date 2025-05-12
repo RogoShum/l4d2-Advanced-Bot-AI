@@ -52,10 +52,15 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 				return true;
 
 			target = BotAI.getSmokerTarget(player);
-			if(BotAI.IsEntityValid(target) && BotAI.IsAlive(target) && target.GetEntityIndex() in BotAI.smokerTongue)
+			if(BotAI.IsEntityValid(target) && BotAI.IsAlive(target) && target.GetEntityIndex() in BotAI.smokerTongue) {
 				return true;
-			else
+			} else {
 				BotAI.setSmokerTarget(player, null);
+			}
+
+			if (BotAI.IsEntitySurvivor(BotAI.GetTarget(player))) {
+				BotAI.UnforceButton(player, 1 );
+			}
 
 			if (!m_trace.hit || m_trace.enthit == null || m_trace.enthit == player) {
 				BotAI.UnforceButton(player, 1 );

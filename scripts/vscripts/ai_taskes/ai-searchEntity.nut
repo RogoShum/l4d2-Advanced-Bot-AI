@@ -72,7 +72,7 @@ class ::AITaskSearchEntity extends AITaskSingle {
 					return true;
 				}
 
-				if(!BotAI.HasItem(player, "first_aid_kit") && name in enumDefibrillator) {
+				if(!BotAI.HasItem(player, "first_aid_kit", invPlayer) && !BotAI.HasItem(player, "defibrillator", invPlayer) && name in enumDefibrillator) {
 					items[player] <- entity;
 					searched.append(entity);
 					return true;
@@ -84,7 +84,7 @@ class ::AITaskSearchEntity extends AITaskSingle {
 					return true;
 				}
 
-				if(!BotAI.HasItem(player, "weapon_melee") && !BotAI.HasItem(player, "weapon_pistol_magnum") && name in enumWeaponSpawn) {
+				if(!BotAI.HasItem(player, "weapon_melee", invPlayer) && !BotAI.HasItem(player, "weapon_pistol_magnum", invPlayer) && name in enumWeaponSpawn) {
 					items[player] <- entity;
 					searched.append(entity);
 					return true;
@@ -115,7 +115,7 @@ class ::AITaskSearchEntity extends AITaskSingle {
 				return true;
 			}
 
-			if(!BotAI.HasItem(player, "first_aid_kit") && name in enumDefibrillator) {
+			if(!BotAI.HasItem(player, "first_aid_kit", invPlayer) && !BotAI.HasItem(player, "defibrillator", invPlayer) && name in enumDefibrillator) {
 				items[player] <- entity;
 				searched.append(entity);
 				return true;
@@ -127,7 +127,7 @@ class ::AITaskSearchEntity extends AITaskSingle {
 				return true;
 			}
 
-			if(!BotAI.HasItem(player, "weapon_melee") && !BotAI.HasItem(player, "weapon_pistol_magnum") && name in enumWeaponSpawn) {
+			if(!BotAI.HasItem(player, "weapon_melee", invPlayer) && !BotAI.HasItem(player, "weapon_pistol_magnum", invPlayer) && name in enumWeaponSpawn) {
 				items[player] <- entity;
 				searched.append(entity);
 				return true;

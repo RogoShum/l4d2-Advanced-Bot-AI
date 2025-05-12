@@ -27,7 +27,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 				local distance = BotAI.distanceof(special.GetOrigin(), player.GetOrigin());
 
 				if (distance <= 600 && (special.GetZombieType() == 3 || special.GetZombieType() == 5 || special.GetZombieType() == 6 || special.GetZombieType() == 8) &&
-					!BotAI.IsEntityValid(BotAI.getSiVictim(special)) && (BotAI.GetTarget(special) == player || (special.GetZombieType() == 8)) &&
+					!BotAI.IsEntityValid(BotAI.getSiVictim(special)) && (BotAI.GetTarget(special) == player || (special.GetZombieType() == 8 && distance < 250)) &&
 					BotAI.CanShotOtherEntityInSight(player, special, -1, MASK_UNTHROUGHABLE)) {
 						dangerous[dangerous.len()] <- special;
 				}

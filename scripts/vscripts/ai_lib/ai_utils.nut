@@ -1286,13 +1286,16 @@ function BotAI::IsEntitySurvivorBot(entity)
 	return false;
 }
 
-function BotAI::HasItem(player, str) {
+function BotAI::HasItem(player, str, t = null) {
 	if(player in BotAI.BotLinkGasCan) {
 		local gas = BotLinkGasCan[player];
 		if(BotAI.IsEntityValid(gas) && gas.GetOwnerEntity() == null && gas.GetClassname() == str)
 			return true;
 	}
-	local t = BotAI.GetHeldItems(player);
+
+	if (t == null) {
+		t = BotAI.GetHeldItems(player);
+	}
 
 	if (t) {
 		foreach (item in t) {
@@ -1850,6 +1853,11 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 			printl("[Bot AI DEBUG] IsDominatedBySpecialInfected: " + m_trace.enthit.IsDominatedBySpecialInfected());
 			printl("[Bot AI DEBUG] GetSpecialInfectedDominatingMe: " + m_trace.enthit.GetSpecialInfectedDominatingMe());
 			printl("[Bot AI DEBUG] SI Victim: " + BotAI.getSiVictim(m_trace.enthit));
+
+			if (IsPlayerABot(m_trace.enthit)) {
+				local target = BotAI.getBotTarget(m_trace.enthit);
+				printl("[Bot AI DEBUG] Bot Target: " + target);
+			}
 		}
 
 		printl("[Bot AI DEBUG] spawn flags: " + NetProps.GetPropInt(m_trace.enthit, "m_spawnflags"));
@@ -1877,6 +1885,7 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 		printl("[Bot AI DEBUG] m_glowEntity: " + glowEntity.GetClassname() + "[" + glowEntity.GetEntityIndex() + "]" + " glow: " + NetProps.GetPropInt(glowEntity, "m_Glow.m_iGlowType") + " color: " + NetProps.GetPropInt(glowEntity, "m_Glow.m_glowColorOverride"));
 
 		printl("[Bot AI DEBUG] Target: " + BotAI.GetTarget(m_trace.enthit));
+
 		if(BotAI.IsEntitySurvivor(BotAI.GetTarget(m_trace.enthit))) {
 			printl("[Bot AI DEBUG] me: " + BotAI.getPlayerBaseName(m_trace.enthit));
 			printl("[Bot AI DEBUG] target: " + BotAI.getPlayerBaseName(BotAI.GetTarget(m_trace.enthit)));
