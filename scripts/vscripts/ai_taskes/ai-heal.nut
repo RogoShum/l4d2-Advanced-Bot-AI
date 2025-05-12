@@ -1,7 +1,6 @@
-class ::AITaskHeal extends AITaskSingle
-{
-	constructor(orderIn, tickIn, compatibleIn, forceIn)
-    {
+class ::AITaskHeal extends AITaskSingle {
+	
+	constructor(orderIn, tickIn, compatibleIn, forceIn) {
         base.constructor(orderIn, tickIn, compatibleIn, forceIn);
     }
 
@@ -10,7 +9,7 @@ class ::AITaskHeal extends AITaskSingle
 	playerTick = {};
 
 	function singleUpdateChecker(player) {
-		if(BotAI.playerDominated > 0) return false;
+		if(BotAI.playerDominated > 0 || BotAI.HasTank) return false;
 		local needHealing = BotAI.getPlayerTotalHealth(player) <= 35 || player.IsOnThirdStrike();
 		local hasTreatmentItems = BotAI.HasItem(player, "weapon_first_aid_kit");
 		local canRest = !BotAI.IsInCombat(player) && !player.GetLastKnownArea().IsDamaging();

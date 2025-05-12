@@ -73,7 +73,7 @@ class ::AITaskShoveInfected extends AITaskSingle {
 			if(needShove) {
 				BotAI.SetTarget(player, target);
 
-				local chance = 2;
+				local chance = 3;
 				chance -= BotAI.BotCombatSkill;
 
 				if (BotAI.BotCombatSkill > 2) {
@@ -96,7 +96,9 @@ class ::AITaskShoveInfected extends AITaskSingle {
 				}
 
 				if (target.GetClassname() == "infected") {
-					if (BotAI.BotCombatSkill < 1) {
+					if (BotAI.BotCombatSkill == 0) {
+						chance += 3;
+					} else if (BotAI.BotCombatSkill == 1) {
 						chance += 1;
 					}
 

@@ -142,9 +142,21 @@ class ::AITaskHitInfected extends AITaskSingle {
 			}
 		}
 
-		local dangerTarget = null;
+		dist = 700;
+		local witch = null;
+		foreach(infected in BotAI.WitchList) {
+			if (BotAI.IsAlive(infected) && (BotAI.witchKilling(infected) || (BotAI.witchRunning(infected) && !BotAI.witchRetreat(infected))) && BotAI.CanShotOtherEntityInSight(player, infected)) {
+				if (BotAI.distanceof(player.GetOrigin(), infected.GetOrigin()) < dist) {
+					dist = BotAI.distanceof(player.GetOrigin(), infected.GetOrigin());
+					witch = infected;
+				}
+			}
+		}
 
-		if (entS != null && BotAI.nextTickDistance(player, entS, 5.0) < 400 && BotAI.GetTarget(entS) == player) {
+		local dangerTarget = null;
+		if (witch != null && BotAI.nextTickDistance(player, witch, 5.0) < 400) {
+			dangerTarget = witch;
+		} else if (entS != null && BotAI.nextTickDistance(player, entS, 5.0) < 400 && BotAI.GetTarget(entS) == player) {
 			dangerTarget = entS;
 		} else if (selected != null && BotAI.GetTarget(selected) == player && BotAI.nextTickDistance(player, selected, 5.0) < 150) {
 			dangerTarget = selected;
@@ -152,8 +164,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 
 		BotAI.setBotCombatTarget(player, dangerTarget);
 
-
-		if(!BotAI.HasTank && entS == null && playerFallingDown != null) {
+		if(!BotAI.HasTank && entS == null && witch == null && playerFallingDown != null) {
 			infectedList[player] <- playerFallingDown;
 			return true;
 		}
@@ -204,17 +215,6 @@ class ::AITaskHitInfected extends AITaskSingle {
 			}
 
 			return true;
-		}
-
-		dist = 700;
-		local witch = null;
-		foreach(infected in BotAI.WitchList) {
-			if (BotAI.IsAlive(infected) && (BotAI.witchKilling(infected) || (BotAI.witchRunning(infected) && !BotAI.witchRetreat(infected))) && BotAI.CanShotOtherEntityInSight(player, infected)) {
-				if (BotAI.distanceof(player.GetOrigin(), infected.GetOrigin()) < dist) {
-					dist = BotAI.distanceof(player.GetOrigin(), infected.GetOrigin());
-					witch = infected;
-				}
-			}
 		}
 
 		if (witch != null) {
