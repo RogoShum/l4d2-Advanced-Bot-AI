@@ -16,7 +16,6 @@ if (!("VSLib" in getroottable())) {
 //if (!("BotAI" in getroottable()))
 {
 	::BotAI <- {
-		_testNullEntity = SpawnEntityFromTable("info_target", { targetname = "botai_test_invalid_entity" })
 		timerTick = 0
 		timerTick_2 = 0
 		debugTick = 0
@@ -205,13 +204,6 @@ if (!("VSLib" in getroottable())) {
 	}
 }
 ::BotAI.MapName = SessionState.MapName.tolower();
-
-if (BotAI._testNullEntity != null) {
-	printl("_testNullEntity: " + BotAI._testNullEntity)
-	BotAI._testNullEntity.Kill();
-} else {
-	printl("_testNullEntity is Null")
-}
 
 function BotAI::trueDude() {
 	return true;
@@ -1059,13 +1051,20 @@ function BotAI::AdjustBotsUpdateRate(args) {
 				//bug Fix
 				//1.
 				local weapon = playerSet.GetActiveWeapon();
-				if (weapon && weapon.GetClassname() == "weapon_first_aid_kit") {
-					if (BotAI.IsPressingAttack(playerSet)) {
-						BotAI.ForceButton(playerSet, 1, 2);
-					}
+				local canRest = !BotAI.IsInCombat(playerSet) && (playerSet.GetLastKnownArea() == null || !playerSet.GetLastKnownArea().IsDamaging());
 
-					if (BotAI.IsBotHealingOthers(playerSet)) {
-						BotAI.ForceButton(playerSet, 2048, 2);
+				if (weapon && weapon.GetClassname() == "weapon_first_aid_kit") {
+					if (canRest) {
+						if (BotAI.IsPressingAttack(playerSet)) {
+							BotAI.ForceButton(playerSet, 1, 2);
+						}
+
+						if (BotAI.IsBotHealingOthers(playerSet)) {
+							BotAI.ForceButton(playerSet, 2048, 2);
+						}
+					} else {
+						BotAI.RemoveFlag(playerSet, FL_FROZEN);
+						BotAI.UnforceButton(playerSet, 1);
 					}
 				}
 
@@ -2001,7 +2000,7 @@ function resetAllBots() {
 	Convars.SetValue( "sb_melee_approach_victim", 0 );
 	Convars.SetValue( "sb_allow_shoot_through_survivors", 0 );
 	Convars.SetValue( "sb_toughness_buffer", 25 );
-	Convars.SetValue( "sb_temp_health_consider_factor", 0.85 );
+	Convars.SetValue( "sb_temp_health_consider_factor", 1.0 );
 	Convars.SetValue( "sb_enforce_proximity_lookat_timeout", 0.0 );
 	Convars.SetValue( "sb_battlestation_human_hold_time", 0.0 );
 	Convars.SetValue( "sb_sidestep_for_horde", 1 );

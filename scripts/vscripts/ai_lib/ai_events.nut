@@ -1166,6 +1166,34 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 			if (BotAI.distanceof(inflictor.GetCenter(), victim.GetOrigin()) > 175) {
 				return false;
 			}
+
+			if (NetProps.HasProp(inflictor, "m_fireCount")) {
+				local fireCount = NetProps.GetPropInt(inflictor, "m_fireCount");
+				local isSafeFromAllFires = true;
+				
+				for (local i = 0; i < fireCount; i++) {
+
+					local firePos = inflictor.GetOrigin() + Vector(
+						NetProps.GetPropIntArray(inflictor, "m_fireXDelta", i),
+						NetProps.GetPropIntArray(inflictor, "m_fireYDelta", i),
+						NetProps.GetPropIntArray(inflictor, "m_fireZDelta", i)
+					);
+					
+					local delta = victim.GetOrigin() - firePos;
+					
+					local xyDist = sqrt(delta.x * delta.x + delta.y * delta.y);
+					local zDist = abs(delta.z);
+					
+					if (xyDist <= 40 || zDist <= 30) {
+						isSafeFromAllFires = false;
+						break;
+					}
+				}
+				
+				if (isSafeFromAllFires) {
+					return false;
+				}
+			}
 		}
 
 		if(BotAI.isPlayerNearLadder(victim)) {

@@ -28,6 +28,7 @@ class::Navigator {
 	function buildPath(goal, id, priority = 0, discardFunc = BotAI.trueDude, distance = 10000) {
 		local goalArea = null;
 		local goalPos = null;
+
 		if (typeof goal == "Vector") {
 			goalPos = goal;
 		} else if (BotAI.IsEntityValid(goal)) {
@@ -81,10 +82,7 @@ class::Navigator {
 
 			return false;
 		} else {
-			if (BotAI.BotDebugMode) {
-				navPrint(id + " build complete.");
-			}
-
+			navPrint(id + " build complete.");
 			local data = PathData(goal, priority, discardFunc, distance);
 
 			pathCache[id] <- data;
@@ -97,9 +95,7 @@ class::Navigator {
 		if (!moving()) return;
 
 		if (getRunningPathData().discardFunc()) {
-			if (BotAI.BotDebugMode) {
-				navPrint("Discard: " + movingID);
-			}
+			navPrint("Discard: " + movingID);
 
 			stop(true);
 		}
@@ -170,6 +166,7 @@ class::Navigator {
 
 		if (BotAI.validVector(getRunningPathData().getPos(null))) {
 			local goalPos = getRunningPathData().getPos(null);
+
 			if (goalPos == null || goalPos.Length() == 0) {
 				stop(true);
 				return;

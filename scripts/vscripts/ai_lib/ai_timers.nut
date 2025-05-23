@@ -25,7 +25,7 @@ function BotAI::moveFunc() {
 			BotAI.DisableButton(player, BUTTON_WALK, 1.0);
 
 			local vec = BotAI.botMoveMap[player];
-			if(vec.Length() >= 5) {
+			if(BotAI.validVector(vec) && vec.Length() >= 5) {
 				if(vec.Length() > 300) {
 					vec = BotAI.normalize(vec).Scale(300);
 				}
@@ -133,6 +133,7 @@ function BotAI::taskTimer::shoveInfected() {
 function BotAI::taskTimer::avoidDanger() {
 	local name = "avoidDanger";
 	local task = BotAI.timerTask.avoidDanger;
+
 	foreach(player in BotAI.SurvivorBotList) {
 		if(!BotAI.IsPlayerEntityValid(player)) continue;
 
@@ -683,6 +684,7 @@ function BotAI::pingSystem() {
 
 			local navigator = BotAI.getNavigator(player);
 			navigator.onUpdate();
+
 			return 0.2;
 		}
 

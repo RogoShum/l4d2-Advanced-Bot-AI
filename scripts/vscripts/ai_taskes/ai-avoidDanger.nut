@@ -62,7 +62,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 					continue;
 
 				local name = danger.GetClassname();
-
+				
 				if (BotAI.BotDebugMode) {
 					//DebugDrawText(player.EyePosition() + Vector(0, 0, height), "Avoid: " + name, false, 0.5);
 					height += 10;

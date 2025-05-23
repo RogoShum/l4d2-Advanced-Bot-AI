@@ -572,7 +572,7 @@ function BotAI::botMove(player, vec) {
 	if(player in BotAI.botMoveMap) {
 		local botVec = BotAI.botMoveMap[player];
 		if(botVec.Length() >= 1)
-			BotAI.botMoveMap[player] = botVec*0.25 + vec*0.75;
+			BotAI.botMoveMap[player] = botVec*0.1 + vec*0.9;
 		else
 			BotAI.botMoveMap[player] = vec;
 	} else {
@@ -585,11 +585,13 @@ function BotAI::botRun(player, targetPos, speed = 220) {
 	local velocity = Vector(pushVec.x, pushVec.y, player.GetVelocity().z);
 
 	local dodgeVec = BotAI.getBotDedgeVector(player);
-	if(BotAI.validVector(dodgeVec))
+	if(BotAI.validVector(dodgeVec)) {
 		velocity = velocity.Scale(0.7) + dodgeVec.Scale(0.3);
+	}
 
-	if(BotAI.validVector(velocity))
+	if(BotAI.validVector(velocity)) {
 		BotAI.botMove(player, velocity);
+	}
 
 	if(BotAI.BotDebugMode) {
 		DebugDrawCircle(targetPos, Vector(0, 255, 0), 1.0, 25, true, 0.2);
@@ -2014,8 +2016,10 @@ function BotAI::xyDotProduct(v1, v2) {
 	}
 }
 
-::BotAI.validVector <- function(vector){
-	return vector != null && "Vector" == typeof vector && vector.x.tostring().find("#") == null && vector.y.tostring().find("#") == null && vector.z.tostring().find("#") == null;
+::BotAI.validVector <- function(vector) {
+	return vector != null && "Vector" == typeof vector 
+	&& vector.x.tostring().find("#") == null && vector.y.tostring().find("#") == null && vector.z.tostring().find("#") == null
+	&& vector.x.tostring().find("nan") == null && vector.y.tostring().find("nan") == null && vector.z.tostring().find("nan") == null;
 }
 
 ::BotAI.normalize <- function(vector){
@@ -2746,6 +2750,7 @@ function BotAI::BotRetreatFrom(boto, otherEntity) {
 
 function BotAI::botCmdMove(boto, vector, ignoreCooldown = false) {
 	if(!BotAI.IsEntityValid(boto)) return;
+
 	if(!IsPlayerABot(boto))
 		return;
 
@@ -2859,7 +2864,7 @@ function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.tru
 
 	if(BotAI.IsPlayerClimb(player) || BotAI.IsBotHealingOthers(player))
 		return false;
-
+	
 	local navigator = BotAI.getNavigator(player);
 	foreach(idx, path in navigator.pathCache) {
 		if(idx == id && BotAI.isEntityEqual(path.pos, pos)) {
