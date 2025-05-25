@@ -2,23 +2,18 @@
 
 class::Navigator {
 	pathCache = {};
+	justDonePath = {};
 	player = null;
 	movingID = null;
-	lastArea = null;
 	buildCoolDown = {};
-	posCheck = null;
-	pathFlat = true;
-	SEARCH_LIMIT = 128;
-	TIME_OUT_LIMIT = 5;
-	JUMP_HIGHT = 50;
+	resetCooldown = -1;
 
 	constructor(playerIn) {
 		player = playerIn;
 		movingID = null;
 		pathCache = {};
-		lastArea = playerIn.GetLastKnownArea();
 		buildCoolDown = {};
-		posCheck = playerIn.GetOrigin();
+		resetCooldown = -1;
 	}
 
 	function _typeof() {
@@ -122,6 +117,22 @@ class::Navigator {
 				delete buildCoolDown[idx];
 		}
 
+		foreach (id, timeLeft in justDonePath) {
+			justDonePath[id] = timeLeft - 1;
+			
+			if (timeLeft <= 0) {
+				delete justDonePath[id];
+			}
+		}
+
+		if (resetCooldown >= 0) {
+			if (resetCooldown == 0) {
+				BotAI.BotReset(player);
+			}
+
+			resetCooldown -= 1;
+		}
+
 		foreach(idx, func in NavigatorPause) {
 			if (func(player)) {
 				return;
@@ -200,10 +211,6 @@ class::Navigator {
 		return movingID != null && movingID != "";
 	}
 
-	function isPathFlat() {
-		return pathFlat;
-	}
-
 	function isMoving(id) {
 		if (id == movingID)
 			return true;
@@ -248,18 +255,27 @@ class::Navigator {
 
 	function stop(resetBot = false) {
 		local id = movingID;
+		
+		if (id != null) {
+			justDonePath[id] <- 5;
+		}
+
 		movingID = null;
 		if (id in pathCache)
 			delete pathCache[id];
 
 		if (resetBot) {
-			BotAI.BotReset(player);
+			resetCooldown = 2;
 		}
 	}
 
 	function getMovingPath(id) {
 		if (!(id in pathCache)) return null;
 		return pathCache[id];
+	}
+
+	function justDone(id) {
+		return (id in justDonePath);
 	}
 
 	function getRunningPathData() {

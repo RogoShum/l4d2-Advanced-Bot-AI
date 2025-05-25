@@ -1,12 +1,13 @@
 function BotAI::bestAim() {
 	foreach(player in BotAI.SurvivorBotList) {
-		local target = null;
+		local aimTarget = null;
 		if(player in BotAI.botAim) {
-			target = BotAI.botAim[player];
+			aimTarget = BotAI.botAim[player];
 		}
 
-		if(BotAI.IsAlive(target)) {
-			BotAI.lookAtEntity(player, target);
+		if(BotAI.IsAlive(aimTarget)) {
+			CommandABot( { cmd = 0, target = aimTarget, bot = player } );
+			BotAI.lookAtEntity(player, aimTarget);
 		}
 	}
 
@@ -18,7 +19,9 @@ function BotAI::moveFunc() {
 		if(player in BotAI.botMoveMap) {
 
 			if(player.IsIncapacitated() || player.IsDominatedBySpecialInfected() || BotAI.isPlayerBeingRevived(player) || BotAI.IsPlayerReviving(player)) {
+				NetProps.SetPropVector(player, "m_vecBaseVelocity", Vector(0, 0, 0));
 				BotAI.botMoveMap[player] = Vector(0, 0, 0);
+				BotAI.getNavigator(player).clearPath("botMove^+");
 				continue;
 			}
 
@@ -366,7 +369,7 @@ function BotAI::createPlayerTargetTimer(player) {
 		}
 
 		local navigator = BotAI.getNavigator(player);
-		if (navigator.moving() || BotAI.IsBotHealing(player)) {
+		if (navigator.moving() || BotAI.IsBotHealing(player) || BotAI.isTakingItem(player, "first_aid_kit")) {
 			awareAngle -= 2.0;
 			selectedDis -= BotAI.BotCombatSkill * 10 + 10;
 			closestDis -= 75;

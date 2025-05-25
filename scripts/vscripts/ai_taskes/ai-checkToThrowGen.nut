@@ -118,12 +118,12 @@ class ::AITaskCheckToThrowGen extends AITaskGroup
 					BotAI.ForceButton(player, 1 , 0.5, true);
 					BotAI.setBotLockTheard(player, -1);
 					cooldown = 3;
-				}
-				else
+				} else {
 					BotAI.ChangeItem(player, 2);
-			}
-			else
+				}
+			} else {
 				BotAI.setBotLockTheard(player, -1);
+			}
 		}
 
 		updating = false;

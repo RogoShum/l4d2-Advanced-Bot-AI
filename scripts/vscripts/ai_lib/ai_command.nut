@@ -543,9 +543,13 @@ function BotAI::registerMenu() {
 
 	local pingMenu = ::HoloMenu.Menu("ping_menu", BUTTON_ALT2);
 	local function openMenu(player) {
-		if(BotAI.MainMenu.len()>0)
+		if(BotAI.MainMenu.len() > 0)
 			BotExitMenuCmd(player, "", "");
 		if(!(player in BotAI.pingPoint) || !BotAI.IsAlive(BotAI.pingPoint[player])) return;
+		if(!ABA_IsAdmin(player)) {
+			BotAI.SendPlayer(player, "botai_admin_only");
+			return;
+		}
 		local traceTable = {
 			start = player.EyePosition()
 			end =  player.EyePosition() + player.EyeAngles().Forward().Scale(9999)
@@ -580,6 +584,10 @@ function BotAI::registerMenu() {
 	}
 
 	local function ping(player) {
+		if(!ABA_IsAdmin(player)) {
+			BotAI.SendPlayer(player, "botai_admin_only");
+			return;
+		}
 		local point = BotAI.CanSeeOtherEntityPrintName(player, 2000, 0, g_MapScript.TRACE_MASK_ALL);
 		if(!BotAI.IsEntitySurvivorBot(point)) {
 			local dot = 0.98;
@@ -660,15 +668,22 @@ function BotAI::registerMenu() {
 		local entity  = BotAI.pingEntity[player];
 		local bot = BotAI.pingPoint[player];
 		local function changeAndUse() {
-			if(!BotAI.IsAlive(bot)) return true;
-			if(!BotAI.IsAlive(entity)) return true;
-			local navigator = BotAI.getNavigator(bot);
+			if(!BotAI.IsAlive(bot)) {
+				return true;
+			}
+
+			if(!BotAI.IsEntityValid(entity) || entity.GetOwnerEntity() != null) {
+				return true;
+			}
+
 			if(BotAI.distanceof(entity.GetOrigin(), bot.GetOrigin()) <= 100) {
 				DoEntFire("!self", "Use", "", 0, bot, entity);
 				return true;
 			}
+
 			return false;
 		}
+
 		if(player in BotAI.pingPoint && BotAI.botRunPos(BotAI.pingPoint[player], entity, "ping", 4, changeAndUse))
 			delete BotAI.pingPoint[player];
 	}

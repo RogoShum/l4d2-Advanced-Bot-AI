@@ -469,11 +469,23 @@ function BotAI::ChangeItem(p, slot) {
 	}
 }
 
+function BotAI::isNearCheckPoint(player, distance = 250) {
+	local areas = {};
+	NavMesh.GetNavAreasInRadius(player.GetOrigin(), distance, areas);
+	foreach(area in areas) {
+		//                                                         CHECKPOINT ||                 DOOR or DESTROYED_DOOR
+		if ("HasSpawnAttributes" in area && (area.HasSpawnAttributes(1 << 11) || area.HasSpawnAttributes(1 << 18))) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 ::BotAI.GetPrimaryClipAmmo <- function(p) {
 	local t = BotAI.GetHeldItems(p);
 
-	if (t && "slot0" in t)
-	{
+	if (t && "slot0" in t) {
 		return NetProps.GetPropInt(t["slot0"], "m_iClip1")
 	}
 
@@ -599,8 +611,7 @@ function BotAI::botRun(player, targetPos, speed = 220) {
 	}
 }
 
-function BotAI::EnableSight(arg)
-{
+function BotAI::EnableSight(arg) {
 	if("infect" in arg && BotAI.IsEntityValid(arg.infect) && "IsDead" in arg.infect && !arg.infect.IsDead())
 		arg.infect.SetSenseFlags(arg.infect.GetSenseFlags() & ~BOT_CANT_SEE);
 }
@@ -1090,18 +1101,6 @@ function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1) {
 		local dirction = Vector(headPos.x - ent_self.EyePosition().x, headPos.y - ent_self.EyePosition().y, headPos.z - ent_self.EyePosition().z);
 		local qAngleDirction = BotAI.CreateQAngle(dirction.x, dirction.y, dirction.z);
 
-		/*
-		if(BotAI.BotCombatSkill == 0) {
-			local eyeAngle = ent_self.EyeAngles();
-			local angle = (qAngleDirction.Yaw() - eyeAngle.Yaw()) / 4;
-			if(angle <= 20 && angle >= -20)
-				angle = qAngleDirction.Yaw();
-			else
-				angle = eyeAngle.Yaw() + angle;
-			qAngleDirction = QAngle(qAngleDirction.Pitch(), angle, qAngleDirction.Roll());
-		}
-		*/
-
 		ent_self.SnapEyeAngles(qAngleDirction);
 
 		if(frozen) {
@@ -1114,17 +1113,18 @@ function BotAI::lookAtEntity(ent_self, ent_b, frozen = false, time = 1) {
 
 			::BotAI.Timers.AddTimerByName("RemoveFrozen" + ent_self.GetEntityIndex(), time, false, RemoveFlag, ent_self);
 		}
-	}
-	else
+	} else {
 		BotAI.lookAtPosition(ent_self, headPos, frozen, time);
+	}
 }
 
 function BotAI::lookAtPosition(player, vec, frozen = false, time = 1) {
 	if(frozen && BotAI.HasFlag(player, FL_FROZEN))
 		BotAI.RemoveFlag(player, FL_FROZEN );
 
-	if("SnapEyeAngles" in player)
+	if("SnapEyeAngles" in player) {
 		player.SnapEyeAngles(BotAI.CreateQAngle(vec.x - player.EyePosition().x, vec.y - player.EyePosition().y, vec.z - player.EyePosition().z));
+	}
 
 	if(frozen) {
 		BotAI.AddFlag(player, FL_FROZEN );
@@ -1284,6 +1284,16 @@ function BotAI::IsEntitySurvivorBot(entity)
 {
 	if(BotAI.IsEntitySurvivor(entity) && IsPlayerABot(entity))
 		return true;
+
+	return false;
+}
+
+function BotAI::isTakingItem(player, str) {
+	local weapon = player.GetActiveWeapon();
+	
+	if (weapon != null && (weapon.GetClassname() == str || weapon.GetClassname() == "weapon_" + str)) {
+		return true;
+	}
 
 	return false;
 }
@@ -2017,12 +2027,12 @@ function BotAI::xyDotProduct(v1, v2) {
 }
 
 ::BotAI.validVector <- function(vector) {
-	return vector != null && "Vector" == typeof vector 
+	return vector != null && "Vector" == typeof vector
 	&& vector.x.tostring().find("#") == null && vector.y.tostring().find("#") == null && vector.z.tostring().find("#") == null
 	&& vector.x.tostring().find("nan") == null && vector.y.tostring().find("nan") == null && vector.z.tostring().find("nan") == null;
 }
 
-::BotAI.normalize <- function(vector){
+::BotAI.normalize <- function(vector) {
 	if(!validVector(vector)) return Vector(0, 0, 0);
 	local length = vector.Length();
 
@@ -2864,7 +2874,7 @@ function BotAI::botRunPos(player, pos, id, priority = 0, discardFunc = BotAI.tru
 
 	if(BotAI.IsPlayerClimb(player) || BotAI.IsBotHealingOthers(player))
 		return false;
-	
+
 	local navigator = BotAI.getNavigator(player);
 	foreach(idx, path in navigator.pathCache) {
 		if(idx == id && BotAI.isEntityEqual(path.pos, pos)) {

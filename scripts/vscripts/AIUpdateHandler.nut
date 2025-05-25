@@ -1650,9 +1650,16 @@ function BotAI::AdjustBotState(args) {
 					}
 				}
 
-				if (tpPoint != null && Director.IsAnySurvivorInExitCheckpoint() && BotAI.IsPlayerAtCheckPoint(tpPoint) && !BotAI.IsPlayerAtCheckPoint(bot)) {
+				if (tpPoint != null && Director.IsAnySurvivorInExitCheckpoint() && BotAI.IsPlayerAtCheckPoint(tpPoint) && !BotAI.isNearCheckPoint(bot, 300)) {
 					local function changeAndUse() {
-						if(!BotAI.IsAlive(bot) || BotAI.IsPlayerAtCheckPoint(bot) || !Director.IsAnySurvivorInExitCheckpoint()) return true;
+						local alive = !BotAI.IsAlive(bot);
+						local out = !Director.IsAnySurvivorInExitCheckpoint();
+						local near = BotAI.isNearCheckPoint(bot);
+						
+						if(alive || near || out) {
+							printl("alive -> " + alive + ", near -> " + near + ", out -> " + out);
+							return true;
+						}
 
 						return false;
 					}
@@ -1677,7 +1684,7 @@ function BotAI::AdjustBotState(args) {
 				}
 			}
 
-			if(BotAI.PossibleBotStuck(bot) && !idle) {
+			if(BotAI.PossibleBotStuck(bot) && !idle && !BotAI.IsBotHealing(bot)) {
 				if(!(bot in BotAI.BotStuckCount)) {
 					BotAI.BotStuckCount[bot] <- 0;
 				}
@@ -1694,7 +1701,7 @@ function BotAI::AdjustBotState(args) {
 				}
 			}
 
-			if (stuck) {
+			if (stuck && !BotAI.IsBotHealing(bot) && !BotAI.IsPlayerReviving(bot)) {
 				bot.SetOrigin(bot.GetOrigin() + Vector(0, 0, 20));
 				BotAI.BotReset(bot);
 				BotAI.BotStuckCount[bot] <- 0;
@@ -1939,7 +1946,7 @@ function resetAllBots() {
 
 	printl("[Bot AI] Loading timers...");
 
-	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("CheckBotPosition", 0.2, true, BotAI.CheckBotPosition));
+	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("CheckBotPosition", 0.4, true, BotAI.CheckBotPosition));
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("AdjustBotState", 1.5, true, BotAI.AdjustBotState));
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("TriggerHandler", 20, true, BotAI.TriggerHandler));
 	printl("[Bot AI] Add Timer " + BotAI.Timers.AddTimerByName("ModifyMolotovVector", 0.1, true, BotAI.ModifyMolotovVector));

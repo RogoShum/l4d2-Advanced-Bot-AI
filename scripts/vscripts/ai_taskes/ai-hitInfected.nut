@@ -46,7 +46,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 			}
 		}
 
-		if(nearestRock != null){
+		if(nearestRock != null) {
 			infectedList[player] <- nearestRock;
 			BotAI.setBotTarget(player, nearestRock);
 			return true;

@@ -55,7 +55,7 @@ class ::AITaskHeal extends AITaskSingle {
 		if(BotAI.HasFlag(player, FL_FROZEN) && BotAI.IsBotHealingSelf(player)) {
 			BotAI.RemoveFlag(player, FL_FROZEN );
 			BotAI.UnforceButton(player, 1 );
-			BotAI.ChangeItem(player, 1);
+			//BotAI.ChangeItem(player, 1);
 			BotAI.BotReset(player);
 		}
 	}

@@ -143,9 +143,9 @@ class ::AITaskUpdateBotFireState extends AITaskSingle
 			}
 
 			local isMelee = ename == "weapon_melee" || ename == "weapon_chainsaw";
-			local mel = isMelee && (distance > meleeRange || isTank);
+			local mel = isMelee && (distance > (meleeRange + 20) || isTank);
 
-			if(!player.IsIncapacitated() && !BotAI.IsSurvivorTrapped(player) && !BotAI.HasFlag(player, FL_FROZEN) && (BotAI.GetPrimaryClipAmmo(player) > 0 || isTank) && mel) {
+			if(!player.IsIncapacitated() && !BotAI.IsSurvivorTrapped(player) && !BotAI.HasFlag(player, FL_FROZEN) && BotAI.GetPrimaryClipAmmo(player) > 0 && mel) {
 				BotAI.ChangeItem(player, 0);
 			}
 

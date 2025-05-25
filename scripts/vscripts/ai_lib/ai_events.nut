@@ -167,6 +167,7 @@
 ::BotAI.Events.OnGameEvent_weapon_fire <- function(event) {
 	local p = GetPlayerFromUserID(event.userid);
 	local victim = BotAI.getBotLookAt(p);
+	local weaponName = event.weapon;
 
 	/*
 	if("weapon" in event && event.weapon.find("claw") != null && !p.IsSurvivor()) {
@@ -179,20 +180,32 @@
 	*/
 
 	if(p != null && p.IsSurvivor() && (IsPlayerABot(p) || BotAI.BotDebugMode)) {
+		if(IsDedicatedServer() && (weaponName.find("pipe_bomb") != null || weaponName.find("molotov") != null || weaponName.find("vomitjar") != null)) {
+			local invPlayer = BotAI.GetHeldItems(p);
+			local hasBomb = ("slot2" in invPlayer);
+
+			local function deleteBomb() {
+				local _invPlayer = BotAI.GetHeldItems(p);
+				local _hasBomb = ("slot2" in _invPlayer);
+				if(_hasBomb) {
+					printl("killed Bomb")
+					_invPlayer["slot2"].Kill();
+				}
+			}
+
+			BotAI.delayTimer(deleteBomb, 0.2);
+
+			return;
+		}
 		local wep = p.GetActiveWeapon();
-		local ename = " ";
-
-		if(BotAI.IsEntityValid(wep))
-			ename = wep.GetClassname();
-
-		local isSniper = ename.find("shotgun") != null || ename.find("sniper") != null || ename.find("pistol") != null;
+		local isSniper = weaponName.find("shotgun") != null || weaponName.find("sniper") != null || weaponName.find("pistol") != null;
 
 		local pass = false;
 		local function counterSpecial(target, sight) {
 			if(BotAI.IsEntitySurvivor(target) && target.IsDominatedBySpecialInfected()) {
 				local realTarget = target.GetSpecialInfectedDominatingMe();
 				if(realTarget.GetZombieType() == 5) {
-					realTarget.TakeDamage(BotAI.getDamage(ename)*0.7, BotAI.headshotDmg, p);
+					realTarget.TakeDamage(BotAI.getDamage(weaponName)*0.7, BotAI.headshotDmg, p);
 					pass = true;
 				} else if(realTarget.GetZombieType() == 1 && RandomInt(0, abs(BotAI.BotCombatSkill - 4) * 1.8) == 0) {
 					BotAI.breakTongue(realTarget);
@@ -216,7 +229,7 @@
 
 		local damaged = false;
 
-		if((ename == "weapon_melee" || ename == "weapon_chainsaw") && BotAI.BotCombatSkill > 0) {
+		if((weaponName.find("melee") != null || weaponName.find("chainsaw") != null) && BotAI.BotCombatSkill > 0) {
 			local target = null;
 			local skillFactor = BotAI.BotCombatSkill * 10;
 			local range = Convars.GetFloat("melee_range") + skillFactor;
@@ -228,7 +241,7 @@
 
 			local damagePos = BotAI.getEntityHeadPos(p);
 			damagePos = Vector(damagePos.x, damagePos.y, p.EyePosition().z);
-			if(ename == "weapon_chainsaw") {
+			if(weaponName.find("chainsaw") != null) {
 				TD = 50;
 			}
 
@@ -305,8 +318,7 @@
 		&& IsPlayerABot(p)
 		&& p.IsSurvivor()) {
 		local weapon = p.GetActiveWeapon();
-		local weaponName = weapon.GetClassname();
-		if(weaponName != "weapon_melee" && weaponName != "weapon_chainsaw") {
+		if(!weaponName.find("melee") != null && !weaponName.find("chainsaw") != null) {
 			local count = 1;
 			local mult = 0.35;
 			if(weapon && weaponName.find("shotgun") != null) {
@@ -1102,6 +1114,7 @@ function ChatTriggers::botnotice( player, args, text ) {
     }
 }
 
+/*
 function ChatTriggers::botcrash( player, args, text ) {
 	local function makeCrash(i) {
 		i.tryMakeACrash();
@@ -1109,19 +1122,13 @@ function ChatTriggers::botcrash( player, args, text ) {
 
 	BotAI.Timers.AddTimerByName("makeCrash-" + UniqueString(), 0.5, true, makeCrash, player);
 }
+*/
 
 function ChatTriggers::botupgrades( player, args, text ) {
 	BotUseUpgradesCmd( player, args, text );
 }
 
 /*
-function ChatTriggers::botreset( player, args, text ) {
-	foreach(_bot in BotAI.SurvivorBotList) {
-		BotAI.BotReset(_bot);
-		BotAI.setBotLockTheard(_bot, -1);
-	}
-}
-
 function ChatTriggers::bottask( player, args, text ) {
 	if(args) {
 		if(args[0] in BotAI.disabledTask)
@@ -1170,7 +1177,7 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 			if (NetProps.HasProp(inflictor, "m_fireCount")) {
 				local fireCount = NetProps.GetPropInt(inflictor, "m_fireCount");
 				local isSafeFromAllFires = true;
-				
+
 				for (local i = 0; i < fireCount; i++) {
 
 					local firePos = inflictor.GetOrigin() + Vector(
@@ -1178,18 +1185,18 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 						NetProps.GetPropIntArray(inflictor, "m_fireYDelta", i),
 						NetProps.GetPropIntArray(inflictor, "m_fireZDelta", i)
 					);
-					
+
 					local delta = victim.GetOrigin() - firePos;
-					
+
 					local xyDist = sqrt(delta.x * delta.x + delta.y * delta.y);
 					local zDist = abs(delta.z);
-					
+
 					if (xyDist <= 40 || zDist <= 30) {
 						isSafeFromAllFires = false;
 						break;
 					}
 				}
-				
+
 				if (isSafeFromAllFires) {
 					return false;
 				}
@@ -1197,8 +1204,9 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 		}
 
 		if(BotAI.isPlayerNearLadder(victim)) {
-			if(damageTable.DamageType & DMG_FALL)
+			if(damageTable.DamageType & DMG_FALL) {
 				return false;
+			}
 		}
 
 		if(BotAI.FallProtect && damageTable.DamageDone >= 100) {
