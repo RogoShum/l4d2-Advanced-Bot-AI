@@ -452,20 +452,26 @@ function BotAI::ChangeItem(p, slot) {
 	if(BotAI.IsEntityValid(wep))
 		ename = wep.GetClassname();
 
-	if(BotAI.IsBotHealingOthers(p) || ename == "weapon_first_aid_kit" ||
-	ename == "weapon_defibrillator" || ename == "weapon_pain_pills" || ename == "weapon_adrenaline") return;
+	if (BotAI.IsBotHealingOthers(p)) return;
+
+	if (!BotAI.IsInCombat(player) && (ename == "weapon_first_aid_kit" ||
+	ename == "weapon_defibrillator" || ename == "weapon_pain_pills" || ename == "weapon_adrenaline")) return;
 
 	local t = BotAI.GetHeldItems(p);
 
 	if (t && ("slot" + slot.tostring()) in t) {
 		local weapon = t[("slot" + slot.tostring())];
-		//NetProps.SetPropEntity(p, "m_hActiveWeapon", t[("slot" + slot.tostring())]);
-		p.SwitchToItem(weapon.GetClassname());
-		if(BotAI.BotDebugMode) {
-			DebugDrawText(p.EyePosition(), BotAI.getPlayerBaseName(p) + " change " + weapon.GetClassname(), true, 0.2);
+		
+		if (weapon.GetClassname() != ename) {
+			p.SwitchToItem(weapon.GetClassname());
+			if(BotAI.BotDebugMode) {
+				local str = BotAI.getPlayerBaseName(p) + " change: " + ename + " -> "+ weapon.GetClassname();
+				DebugDrawText(p.EyePosition(), str, true, 0.8);
+				printl(str)
+			}
+			NetProps.SetPropFloat(weapon, "m_flNextPrimaryAttack", Time() - 1);
+			NetProps.SetPropFloat(weapon, "m_flNextSecondaryAttack", Time() - 1);
 		}
-		NetProps.SetPropFloat(weapon, "m_flNextPrimaryAttack", Time() - 1);
-		NetProps.SetPropFloat(weapon, "m_flNextSecondaryAttack", Time() - 1);
 	}
 }
 
@@ -1430,12 +1436,18 @@ function BotAI::applyDamageEx(owner, target, amount, damageType, damagepos = nul
 	}
 }
 
-function BotAI::IsInCombat(player) {
+function BotAI::IsInCombat(player, commonOnly = false) {
 	if(!BotAI.IsPlayerEntityValid(player)) return false;
 
 	local map = BotAI.getBotPropertyMap(player);
-	if(map != null)
-		return BotAI.IsAlive(map.combatTarget);
+
+	if(map != null) {
+		if (commonOnly) {
+			return BotAI.IsAlive(map.combatCommon);
+		} else {
+			return BotAI.IsAlive(map.combatSpecial) || BotAI.IsAlive(map.combatCommon);
+		}
+	}
 
 	return false;
 }

@@ -650,10 +650,16 @@ function BotAI::removeNullString(array) {
 		map.target = target;
 }
 
-::BotAI.setBotCombatTarget <- function(player, target) {
+::BotAI.setBotCombatSpecial <- function(player, target) {
 	local map = BotAI.getBotPropertyMap(player);
 	if(map != null)
-		map.combatTarget = target;
+		map.combatSpecial = target;
+}
+
+::BotAI.setBotCombatCommon <- function(player, target) {
+	local map = BotAI.getBotPropertyMap(player);
+	if(map != null)
+		map.combatCommon = target;
 }
 
 ::BotAI.getBotShoveTarget <- function(player) {
@@ -752,7 +758,8 @@ class ::BotProperty {
 	avoidList = {};
 	taskLock = 0;
 	moveCooldown = Time();
-	combatTarget = null;
+	combatCommon = null;
+	combatSpecial = null;
 }
 
 class ::BotLinkedGas
@@ -1976,7 +1983,7 @@ function resetAllBots() {
 	} else {
 		Convars.SetValue( "sb_separation_range", 250 );
 		Convars.SetValue( "sb_separation_danger_min_range", 200 );
-		Convars.SetValue( "sb_separation_danger_max_range", 500 );
+		Convars.SetValue( "sb_separation_danger_max_range", 400 );
 		Convars.SetValue( "sb_allow_leading", 0 );
 		Convars.SetValue( "sb_neighbor_range", 200 );
 	}

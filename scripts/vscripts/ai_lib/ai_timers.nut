@@ -369,7 +369,10 @@ function BotAI::createPlayerTargetTimer(player) {
 		}
 
 		local navigator = BotAI.getNavigator(player);
-		if (navigator.moving() || BotAI.IsBotHealing(player) || BotAI.isTakingItem(player, "first_aid_kit")) {
+		local moving = navigator.moving();
+		local healingAnyOne = BotAI.IsBotHealing(player);
+		local takingAidKit = BotAI.isTakingItem(player, "first_aid_kit");
+		if (moving || healingAnyOne || takingAidKit) {
 			awareAngle -= 2.0;
 			selectedDis -= BotAI.BotCombatSkill * 10 + 10;
 			closestDis -= 75;
@@ -388,10 +391,23 @@ function BotAI::createPlayerTargetTimer(player) {
 			DebugDrawCircle(player.GetCenter(), Vector(25, 255, 25), 0, closestDis, false, 0.2);
 		}
 
+		BotAI.setBotCombatCommon(player, null);
+		
 		while(com = Entities.FindByClassnameWithin(com, "infected", player.GetCenter(), closestDis)) {
-			if(!BotAI.IsAlive(com) || (BotAI.IsInfectedBeShoved(com) && isShove && !isHealing) || BotAI.IsEntitySI(BotAI.GetTarget(com))) continue;
+			if(!BotAI.IsAlive(com) || BotAI.IsEntitySI(BotAI.GetTarget(com))) {
+				continue;
+			}
+
 			local dis = BotAI.nextTickDistance(player, com);
 			local isTarget = BotAI.IsTarget(player, com);
+
+			if (isTarget && dis < 150) {
+				BotAI.setBotCombatCommon(player, com);
+			}
+
+			if (BotAI.IsInfectedBeShoved(com) && isShove && !isHealing) {
+				continue;
+			}
 
 			if(selected != null && selectedDis < dis) continue;
 

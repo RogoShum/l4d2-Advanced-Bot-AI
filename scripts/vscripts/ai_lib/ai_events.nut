@@ -120,7 +120,7 @@
 		}
 	}
 
-	BotAI.SetBotHealing(bot, player);
+	BotAI.SetBotHealing(bot, null);
 }
 
 ::BotAI.Events.OnGameEvent_player_jump <- function(event) {
@@ -470,7 +470,7 @@
 }
 
 ::BotAI.Events.OnGameEvent_heal_end <- function(event) {
-	BotAI.SetBotHealing(GetPlayerFromUserID(event.userid), GetPlayerFromUserID(event.subject));
+	BotAI.SetBotHealing(GetPlayerFromUserID(event.userid), null);
 }
 
 ::BotAI.Events.OnGameEvent_witch_harasser_set <- function(event) {

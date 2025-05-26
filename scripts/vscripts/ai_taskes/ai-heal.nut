@@ -56,7 +56,7 @@ class ::AITaskHeal extends AITaskSingle {
 			BotAI.RemoveFlag(player, FL_FROZEN );
 			BotAI.UnforceButton(player, 1 );
 			//BotAI.ChangeItem(player, 1);
-			BotAI.BotReset(player);
+			//BotAI.BotReset(player);
 		}
 	}
 }

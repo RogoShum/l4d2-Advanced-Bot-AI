@@ -158,11 +158,9 @@ class ::AITaskHitInfected extends AITaskSingle {
 			dangerTarget = witch;
 		} else if (entS != null && BotAI.nextTickDistance(player, entS, 5.0) < 400 && BotAI.GetTarget(entS) == player) {
 			dangerTarget = entS;
-		} else if (selected != null && BotAI.GetTarget(selected) == player && BotAI.nextTickDistance(player, selected, 5.0) < 150) {
-			dangerTarget = selected;
 		}
 
-		BotAI.setBotCombatTarget(player, dangerTarget);
+		BotAI.setBotCombatSpecial(player, dangerTarget);
 
 		if(!BotAI.HasTank && entS == null && witch == null && playerFallingDown != null) {
 			infectedList[player] <- playerFallingDown;
