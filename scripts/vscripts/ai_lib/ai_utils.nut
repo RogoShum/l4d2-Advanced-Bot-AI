@@ -454,14 +454,14 @@ function BotAI::ChangeItem(p, slot) {
 
 	if (BotAI.IsBotHealingOthers(p)) return;
 
-	if (!BotAI.IsInCombat(player) && (ename == "weapon_first_aid_kit" ||
+	if (!BotAI.IsInCombat(p) && (ename == "weapon_first_aid_kit" ||
 	ename == "weapon_defibrillator" || ename == "weapon_pain_pills" || ename == "weapon_adrenaline")) return;
 
 	local t = BotAI.GetHeldItems(p);
 
 	if (t && ("slot" + slot.tostring()) in t) {
 		local weapon = t[("slot" + slot.tostring())];
-		
+
 		if (weapon.GetClassname() != ename) {
 			p.SwitchToItem(weapon.GetClassname());
 			if(BotAI.BotDebugMode) {
@@ -1296,7 +1296,7 @@ function BotAI::IsEntitySurvivorBot(entity)
 
 function BotAI::isTakingItem(player, str) {
 	local weapon = player.GetActiveWeapon();
-	
+
 	if (weapon != null && (weapon.GetClassname() == str || weapon.GetClassname() == "weapon_" + str)) {
 		return true;
 	}

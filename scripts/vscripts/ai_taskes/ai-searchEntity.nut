@@ -156,6 +156,19 @@ class ::AITaskSearchEntity extends AITaskSingle {
 
 		if (distance > 150 && distance < 400) {
 			BotAI.botRunPos(player, entity, "findResource", 0, changeAndUse)
+
+			local function forceTake() {
+				if(!BotAI.IsEntityValid(entity) || entity.GetMoveParent() != null) return;
+
+				DoEntFire("!self", "Use", "", 0, player, entity);
+				NetProps.SetPropEntity(entity, "m_hOwnerEntity", player);
+
+				if (BotAI.BotDebugMode) {
+					printl("try force take")
+				}
+			}
+
+			BotAI.delayTimer(forceTake, 6.0, player.tostring() + "delayForceTake");
 		} else if (distance < 150) {
 			if(entity.GetClassname() in enumBombSpawn && entity.GetClassname().find("spawn") != null) {
 				if(NetProps.GetPropInt(entity, "m_spawnflags") >= 8) {

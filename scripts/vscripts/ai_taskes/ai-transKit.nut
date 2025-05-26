@@ -13,7 +13,7 @@ class ::AITaskTransKit extends AITaskSingle {
 
 		local survivor = null;
 		while(survivor = Entities.FindByClassnameWithin(survivor, "player", player.GetOrigin(), 150)) {
-			if(survivor != player && BotAI.IsPlayerEntityValid(survivor) && survivor.IsSurvivor() && BotAI.IsLastStrike(survivor) && BotAI.PassingItems) {
+			if(survivor != player && BotAI.IsPlayerEntityValid(survivor) && survivor.IsSurvivor() && BotAI.IsLastStrike(survivor) && BotAI.PassingItems && !(player in BotAI.itemPassingCooldown)) {
 				local invPlayer = BotAI.GetHeldItems(player);
 				local inv = BotAI.GetHeldItems(survivor);
 				local weapon = player.GetActiveWeapon();

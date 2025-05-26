@@ -119,7 +119,7 @@ class::Navigator {
 
 		foreach (id, timeLeft in justDonePath) {
 			justDonePath[id] = timeLeft - 1;
-			
+
 			if (timeLeft <= 0) {
 				delete justDonePath[id];
 			}
@@ -255,7 +255,7 @@ class::Navigator {
 
 	function stop(resetBot = false) {
 		local id = movingID;
-		
+
 		if (id != null) {
 			justDonePath[id] <- 5;
 		}

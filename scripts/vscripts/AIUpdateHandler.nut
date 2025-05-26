@@ -65,6 +65,7 @@ if (!("VSLib" in getroottable())) {
 		obstacles = {}
 
 		searchedEntity = {}
+		itemPassingCooldown = {}
 		humanSearchedEntity = {}
 		targetLocked = {}
 		somethingBad = {}
@@ -1492,6 +1493,11 @@ function BotAI::PossibleBotStuck(bot, maxDistance = 70) {
 }
 
 function BotAI::AdjustBotState(args) {
+	BotAI.survivorLimpHealth <- Convars.GetFloat("survivor_limp_health");
+	BotAI.splatRange <- Convars.GetFloat("z_exploding_splat_radius") + 10;
+	BotAI.tongueSpeed <- Convars.GetFloat("tongue_fly_speed");
+	BotAI.tongueRange <- Convars.GetFloat("tongue_range");
+
 	if(BotAI.Melee) {
 		BotAI.resetBotMeleeAction();
 	}
@@ -1566,6 +1572,14 @@ function BotAI::AdjustBotState(args) {
 		Convars.SetValue( "sb_allow_leading", 1 );
 	}
 
+	foreach (bot, timeLeft in BotAI.itemPassingCooldown) {
+		BotAI.itemPassingCooldown[bot] = timeLeft - 1;
+
+		if (timeLeft <= 0) {
+			delete BotAI.itemPassingCooldown[bot];
+		}
+	}
+
 	foreach(bot in BotAI.SurvivorBotList) {
 		if(!BotAI.IsPlayerEntityValid(bot) || bot.IsIncapacitated() || bot.IsHangingFromLedge() || bot.IsDominatedBySpecialInfected()) continue;
 		local vehicleDis = 300;
@@ -1604,7 +1618,7 @@ function BotAI::AdjustBotState(args) {
 		}
 	}
 
-	local needRecall = true;
+	local needRecall = Director.HasAnySurvivorLeftSafeArea();
 	local display = null;
 	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
 		if(BotAI.IsEntityValid(display) && NetProps.GetPropInt(display, "terror_gamerules_data.m_iScavengeTeamScore") < NetProps.GetPropInt(display, "terror_gamerules_data.m_nScavengeItemsGoal"))
@@ -1662,7 +1676,7 @@ function BotAI::AdjustBotState(args) {
 						local alive = !BotAI.IsAlive(bot);
 						local out = !Director.IsAnySurvivorInExitCheckpoint();
 						local near = BotAI.isNearCheckPoint(bot);
-						
+
 						if(alive || near || out) {
 							printl("alive -> " + alive + ", near -> " + near + ", out -> " + out);
 							return true;

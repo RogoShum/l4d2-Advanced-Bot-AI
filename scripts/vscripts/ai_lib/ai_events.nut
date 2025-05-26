@@ -858,6 +858,8 @@
 		} else {
 			BotAI.SpecialBotList[event.bot] <- bot;
 		}
+
+		BotAI.itemPassingCooldown[bot] <- 20;
 	}
 
 	if("player" in event) {
