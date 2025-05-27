@@ -1387,8 +1387,8 @@ function BotAI::showAABB(entity) {
 		local radius = NetProps.GetPropFloat(entity, "m_Collision.m_flRadius");
 		local m_vecMins = NetProps.GetPropVector(entity, "m_Collision.m_vecMins");
 		local m_vecMaxs = NetProps.GetPropVector(entity, "m_Collision.m_vecMaxs");
-
-		DebugDrawBox(entity.GetOrigin(), m_vecMins, m_vecMaxs, 0, 0, 255, 0.2, 0.2);
+		
+		DebugDrawBoxAngles(entity.GetOrigin(), m_vecMins, m_vecMaxs, entity.GetAngles(), Vector(0, 0, 255), 0.2, 0.2);
 		DebugDrawCircle(entity.GetCenter(), Vector(0, 0, 255), 0.2, radius, true, 0.2);
 	}
 }

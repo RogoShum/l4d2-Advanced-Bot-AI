@@ -16,6 +16,22 @@ class ::AITaskCheckToThrowBomb extends AITaskGroup {
 			return false;
 		}
 
+		local hasActivePipeBomb = false;
+		local pipeBomb = null;
+		while(pipeBomb = Entities.FindByClassname(pipeBomb, "pipe_bomb_projectile")) {
+			if(BotAI.IsEntityValid(pipeBomb) && BotAI.IsEntityValid(NetProps.GetPropEntity(pipeBomb, "m_hThrower"))) {
+				hasActivePipeBomb = true;
+				break;
+			}
+		}
+
+		if(hasActivePipeBomb) {
+			if (BotAI.BotDebugMode) {
+				printl("contain active pipe")
+			}
+			return false;
+		}
+
 		local humanFactor = false;
 		local aliveCount = 0;
 
@@ -30,7 +46,9 @@ class ::AITaskCheckToThrowBomb extends AITaskGroup {
 				aliveCount++;
 			}
 
-			humanFactor = true;
+			if (BotAI.HasItem(human, "weapon_pipe_bomb") && !human.IsDominatedBySpecialInfected()) {
+				humanFactor = true;
+			}
 		}
 
 		if (humanFactor) {
@@ -57,7 +75,7 @@ class ::AITaskCheckToThrowBomb extends AITaskGroup {
 		zombieCleaner = null;
 
 		foreach(player in BotAI.SurvivorList) {
-			if(hasPipeBomb || !BotAI.IsAlive(player) || player.IsIncapacitated() || player.IsHangingFromLedge() || player.IsDominatedBySpecialInfected()) {
+			if(hasPipeBomb || !BotAI.IsAlive(player) || player.IsIncapacitated() || player.IsHangingFromLedge() || player.IsDominatedBySpecialInfected() || BotAI.IsPlayerReviving(player)) {
 				continue;
 			}
 

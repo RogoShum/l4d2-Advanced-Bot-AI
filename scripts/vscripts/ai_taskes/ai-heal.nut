@@ -9,8 +9,8 @@ class ::AITaskHeal extends AITaskSingle {
 	playerTick = {};
 
 	function singleUpdateChecker(player) {
-		if(BotAI.playerDominated > 0 || BotAI.HasTank) return false;
-		local needHealing = BotAI.getPlayerTotalHealth(player) <= 35 || player.IsOnThirdStrike();
+		if(BotAI.playerDominated > 0 || BotAI.HasTank || BotAI.IsBotHealing(player)) return false;
+		local needHealing = BotAI.getPlayerTotalHealth(player) <= 30 || player.IsOnThirdStrike();
 		local hasTreatmentItems = BotAI.HasItem(player, "weapon_first_aid_kit");
 		local canRest = !BotAI.IsInCombat(player) && !player.GetLastKnownArea().IsDamaging();
 		local safeCheck = canRest && !BotAI.validVector(BotAI.getBotDedgeVector(player)) && !BotAI.IsPlayerClimb(player);
