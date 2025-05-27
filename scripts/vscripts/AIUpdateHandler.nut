@@ -175,7 +175,8 @@ if (!("VSLib" in getroottable())) {
 		BotDebugMode = false
 		BotCombatSkill = 0
 		NeedGasFinding = true
-		NeedThrowGrenade = true
+		NeedThrowMolotov = true
+		NeedThrowPipeBomb = true
 		Immunity = false
 		PathFinding = false
 		UseUpgrades = true
@@ -309,6 +310,7 @@ IncludeScript("ai_taskes/ai-transItem.nut");
 IncludeScript("ai_taskes/ai-transKit.nut");
 IncludeScript("ai_taskes/ai-searchBody.nut");
 IncludeScript("ai_taskes/ai-checkToThrowGen.nut");
+IncludeScript("ai_taskes/ai-checkToThrowBomb.nut");
 IncludeScript("ai_taskes/ai-doUpgrades.nut");
 IncludeScript("ai_taskes/ai-searchTrigger.nut");
 IncludeScript("ai_taskes/ai-tryTraceGascan.nut");
@@ -428,7 +430,8 @@ BotAI.witchMeleeDmg <- -2145386492;
 		"\nSaveTeleport = " + BotAI.SaveTeleport.tostring() +
         "\nBotDebugMode = " + BotAI.BotDebugMode.tostring() +
         "\nNeedGasFinding = " + BotAI.NeedGasFinding.tostring() +
-        "\nNeedThrowGrenade = " + BotAI.NeedThrowGrenade.tostring() +
+        "\nNeedThrowMolotov = " + BotAI.NeedThrowMolotov.tostring() +
+		"\nNeedThrowPipeBomb = " + BotAI.NeedThrowPipeBomb.tostring() +
 		"\nUseUpgrades = " + BotAI.UseUpgrades.tostring() +
         "\nImmunity = " + BotAI.Immunity.tostring() +
         "\nPathFinding = " + BotAI.PathFinding.tostring() +
@@ -1811,8 +1814,8 @@ function BotAI::doNoticeText(args) {
 				{ key = "menu_pathfinding", value = "", enabled = ::BotAI.PathFinding, isValue = false },
 				{ key = "menu_unstick", value = "", enabled = ::BotAI.UnStick, isValue = false },
 				{ key = "menu_find_gas", value = "", enabled = ::BotAI.NeedGasFinding, isValue = false },
-				{ key = "menu_immunity", value = "", enabled = ::BotAI.Immunity, isValue = false },
-				{ key = "menu_throw", value = "", enabled = ::BotAI.NeedThrowGrenade, isValue = false },
+				{ key = "menu_throw_pipe", value = "", enabled = ::BotAI.NeedThrowPipeBomb, isValue = false },
+				{ key = "menu_throw_fire", value = "", enabled = ::BotAI.NeedThrowMolotov, isValue = false },
 				{ key = "menu_take_melee", value = "", enabled = ::BotAI.Melee, isValue = false },
 				{ key = "menu_defibrillator", value = "", enabled = ::BotAI.Defibrillator, isValue = false }
 			];
@@ -1892,6 +1895,7 @@ function BotAI::loadAITask() {
 	BotAI.addTask("transKit", AITaskTransKit(1, 10, true, false));
 	BotAI.addTask("heal", AITaskHeal(2, 20, false, false));
 	BotAI.addTask("checkToThrowGen", AITaskCheckToThrowGen(0, 10, true, true));
+	BotAI.addTask("checkToThrowBomb", AITaskCheckToThrowBomb(0, 10, true, true));
 	BotAI.addTask("savePlayer", AITaskSavePlayer(1, 5, true, true));
 	BotAI.addTask("searchBody", AITaskSearchBody(2, 10, true, true));
 	BotAI.addTask("doUpgrades", AITaskDoUpgrades(3, 10, true, true));

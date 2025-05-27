@@ -1021,8 +1021,12 @@ function ChatTriggers::botfindgas( player, args, text ) {
 	BotGascanFindCmd( player, args, text );
 }
 
-function ChatTriggers::botthrow( player, args, text ) {
-	BotThrowGrenadeCmd( player, args, text );
+function ChatTriggers::botthrowmolotov( player, args, text ) {
+	BotThrowFireCmd( player, args, text );
+}
+
+function ChatTriggers::botthrowpipe( player, args, text ) {
+	BotThrowPipeBombCmd( player, args, text );
 }
 
 function ChatTriggers::botimmunity( player, args, text ) {

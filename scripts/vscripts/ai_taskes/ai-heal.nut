@@ -30,7 +30,7 @@ class ::AITaskHeal extends AITaskSingle {
 
 	function playerUpdate(player) {
 		BotAI.AddFlag(player, FL_FROZEN );
-		local duration = Convars.GetFloat("first_aid_kit_use_duration") + 0.1;
+		local duration = Convars.GetFloat("first_aid_kit_use_duration") + 1.0;
 		local function RemoveFlag(ent_) {
 			if(BotAI.IsEntityValid(ent_))
 				BotAI.RemoveFlag(ent_, FL_FROZEN );
@@ -39,9 +39,9 @@ class ::AITaskHeal extends AITaskSingle {
 		::BotAI.Timers.AddTimerByName("[BotAI]Heal" + player.GetEntityIndex(), duration, false, RemoveFlag, player);
 
 		local weapon = player.GetActiveWeapon();
-		if(weapon && weapon.GetClassname() == "weapon_first_aid_kit" && NetProps.GetPropFloat(weapon, "m_flNextPrimaryAttack") <= Time())
+		if(weapon && weapon.GetClassname() == "weapon_first_aid_kit" && NetProps.GetPropFloat(weapon, "m_flNextPrimaryAttack") <= Time()) {
 			BotAI.ForceButton(player, 1 , duration, true);
-		else {
+		} else {
 			BotAI.ChangeItem(player, 3);
 			BotAI.ForceButton(player, 1 , duration, true);
 		}

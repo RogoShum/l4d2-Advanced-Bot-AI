@@ -156,7 +156,7 @@
 	BotExitMenuCmd(speaker, args, args1);
 }
 
-::BotThrowGrenadeCmd <- function ( speaker, args , args1) {
+::BotThrowFireCmd <- function ( speaker, args , args1) {
 	local player = speaker;
 	if (typeof player == "VSLIB_PLAYER")
 		player = player.GetBaseEntity();
@@ -165,12 +165,33 @@
 		BotAI.SendPlayer(player, "botai_admin_only");
 		return;
 	}
-	if(BotAI.NeedThrowGrenade) {
-		BotAI.NeedThrowGrenade = false;
-		BotAI.SendPlayer(player, "botai_throw_grenade_off");
+	if(BotAI.NeedThrowMolotov) {
+		BotAI.NeedThrowMolotov = false;
+		BotAI.SendPlayer(player, "botai_throw_fire_off");
 	} else {
-		BotAI.NeedThrowGrenade = true;
-		BotAI.SendPlayer(player, "botai_throw_grenade_on");
+		BotAI.NeedThrowMolotov = true;
+		BotAI.SendPlayer(player, "botai_throw_fire_on");
+	}
+
+	BotAI.SaveSetting();
+	BotExitMenuCmd(speaker, args, args1);
+}
+
+::BotThrowPipeBombCmd <- function ( speaker, args , args1) {
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER")
+		player = player.GetBaseEntity();
+
+	if(!ABA_IsAdmin(speaker)) {
+		BotAI.SendPlayer(player, "botai_admin_only");
+		return;
+	}
+	if(BotAI.NeedThrowPipeBomb) {
+		BotAI.NeedThrowPipeBomb = false;
+		BotAI.SendPlayer(player, "botai_throw_pipe_off");
+	} else {
+		BotAI.NeedThrowPipeBomb = true;
+		BotAI.SendPlayer(player, "botai_throw_pipe_on");
 	}
 
 	BotAI.SaveSetting();
@@ -840,7 +861,7 @@ function BotAI::displayOptionMenu(player, args, args1) {
 	local function top(menu) {
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_bot_skill") + ": " + (1 + BotAI.BotCombatSkill).tostring(), BotAI.displayOptionMenuBotCombat);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_follow") + ": " + (BotAI.FollowDistance).tostring(), BotAI.displayOptionMenuBotDistance);
-		menu.AddOption(BotAI.fromParams(BotAI.NeedThrowGrenade, lang)+I18n.getTranslationKeyByLang(lang, "menu_throw"), BotThrowGrenadeCmd);
+		menu.AddOption(BotAI.fromParams(BotAI.NeedThrowMolotov, lang)+I18n.getTranslationKeyByLang(lang, "menu_throw_fire"), BotThrowFireCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Melee, lang)+I18n.getTranslationKeyByLang(lang, "menu_take_melee"), BotMeleeCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Immunity, lang)+I18n.getTranslationKeyByLang(lang, "menu_immunity"), BotImmunityCmd);
 	}
@@ -889,7 +910,7 @@ function BotAI::displayOptionMenuNextNext(player, args, args1) {
 
 	local function bot(menu) {
 		menu.AddOption(BotAI.fromParams(BotAI.CloseSaferoomDoor, lang)+I18n.getTranslationKeyByLang(lang, "menu_close_door"), BotCloseSaferoomDoorCmd);
-		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption(BotAI.fromParams(BotAI.NeedThrowPipeBomb, lang)+I18n.getTranslationKeyByLang(lang, "menu_throw_pipe"), BotThrowPipeBombCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNext);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);

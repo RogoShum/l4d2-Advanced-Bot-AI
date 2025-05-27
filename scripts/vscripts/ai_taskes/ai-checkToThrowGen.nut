@@ -47,15 +47,16 @@ class ::AITaskCheckToThrowGen extends AITaskGroup
 
 		BotAI.HasTank = gettank && Director.IsTankInPlay();
 
-		if(!BotAI.NeedThrowGrenade)
+		if(!BotAI.NeedThrowMolotov)
 			return false;
 
 		local bungie = {};
 		foreach(bungie_mama, val in stasis) {
-			if(val == "weapon_molotov")
-			foreach(player in BotAI.SurvivorList) {
-				if(BotAI.distanceof(player.GetOrigin(), bungie_mama.GetOrigin()) < 200)
-					stasis[bungie_mama] = null;
+			if(val == "weapon_molotov") {
+				foreach(player in BotAI.SurvivorList) {
+					if(BotAI.distanceof(player.GetOrigin(), bungie_mama.GetOrigin()) < 200)
+						stasis[bungie_mama] = null;
+				}
 			}
 
 			if(stasis[bungie_mama] != null)
