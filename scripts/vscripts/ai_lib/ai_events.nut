@@ -151,8 +151,9 @@
 			if(TtoI < 200 || TtoB + 200 > ItoB) {
 				r = 0;
 				g = 255;
-			} else {
-				BotAI.applyDamageEx(bot, target, BotAI.getDamage(bot.GetActiveWeapon()) * 0.1 * BotAI.BotCombatSkill, BotAI.headshotDmg);
+			} else if (bot.GetActiveWeapon() != null) {
+				local weaponName = bot.GetActiveWeapon().GetClassname();
+				BotAI.applyDamageEx(bot, target, BotAI.getDamage(weaponName) * 0.1 * BotAI.BotCombatSkill, BotAI.headshotDmg);
 			}
 
 			if(BotAI.BotDebugMode) {
@@ -167,7 +168,7 @@
 ::BotAI.Events.OnGameEvent_weapon_fire <- function(event) {
 	local p = GetPlayerFromUserID(event.userid);
 	local victim = BotAI.getBotLookAt(p);
-	local weaponName = event.weapon;
+	local weaponName = "weapon_" + event.weapon;
 
 	/*
 	if("weapon" in event && event.weapon.find("claw") != null && !p.IsSurvivor()) {
@@ -1067,6 +1068,10 @@ function ChatTriggers::botdefib( player, args, text ) {
 
 function ChatTriggers::botfollow( player, args, text ) {
 	BotFollowDistanceCmd( player, args, text );
+}
+
+function ChatTriggers::botteleport( player, args, text ) {
+	BotTeleportDistanceCmd( player, args, text );
 }
 
 function ChatTriggers::botsaveteleport( player, args, text ) {

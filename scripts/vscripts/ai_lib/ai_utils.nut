@@ -1939,8 +1939,8 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 			printl("[Bot AI DEBUG]  EyeAngles: " + m_trace.enthit.EyeAngles());
 
 		local direcVec = NetProps.GetPropVector(m_trace.enthit, "m_angRotation");
-		printl("[Bot AI DEBUG]  m_angRotation: " +BotAI.CreateQAngle(direcVec.x, direcVec.y, direcVec.z));
-		printl("[Bot AI DEBUG]  GetForwardVector: " +BotAI.CreateQAngle(m_trace.enthit.GetForwardVector().x, m_trace.enthit.GetForwardVector().y, m_trace.enthit.GetForwardVector().z));
+		printl("[Bot AI DEBUG]  m_angRotation: " + BotAI.CreateQAngle(direcVec.x, direcVec.y, direcVec.z));
+		printl("[Bot AI DEBUG]  GetForwardVector: " + BotAI.CreateQAngle(m_trace.enthit.GetForwardVector().x, m_trace.enthit.GetForwardVector().y, m_trace.enthit.GetForwardVector().z));
 	}
 
 	return m_trace.enthit;
@@ -2146,7 +2146,7 @@ function BotAI::vomitTank(entity) {
 	backForce *= disScale;
 
 	if(BotAI.getIsMelee(player) && (!BotAI.IsEntitySI(infected) || infected.GetZombieType() != 8)) {
-		if(BotAI.IsTargetStaggering(infected) || (BotAI.IsEntitySI(infected) && infected.IsStaggering())) {
+		if(BotAI.IsTargetStaggering(infected)) {
 			local attractVec = nextInfected - nextPlayer;
 			return BotAI.fakeTwoD(BotAI.normalize(attractVec).Scale(limit));
 		} else if(BotAI.IsLivingEntity(infected)) {
@@ -2648,8 +2648,8 @@ function BotAI::GetTarget(_ent) {
 	(entity.GetZombieType() == 3 && sequence >= 45 && sequence <= 49) ||
 	(entity.GetZombieType() == 1 && sequence == 39) ||
 	(entity.GetZombieType() == 4 && sequence == 17) ||
-	(entity.GetZombieType() == 6 && sequence >= 38 && sequence <= 42)
-	)
+	(entity.GetZombieType() == 6 && sequence >= 38 && sequence <= 42) ||
+	entity.IsStaggering())
 	)
 	|| BotAI.IsInfectedBeShoved(entity);
 }

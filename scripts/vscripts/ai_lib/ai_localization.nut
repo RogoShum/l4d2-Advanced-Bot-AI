@@ -104,8 +104,9 @@ function I18n::init() {
 		botai_special_damage = "Bot's damage multiplier to Special Infected set to: ",
 		botai_common_damage = "Bot's damage multiplier to Common Infected set to: ",
 		botai_tank_damage = "Bot's damage multiplier to Tank set to: ",
-		botai_bot_follow_distance = "Bot max follow/teleport distance set to: ",
-		botai_bot_follow_distance_off = "Bot teleport-when-too-far function disabled!",
+		botai_bot_follow_distance = "Bot max follow distance set to: ",
+		botai_bot_teleport_distance = "Bot max teleport distance set to: ",
+		botai_bot_teleport_distance_off = "Bot teleport-when-too-far function disabled!",
 		botai_bot_save_teleport = "Bot rescue teleport timeout: ",
 		botai_bot_save_teleport_off = "Bot rescue teleport function disabled!",
 		botai_use_command_notice = "Use command !botnotice to disable config notifications.",
@@ -130,7 +131,8 @@ function I18n::init() {
 		menu_tank_damage = "Tank Dmg Mult",
 		menu_alive = "Continue after player death",
 		menu_upgrads = "Use Ammo Upgrades",
-		menu_follow = "Bot Teleport Range",
+		menu_follow = "Bot Follow Range",
+		menu_teleport = "Bot Teleport Range",
 		menu_passing_item = "Item Passing",
 		menu_close_door = "Close Safety Door",
 		menu_save_teleport = "Rescue Teleport",
@@ -200,8 +202,9 @@ function I18n::init() {
 		botai_no_holomenu = "全息菜单仅限客户端使用。",
 		botai_admin_only = "该指令仅管理员可用。",
 		botai_bot_combat_skill = "Bot战斗能力设置为: ",
-		botai_bot_follow_distance = "Bot最大跟随、传送距离设置为："
-		botai_bot_follow_distance_off = "Bot过远传送功能已关闭！"
+		botai_bot_follow_distance = "Bot最大跟随距离设置为："
+		botai_bot_teleport_distance = "Bot最大传送距离设置为："
+		botai_bot_teleport_distance_off = "Bot过远传送功能已关闭！"
 		botai_bot_save_teleport = "Bot尝试救人的超时传送时间为："
 		botai_bot_save_teleport_off = "Bot尝试救人的超时传送功能已关闭！"
 		botai_use_command_notice = "使用指令!botnotice关闭配置提示",
@@ -230,7 +233,8 @@ function I18n::init() {
 		menu_passing_item = "Bot传递物资",
 		menu_close_door = "Bot关安全门",
 		menu_upgrads = "Bot弹药升级",
-		menu_follow = "Bot传送距离",
+		menu_follow = "Bot跟随距离",
+		menu_teleport = "Bot传送距离",
 		menu_defibrillator = "使用电击器",
 		menu_enable = "√ ",
 		menu_disable = "✕ ",
@@ -292,8 +296,9 @@ function I18n::init() {
 		botai_no_holomenu = "全息選單僅限主機使用。",
 		botai_admin_only = "此指令僅限管理員使用。",
 		botai_bot_combat_skill = "Bot战斗能力设置为: ",
-		botai_bot_follow_distance = "Bot最大跟隨、傳送距離設置為：",
-		botai_bot_follow_distance_off = "Bot過遠傳送功能已關閉！",
+		botai_bot_follow_distance = "Bot最大跟隨距離設置為：",
+		botai_bot_teleport_distance = "Bot最大傳送距離設置為：",
+		botai_bot_teleport_distance_off = "Bot過遠傳送功能已關閉！",
 		botai_bot_save_teleport = "Bot救人超時傳送時間設置為：",
 		botai_bot_save_teleport_off = "Bot救人超時傳送功能已關閉！",
 		botai_witch_damage = "Bot對女巫傷害倍率已設置為: ",
@@ -326,7 +331,8 @@ function I18n::init() {
 		menu_save_teleport = "救人超時傳送",
 		menu_passing_item = "Bot傳遞物資",
 		menu_close_door = "Bot關安全門",
-		menu_follow = "Bot傳送距離",
+		menu_follow = "Bot跟隨距離",
+		menu_teleport = "Bot傳送距離",
 		menu_alive = "Bot玩家全滅後繼續",
 		menu_defibrillator = "使用電擊器",
 		menu_enable = "√ ",

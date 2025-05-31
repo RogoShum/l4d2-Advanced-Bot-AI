@@ -86,12 +86,61 @@
     if (distance > 999999) distance = 999999;
 
     BotAI.FollowDistance = distance;
-    Convars.SetValue("sb_enforce_proximity_range", distance);
+	
+	if(BotAI.PathFinding) {
+		Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 2000 );
+	} else {
+		Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 50 );
+		Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance );
+		Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 100 );
+		Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 200 );
+		Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 200 );
+	}
+
+	BotAI.SendPlayer(player, "botai_bot_follow_distance", 0.2, distance);
+
+    BotExitMenuCmd(speaker, args, args1);
+    BotAI.SaveSetting();
+}
+
+::BotTeleportDistanceCmd <- function (speaker, args, args1) {
+    local player = speaker;
+    if (typeof player == "VSLIB_PLAYER") {
+		player = player.GetBaseEntity();
+	}
+
+	if(!ABA_IsAdmin(speaker)) {
+		BotAI.SendPlayer(player, "botai_admin_only");
+		return;
+	}
+    local input = "";
+    foreach (idx, val in args) {
+        input += val + " ";
+    }
+
+    input = strip(input);
+
+    local distance = null;
+    try {
+        distance = input.tointeger();
+    } catch (ex) {
+        distance = 1500;
+    }
+
+    if (distance < 100) distance = 100;
+    if (distance > 999999) distance = 999999;
+
+	Convars.SetValue( "sb_enforce_proximity_range", distance );
+    BotAI.TeleportDistance = distance;
 
 	if (distance > 999990) {
-		BotAI.SendPlayer(player, "botai_bot_follow_distance_off", 0.2);
+		BotAI.SendPlayer(player, "botai_bot_teleport_distance_off", 0.2);
 	} else {
-		BotAI.SendPlayer(player, "botai_bot_follow_distance", 0.2, distance);
+		BotAI.SendPlayer(player, "botai_bot_teleport_distance", 0.2, distance);
 	}
 
     BotExitMenuCmd(speaker, args, args1);
@@ -372,19 +421,21 @@
 
 	if(BotAI.PathFinding) {
 		BotAI.PathFinding = false;
-		Convars.SetValue( "sb_separation_range", 250 );
-		Convars.SetValue( "sb_separation_danger_min_range", 200 );
-		Convars.SetValue( "sb_separation_danger_max_range", 500 );
+		Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 50 );
+		Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance );
+		Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 100 );
+		Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 200 );
+		Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 200 );
 		Convars.SetValue( "sb_allow_leading", 0 );
-		Convars.SetValue( "sb_neighbor_range", 200 );
 		BotAI.SendPlayer(player, "botai_path_finding_off");
 	} else {
 		BotAI.PathFinding = true;
 		Convars.SetValue( "sb_allow_leading", 1 );
-		Convars.SetValue( "sb_separation_range", 2000 );
-		Convars.SetValue( "sb_separation_danger_min_range", 300 );
-		Convars.SetValue( "sb_separation_danger_max_range", 2500 );
-		Convars.SetValue( "sb_neighbor_range", 1500 );
+		Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 2000 );
 		BotAI.SendPlayer(player, "botai_path_finding_on");
 		if(BotAI.PathFinding) {
 			BotAI.SendPlayer(player, "botai_unstick_pathfinding");
@@ -812,7 +863,6 @@ function BotAI::registerMenu() {
 function BotAI::buildMenu(player, topOptions, bottomOptions) {
 	// 为什么在这里要再SetLayout一次呢? 因为旧时代遗老mod Vscript Loader已经没有存在的必要了, 它的加载顺序滞后导致其他依赖Vslib的模组无法正常加载HUD, 需要有人来制裁
 	HUDSetLayout( ::VSLib.HUD._hud );
-	printl("bind key");
 	SendToConsole("bind \"1\" \"slot1; scripted_user_func slot1\"");
 	SendToConsole("bind \"2\" \"slot2; scripted_user_func slot2\"");
 	SendToConsole("bind \"3\" \"slot3; scripted_user_func slot3\"");
@@ -861,7 +911,7 @@ function BotAI::displayOptionMenu(player, args, args1) {
 	local function top(menu) {
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_bot_skill") + ": " + (1 + BotAI.BotCombatSkill).tostring(), BotAI.displayOptionMenuBotCombat);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_follow") + ": " + (BotAI.FollowDistance).tostring(), BotAI.displayOptionMenuBotDistance);
-		menu.AddOption(BotAI.fromParams(BotAI.NeedThrowMolotov, lang)+I18n.getTranslationKeyByLang(lang, "menu_throw_fire"), BotThrowFireCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_teleport") + ": " + (BotAI.TeleportDistance).tostring(), BotAI.displayOptionMenuBotFollowTeleport);
 		menu.AddOption(BotAI.fromParams(BotAI.Melee, lang)+I18n.getTranslationKeyByLang(lang, "menu_take_melee"), BotMeleeCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Immunity, lang)+I18n.getTranslationKeyByLang(lang, "menu_immunity"), BotImmunityCmd);
 	}
@@ -903,8 +953,8 @@ function BotAI::displayOptionMenuNextNext(player, args, args1) {
 	local function top(menu) {
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_tank_damage") + ": " + (BotAI.TankDamageMultiplier).tostring(), BotAI.displayOptionMenuBotTankDamage);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_common_damage") + ": " + (BotAI.CommonDamageMultiplier).tostring(), BotAI.displayOptionMenuBotCommonDamage);
-		menu.AddOption(BotAI.fromParams(BotAI.FallProtect, lang)+I18n.getTranslationKeyByLang(lang, "menu_fall_protect"), BotFallProtectCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_save_teleport") + ": " + (BotAI.SaveTeleport).tostring(), BotAI.displayOptionMenuBotTeleport);
+		menu.AddOption(BotAI.fromParams(BotAI.FallProtect, lang)+I18n.getTranslationKeyByLang(lang, "menu_fall_protect"), BotFallProtectCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.PassingItems, lang)+I18n.getTranslationKeyByLang(lang, "menu_passing_item"), BotPassingItemsCmd);
 	}
 
@@ -912,6 +962,27 @@ function BotAI::displayOptionMenuNextNext(player, args, args1) {
 		menu.AddOption(BotAI.fromParams(BotAI.CloseSaferoomDoor, lang)+I18n.getTranslationKeyByLang(lang, "menu_close_door"), BotCloseSaferoomDoorCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.NeedThrowPipeBomb, lang)+I18n.getTranslationKeyByLang(lang, "menu_throw_pipe"), BotThrowPipeBombCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNext);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_next"), BotAI.displayOptionMenuNextNextNext);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
+	}
+
+	BotAI.buildMenu(player, top, bot);
+}
+
+function BotAI::displayOptionMenuNextNextNext(player, args, args1) {
+	local lang = BotAI.language;
+	local function top(menu) {
+		menu.AddOption(BotAI.fromParams(BotAI.NeedThrowMolotov, lang)+I18n.getTranslationKeyByLang(lang, "menu_throw_fire"), BotThrowFireCmd);
+		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption("emp_3", BotEmptyCmd);
+		menu.AddOption("emp_4", BotEmptyCmd);
+	}
+
+	local function bot(menu) {
+		menu.AddOption("emp_1", BotEmptyCmd);
+		menu.AddOption("emp_2", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNextNext);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
 	}
@@ -972,19 +1043,67 @@ function BotAI::displayOptionMenuBotDistance(player, args, args1) {
 		followDistance(100);
 	}
 	local function high(player, args, args1) {
+		followDistance(200);
+	}
+	local function ultra(player, args, args1) {
+		followDistance(350);
+	}
+	local function extreme(player, args, args1) {
+		followDistance(500);
+	}
+	local function pro(player, args, args1) {
+		followDistance(700);
+	}
+	local function pro_(player, args, args1) {
+		followDistance(1000);
+	}
+	local function pro__(player, args, args1) {
+		followDistance(999999);
+	}
+
+	local function top(menu) {
+		menu.AddOption("100", normal);
+		menu.AddOption("200", high);
+		menu.AddOption("350", ultra);
+		menu.AddOption("500", extreme);
+		menu.AddOption("700", pro);
+	}
+
+	local function bot(menu) {
+		menu.AddOption("1000", pro_);
+		menu.AddOption("999999", pro__);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
+		menu.AddOption("emp_0", BotEmptyCmd);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
+	}
+
+	BotAI.buildMenu(player, top, bot);
+}
+
+function BotAI::displayOptionMenuBotFollowTeleport(player, args, args1) {
+	local lang = BotAI.language;
+	local function followDistance(value) {
+		local ability = [];
+		ability.append(value.tostring());
+		BotTeleportDistanceCmd(player, ability, "");
+	}
+	local function normal(player, args, args1) {
+		followDistance(100);
+	}
+	local function high(player, args, args1) {
 		followDistance(350);
 	}
 	local function ultra(player, args, args1) {
-		followDistance(700);
+		followDistance(500);
 	}
 	local function extreme(player, args, args1) {
-		followDistance(1000);
+		followDistance(700);
 	}
 	local function pro(player, args, args1) {
-		followDistance(1500);
+		followDistance(1000);
 	}
 	local function pro_(player, args, args1) {
-		followDistance(2000);
+		followDistance(1250);
 	}
 	local function pro__(player, args, args1) {
 		followDistance(999999);
@@ -993,13 +1112,13 @@ function BotAI::displayOptionMenuBotDistance(player, args, args1) {
 	local function top(menu) {
 		menu.AddOption("100", normal);
 		menu.AddOption("350", high);
-		menu.AddOption("700", ultra);
-		menu.AddOption("1000", extreme);
-		menu.AddOption("1500", pro);
+		menu.AddOption("500", ultra);
+		menu.AddOption("700", extreme);
+		menu.AddOption("1000", pro);
 	}
 
 	local function bot(menu) {
-		menu.AddOption("2000", pro_);
+		menu.AddOption("1250", pro_);
 		menu.AddOption("999999", pro__);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
 		menu.AddOption("emp_0", BotEmptyCmd);

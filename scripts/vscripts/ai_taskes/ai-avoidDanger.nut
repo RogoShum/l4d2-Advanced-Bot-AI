@@ -148,10 +148,18 @@ class::AITaskAvoidDanger extends AITaskSingle {
 								return false;
 							}
 
+							if (!NavMesh.NavAreaBuildPath(player.GetLastKnownArea(), null, point, 500, 2, false)) {
+								return true;
+							}
+
 							local playerPos = player.GetCenter();
 							local tankPos = danger.GetCenter();
 							local tankRadius = 50;
 							local direction = BotAI.normalize(point - player.GetOrigin());
+
+							if (BotAI.GetDistanceToWall(player, direction) < 30) {
+								return true;
+							}
 
 							local playerToTank = tankPos - playerPos;
 							local projection = playerToTank.Dot(direction);
@@ -206,7 +214,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 								local randomSpot = player.TryGetPathableLocationWithin(tpRadius);
 								local spotColor = Vector(255, 255, 25);
 
-								if (targetDirection == null && ((BotAI.distanceof(danger.GetOrigin(), randomSpot) > 180
+								if (targetDirection == null && ((BotAI.distanceof(danger.GetOrigin(), randomSpot) > 180 && !canHitTank(randomSpot)
 								&& !isTankBetweenHeights(randomSpot)) || (BotAI.BotCombatSkill >= 3 && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 140))) {
 									local spotDirection = randomSpot - player.GetOrigin();
 									local maxWallDist = 170;

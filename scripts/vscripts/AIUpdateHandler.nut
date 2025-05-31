@@ -97,8 +97,6 @@ if (!("VSLib" in getroottable())) {
 		scavenge_start = false
 		HasTank = false
 		MapName = " "
-		sb_battlestation_give_up_range_from_human = 0
-		sb_max_battlestation_range_from_human = 0
 
 		TriggerList = {}
 		FinaleStart = false
@@ -183,7 +181,8 @@ if (!("VSLib" in getroottable())) {
 		UnStick = true
 		CloseSaferoomDoor = true
 		PassingItems = true
-		FollowDistance = 1000
+		FollowDistance = 200
+		TeleportDistance = 1000
 		SaveTeleport = 9
 		Melee = true
 		Defibrillator = true
@@ -427,6 +426,7 @@ BotAI.witchMeleeDmg <- -2145386492;
     local settingList =
         "BotCombatSkill = " + BotAI.BotCombatSkill.tostring() +
 		"\nFollowDistance = " + BotAI.FollowDistance.tostring() +
+		"\nTeleportDistance = " + BotAI.TeleportDistance.tostring() +
 		"\nSaveTeleport = " + BotAI.SaveTeleport.tostring() +
         "\nBotDebugMode = " + BotAI.BotDebugMode.tostring() +
         "\nNeedGasFinding = " + BotAI.NeedGasFinding.tostring() +
@@ -590,9 +590,8 @@ function BotAI::removeNullString(array) {
 		player = player.GetBaseEntity();
 
 	if (IsDedicatedServer()) {
-		printl("IsDedicatedServer")
+
 	} else if (Director.IsSinglePlayerGame() || GetListenServerHost() == player || !BotAI.ServerMode) {
-		printl("IsSinglePlayerGame")
 		return true;
 	}
 
@@ -1387,9 +1386,12 @@ function BotAI::showAABB(entity) {
 		local radius = NetProps.GetPropFloat(entity, "m_Collision.m_flRadius");
 		local m_vecMins = NetProps.GetPropVector(entity, "m_Collision.m_vecMins");
 		local m_vecMaxs = NetProps.GetPropVector(entity, "m_Collision.m_vecMaxs");
-		
-		DebugDrawBoxAngles(entity.GetOrigin(), m_vecMins, m_vecMaxs, entity.GetAngles(), Vector(0, 0, 255), 0.2, 0.2);
-		DebugDrawCircle(entity.GetCenter(), Vector(0, 0, 255), 0.2, radius, true, 0.2);
+
+		local boxColor = Vector(0, 0, 255);
+		local circleColor = Vector(0, 0, 255);
+
+		DebugDrawBoxAngles(entity.GetOrigin(), m_vecMins, m_vecMaxs, entity.GetAngles(), boxColor, 0.2, 0.2);
+		DebugDrawCircle(entity.GetCenter(), circleColor, 0.2, radius, true, 0.2);
 	}
 }
 
@@ -1519,7 +1521,17 @@ function BotAI::AdjustBotState(args) {
 
 		if(BotAI.PathFinding) {
 			Convars.SetValue( "sb_allow_leading", 1 );
+			Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 1200 );
+			Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance + 1200 );
+			Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 1200 );
+			Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 1200 );
+			Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 2000 );
 		} else {
+			Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance );
+			Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 50 );
+			Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 100 );
+			Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 200 );
+			Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 200 );
 			Convars.SetValue( "sb_allow_leading", 0 );
 		}
 
@@ -1531,6 +1543,11 @@ function BotAI::AdjustBotState(args) {
 	} else {
 		Convars.SetValue( "sb_unstick", 1 );
 		Convars.SetValue( "sb_allow_leading", 1 );
+		Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 2000 );
 		Convars.SetValue( "sb_close_checkpoint_door_interval", 0.15 );
 		Convars.SetValue( "survivor_calm_damage_delay", 0 );
 		Convars.SetValue( "survivor_calm_deploy_delay", 0 );
@@ -1691,7 +1708,7 @@ function BotAI::AdjustBotState(args) {
 					BotAI.botRunPos(bot, tpPoint, "checkpoint", 4, changeAndUse);
 				}
 
-				if(tpPoint != null && dis > (BotAI.FollowDistance + 200)) {
+				if(tpPoint != null && dis > (BotAI.TeleportDistance + 200)) {
 					for(local i = 0; i < 5; ++i) {
 						local pos = tpPoint.TryGetPathableLocationWithin(200);
 						if(!BotAI.CanHumanSeePlace(pos) && BotAI.distanceof(pos, tpPoint.GetOrigin()) > 100) {
@@ -1811,13 +1828,13 @@ function BotAI::doNoticeText(args) {
 			local settings_0 = [
 				{ key = "menu_bot_skill", value = ::BotAI.BotCombatSkill + 1, enabled = true, isValue = true },
 				{ key = "menu_follow", value = ::BotAI.FollowDistance, enabled = true, isValue = true },
+				{ key = "menu_teleport", value = ::BotAI.TeleportDistance, enabled = true, isValue = true },
 				{ key = "menu_pathfinding", value = "", enabled = ::BotAI.PathFinding, isValue = false },
 				{ key = "menu_unstick", value = "", enabled = ::BotAI.UnStick, isValue = false },
 				{ key = "menu_find_gas", value = "", enabled = ::BotAI.NeedGasFinding, isValue = false },
 				{ key = "menu_throw_pipe", value = "", enabled = ::BotAI.NeedThrowPipeBomb, isValue = false },
 				{ key = "menu_throw_fire", value = "", enabled = ::BotAI.NeedThrowMolotov, isValue = false },
-				{ key = "menu_take_melee", value = "", enabled = ::BotAI.Melee, isValue = false },
-				{ key = "menu_defibrillator", value = "", enabled = ::BotAI.Defibrillator, isValue = false }
+				{ key = "menu_take_melee", value = "", enabled = ::BotAI.Melee, isValue = false }
 			];
 
 			local settings_1 = [
@@ -1994,20 +2011,22 @@ function resetAllBots() {
 
 	if(BotAI.PathFinding) {
 		Convars.SetValue( "sb_allow_leading", 1 );
-		Convars.SetValue( "sb_separation_range", 2000 );
-		Convars.SetValue( "sb_separation_danger_min_range", 300 );
-		Convars.SetValue( "sb_separation_danger_max_range", 2500 );
-		Convars.SetValue( "sb_neighbor_range", 1500 );
+		Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 1200 );
+		Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 2000 );
 	} else {
-		Convars.SetValue( "sb_separation_range", 250 );
-		Convars.SetValue( "sb_separation_danger_min_range", 200 );
-		Convars.SetValue( "sb_separation_danger_max_range", 400 );
+		Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance );
+		Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 50 );
+		Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 100 );
+		Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 200 );
+		Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 200 );
 		Convars.SetValue( "sb_allow_leading", 0 );
-		Convars.SetValue( "sb_neighbor_range", 200 );
 	}
 
+	Convars.SetValue( "sb_enforce_proximity_range", BotAI.TeleportDistance );
 	Convars.SetValue( "sb_max_team_melee_weapons", 0 );
-	Convars.SetValue( "sb_enforce_proximity_range", BotAI.FollowDistance );
 
 	local function allBot(arg) {
 		if(BotAI.NeedBotAlive) {
@@ -2043,7 +2062,6 @@ function resetAllBots() {
 		Convars.SetValue( "sb_close_checkpoint_door_interval", 999 );
 	}
 
-	Convars.SetValue( "sb_max_battlestation_range_from_human", 150 );
 	Convars.SetValue( "sb_follow_stress_factor", 0 );
 	Convars.SetValue( "sb_locomotion_wait_threshold", 0.0 );
 	Convars.SetValue( "sb_path_lookahead_range", 2500 );
