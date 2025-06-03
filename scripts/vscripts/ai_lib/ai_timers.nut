@@ -392,7 +392,7 @@ function BotAI::createPlayerTargetTimer(player) {
 		}
 
 		BotAI.setBotCombatCommon(player, null);
-		
+
 		while(com = Entities.FindByClassnameWithin(com, "infected", player.GetCenter(), closestDis)) {
 			if(!BotAI.IsAlive(com) || BotAI.IsEntitySI(BotAI.GetTarget(com))) {
 				continue;

@@ -85,21 +85,9 @@
     if (distance < 100) distance = 100;
     if (distance > 999999) distance = 999999;
 
-    BotAI.FollowDistance = distance;
-	
-	if(BotAI.PathFinding) {
-		Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 1200 );
-		Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance + 1200 );
-		Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 1200 );
-		Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 1200 );
-		Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 2000 );
-	} else {
-		Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 50 );
-		Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance );
-		Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 100 );
-		Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 200 );
-		Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 200 );
-	}
+    BotAI.FollowRange = distance;
+
+	BotAI.resetFollowRange();
 
 	BotAI.SendPlayer(player, "botai_bot_follow_distance", 0.2, distance);
 
@@ -421,26 +409,18 @@
 
 	if(BotAI.PathFinding) {
 		BotAI.PathFinding = false;
-		Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 50 );
-		Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance );
-		Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 100 );
-		Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 200 );
-		Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 200 );
 		Convars.SetValue( "sb_allow_leading", 0 );
 		BotAI.SendPlayer(player, "botai_path_finding_off");
 	} else {
 		BotAI.PathFinding = true;
 		Convars.SetValue( "sb_allow_leading", 1 );
-		Convars.SetValue( "sb_separation_range", BotAI.FollowDistance + 1200 );
-		Convars.SetValue( "sb_separation_danger_min_range", BotAI.FollowDistance + 1200 );
-		Convars.SetValue( "sb_neighbor_range", BotAI.FollowDistance + 1200 );
-		Convars.SetValue( "sb_max_battlestation_range_from_human", BotAI.FollowDistance + 1200 );
-		Convars.SetValue( "sb_separation_danger_max_range", BotAI.FollowDistance + 2000 );
 		BotAI.SendPlayer(player, "botai_path_finding_on");
 		if(BotAI.PathFinding) {
 			BotAI.SendPlayer(player, "botai_unstick_pathfinding");
 		}
 	}
+
+	BotAI.resetFollowRange();
 	BotAI.SaveSetting();
 }
 
@@ -910,7 +890,7 @@ function BotAI::displayOptionMenu(player, args, args1) {
 	local lang = BotAI.language;
 	local function top(menu) {
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_bot_skill") + ": " + (1 + BotAI.BotCombatSkill).tostring(), BotAI.displayOptionMenuBotCombat);
-		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_follow") + ": " + (BotAI.FollowDistance).tostring(), BotAI.displayOptionMenuBotDistance);
+		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_follow") + ": " + (BotAI.FollowRange).tostring(), BotAI.displayOptionMenuBotDistance);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_teleport") + ": " + (BotAI.TeleportDistance).tostring(), BotAI.displayOptionMenuBotFollowTeleport);
 		menu.AddOption(BotAI.fromParams(BotAI.Melee, lang)+I18n.getTranslationKeyByLang(lang, "menu_take_melee"), BotMeleeCmd);
 		menu.AddOption(BotAI.fromParams(BotAI.Immunity, lang)+I18n.getTranslationKeyByLang(lang, "menu_immunity"), BotImmunityCmd);
