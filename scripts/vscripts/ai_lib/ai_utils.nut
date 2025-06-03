@@ -1385,7 +1385,11 @@ function BotAI::isEntityInfected(entity)
 
 function BotAI::getSeverLanguage() {
 	if (!IsDedicatedServer() && !BotAI.ServerMode) {
-		return Convars.GetStr("cl_language").tostring();
+		local ccLang = Convars.GetStr("cc_lang").tostring();
+        if (ccLang == "") {
+            return Convars.GetStr("cl_language").tostring();
+        }
+        return ccLang;
 	} else {
 		return BotAI.ServerLanguage.tostring();
 	}

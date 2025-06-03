@@ -1177,6 +1177,10 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 			BotAI.ListAvoidCar[victim.GetEntityIndex()] <- CarAvoid(victim);
 			return true;
 		}
+
+		if(BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim)) {
+			BotAI.setContext(victim, "BOTAI_KNOCK", 1.25);
+		}
 	}
 
 	if(victim != null && BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim) && !victim.IsDominatedBySpecialInfected()) {

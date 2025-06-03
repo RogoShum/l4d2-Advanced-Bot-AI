@@ -1042,16 +1042,16 @@ function BotAI::displayOptionMenuBotDistance(player, args, args1) {
 	}
 
 	local function top(menu) {
-		menu.AddOption("100", normal);
-		menu.AddOption("200", high);
-		menu.AddOption("350", ultra);
-		menu.AddOption("500", extreme);
-		menu.AddOption("700", pro);
+		menu.AddOption("100hu(1.9m)", normal);
+		menu.AddOption("200hu(3.8m)", high);
+		menu.AddOption("350hu(6.7m)", ultra);
+		menu.AddOption("500hu(9.5m)", extreme);
+		menu.AddOption("700hu(13.3m)", pro);
 	}
 
 	local function bot(menu) {
-		menu.AddOption("1000", pro_);
-		menu.AddOption("999999", pro__);
+		menu.AddOption("1000hu(19.1m)", pro_);
+		menu.AddOption("999999hu(~19050m)", pro__);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);
@@ -1090,16 +1090,16 @@ function BotAI::displayOptionMenuBotFollowTeleport(player, args, args1) {
 	}
 
 	local function top(menu) {
-		menu.AddOption("100", normal);
-		menu.AddOption("350", high);
-		menu.AddOption("500", ultra);
-		menu.AddOption("700", extreme);
-		menu.AddOption("1000", pro);
+		menu.AddOption("100hu(1.9m)", normal);
+		menu.AddOption("350hu(6.7m)", high);
+		menu.AddOption("500hu(9.5m)", ultra);
+		menu.AddOption("700hu(13.3m)", extreme);
+		menu.AddOption("1000hu(19.1m)", pro);
 	}
 
 	local function bot(menu) {
-		menu.AddOption("1250", pro_);
-		menu.AddOption("999999", pro__);
+		menu.AddOption("1250hu(23.8m)", pro_);
+		menu.AddOption("999999hu(~19050m)", pro__);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);

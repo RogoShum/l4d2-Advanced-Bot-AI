@@ -28,7 +28,9 @@ class ::AITaskGroup extends AITask
 			foreach(player in BotAI.SurvivorBotList) {
 				if(!BotAI.IsPlayerEntityValid(player)) continue;
 				if(BotAI.isBotTheardLocking(player, getOrder())) {
-					printl("[BotAI] Can't check bot " + name + " update due to theard locking on " + BotAI.getBotPropertyMap(player).taskLock);
+					if (BotAI.BotDebugMode) {
+						printl("[BotAI] Can't check bot " + name + " update due to theard locking on " + BotAI.getBotPropertyMap(player).taskLock);
+					}
 					continue;
 				}
 

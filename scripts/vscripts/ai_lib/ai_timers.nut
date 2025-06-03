@@ -18,7 +18,7 @@ function BotAI::moveFunc() {
 	foreach(player in BotAI.SurvivorBotList) {
 		if(player in BotAI.botMoveMap) {
 
-			if(player.IsIncapacitated() || player.IsDominatedBySpecialInfected() || BotAI.isPlayerBeingRevived(player) || BotAI.IsPlayerReviving(player)) {
+			if(BotAI.hasContext(player, "BOTAI_KNOCK") || player.IsIncapacitated() || player.IsDominatedBySpecialInfected() || BotAI.isPlayerBeingRevived(player) || BotAI.IsPlayerReviving(player)) {
 				NetProps.SetPropVector(player, "m_vecBaseVelocity", Vector(0, 0, 0));
 				BotAI.botMoveMap[player] = Vector(0, 0, 0);
 				BotAI.getNavigator(player).clearPath("botMove^+");

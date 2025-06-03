@@ -154,12 +154,12 @@ class::Navigator {
 
 			foreach(danger in BotAI.SpecialList) {
 				if (danger.GetClassname() == "player" && danger.GetZombieType() == 8) {
-					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 310) {
-						friction -= 0.1;
+					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 260) {
+						friction -= 0.05;
 					}
 
 					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 200) {
-						speed += 0.5 + BotAI.BotCombatSkill * 0.3;
+						speed += 0.2 + BotAI.BotCombatSkill * 0.3;
 						friction -= 0.2 * BotAI.BotCombatSkill;
 					}
 				}
