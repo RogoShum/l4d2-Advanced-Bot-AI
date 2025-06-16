@@ -188,11 +188,15 @@ if (!("VSLib" in getroottable())) {
 		Defibrillator = true
 		BackPack = true
 		FallProtect = true
+		FireProtect = false
+		AcidProtect = false
+		NonAliveProtect = false
 		ServerMode = false
 		WitchDamageMultiplier = 1.0
 		SpecialDamageMultiplier = 1.0
 		TankDamageMultiplier = 1.0
 		CommonDamageMultiplier = 1.0
+		NonAliveDamageMultiplier = 1.0
 		ServerLanguage = "english"
 		ABA_Admins = {}
 		NoticeConfig = true
@@ -437,6 +441,9 @@ BotAI.witchMeleeDmg <- -2145386492;
         "\nPathFinding = " + BotAI.PathFinding.tostring() +
         "\nUnStick = " + BotAI.UnStick.tostring() +
 		"\nFallProtect = " + BotAI.FallProtect.tostring() +
+		"\nFireProtect = " + BotAI.FireProtect.tostring() +
+		"\nAcidProtect = " + BotAI.AcidProtect.tostring() +
+		"\nNonAliveProtect = " + BotAI.NonAliveProtect.tostring() +
         "\nDefibrillator = " + BotAI.Defibrillator.tostring() +
 		"\nCloseSaferoomDoor = " + BotAI.CloseSaferoomDoor.tostring() +
 		"\nPassingItems = " + BotAI.PassingItems.tostring() +
@@ -445,6 +452,7 @@ BotAI.witchMeleeDmg <- -2145386492;
 		"\nSpecialDamageMultiplier = " + BotAI.SpecialDamageMultiplier.tostring() +
 		"\nTankDamageMultiplier = " + BotAI.TankDamageMultiplier.tostring() +
 		"\nCommonDamageMultiplier = " + BotAI.CommonDamageMultiplier.tostring() +
+		"\nNonAliveDamageMultiplier = " + BotAI.NonAliveDamageMultiplier.tostring() +
 		"\nServerLanguage = \"" + BotAI.ServerLanguage.tostring() + "\"" +
         "\nMelee = " + BotAI.Melee.tostring() +
         "\nNoticeConfig = " + BotAI.NoticeConfig.tostring() +
@@ -1012,8 +1020,8 @@ function BotAI::ModifyMolotovVector(args) {
 }
 
 function BotAI::AdjustBotsUpdateRate(args) {
-	if (BotAI.BotCombatSkill > 4) {
-		BotAI.BotCombatSkill = 4;
+	if (BotAI.BotCombatSkill > 98) {
+		BotAI.BotCombatSkill = 98;
 	}
 
 	local FalledPlayer = 0;
@@ -1521,6 +1529,25 @@ function BotAI::AdjustBotState(args) {
 
 	if(BotAI.Melee) {
 		BotAI.resetBotMeleeAction();
+	}
+
+	if (BotAI.SurvivorBotList.len() > 0 && BotAI.mapTransPack.len() > 0) {
+		foreach (bot in BotAI.SurvivorBotList) {
+			local botKey = BotAI.playerKey(bot);
+			Msg("[Bot AI] key: " + botKey + "\n");
+			foreach (key, props in BotAI.mapTransPack) {
+				if(typeof props == "table" && "modelName" in props && "clazz" in props) {
+					local prop = SpawnEntityFromTable(props.clazz, {model = props.modelName});
+					if(BotAI.IsEntityValid(prop)) {
+						Msg("[Bot AI] Loding prop " + prop + "\n");
+						BotAI.BotTakeGasCan(bot, prop);
+					}
+				}
+
+				delete BotAI.mapTransPack[key];
+				break;
+			}
+		}
 	}
 
 	if (BotAI.SurvivorHumanList.len() > 0) {
@@ -2070,6 +2097,7 @@ function resetAllBots() {
 	Convars.SetValue( "sb_vomit_blind_time", 0 );
 
 	resetAllBots();
+	BotAI.loadBackpack();
 
 	printl("[Bot AI]	Bot AI loaded.");
 }

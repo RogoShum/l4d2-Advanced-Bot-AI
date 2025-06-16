@@ -167,7 +167,7 @@ class::Navigator {
 		}
 
 		if (movingID.find("$") != null) {
-			speed += 0.2;
+			speed += 0.1 * BotAI.BotCombatSkill;
 		}
 
 		NetProps.SetPropFloat(player, "m_flLaggedMovementValue", speed);

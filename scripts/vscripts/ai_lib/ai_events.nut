@@ -13,18 +13,7 @@
 ::BotAI.Events.OnGameEvent_player_transitioned <- function(event) {
 	local player = GetPlayerFromUserID(event.userid);
 	if(!BotAI.IsEntitySurvivor(player)) return;
-	local key = BotAI.playerKey(player);
-	Msg("[Bot AI] key: " + key + "\n");
-	local map = {};
-	RestoreTable("botai_backpack_" + key, map);
-	if(typeof map == "table" && "modelName" in map && "clazz" in map) {
-		local prop = SpawnEntityFromTable(map.clazz, {model = map.modelName});
-		if(BotAI.IsEntityValid(prop)) {
-			Msg("[Bot AI] Loding prop " + prop + "\n");
-			BotAI.BotTakeGasCan(player, prop);
-		}
-	}
-	SaveTable("botai_backpack_" + key, map);
+	BotAI.itemPassingCooldown[player] <- 20;
 }
 
 ::BotAI.Events.OnGameEvent_player_spawn <- function(event) {
@@ -218,8 +207,10 @@
 			}
 
 			if(BotAI.IsEntityValid(target) && target.GetClassname() == "tank_rock") {
-				target.TakeDamage(300, BotAI.headshotDmg, p);
-				pass = true;
+				if (weaponName.find("melee") == null || BotAI.distanceof(target.GetCenter(), p.EyePosition()) < 250) {
+					target.TakeDamage(300, BotAI.headshotDmg, p);
+					pass = true;
+				}
 			}
 		}
 
@@ -257,7 +248,7 @@
 
 			target = null;
 			while(target = Entities.FindByClassnameWithin(target, "player", p.GetOrigin(), range)) {
-				if (BotAI.IsEntitySI(target) && BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range - skillFactor
+				if (BotAI.IsEntitySI(target) && target.GetZombieType() != 8 && BotAI.distanceof(p.GetOrigin(), target.GetOrigin()) > range - skillFactor
 				&& BotAI.VectorDotProduct(BotAI.normalize(p.EyeAngles().Forward()), BotAI.normalize(target.GetOrigin() - p.GetOrigin())) > (0.7 - additionAngle)) {
 					damaged = true;
 					BotAI.applyDamageEx(p, target, TD, BotAI.meleeDmg, damagePos);
@@ -1050,6 +1041,18 @@ function ChatTriggers::botprotect( player, args, text ) {
 	BotFallProtectCmd( player, args, text );
 }
 
+function ChatTriggers::botfireprotect( player, args, text ) {
+	BotFireProtectCmd( player, args, text );
+}
+
+function ChatTriggers::botacidprotect( player, args, text ) {
+	BotAcidProtectCmd( player, args, text );
+}
+
+function ChatTriggers::botnonaliveprotect( player, args, text ) {
+	BotNonAliveProtectCmd( player, args, text );
+}
+
 function ChatTriggers::botmenu( player, args, text ) {
 	BotMenuCmd( player, args, text );
 }
@@ -1092,6 +1095,10 @@ function ChatTriggers::bottankdamage( player, args, text ) {
 
 function ChatTriggers::botcommondamage( player, args, text ) {
 	BotCommonDamageCmd( player, args, text );
+}
+
+function ChatTriggers::botnonalivedamage( player, args, text ) {
+	BotNonAliveDamageCmd( player, args, text );
 }
 
 function ChatTriggers::botdebug( player, args, text ) {
@@ -1181,6 +1188,15 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 		if(BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim)) {
 			BotAI.setContext(victim, "BOTAI_KNOCK", 1.25);
 		}
+
+		if (BotAI.BotCombatSkill > 4) {
+			local damageReduction = (BotAI.BotCombatSkill - 4) / 4.0;
+			damageTable.DamageDone *= (1.0 - damageReduction);
+
+			if (damageTable.DamageDone <= 0) {
+				return false;
+			}
+		}
 	}
 
 	if(victim != null && BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim) && !victim.IsDominatedBySpecialInfected()) {
@@ -1189,12 +1205,15 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 				return false;
 			}
 
+			if (BotAI.AcidProtect && inflictor.GetClassname() == "insect_swarm") {
+				return false;
+			}
+
 			if (NetProps.HasProp(inflictor, "m_fireCount")) {
 				local fireCount = NetProps.GetPropInt(inflictor, "m_fireCount");
 				local isSafeFromAllFires = true;
 
 				for (local i = 0; i < fireCount; i++) {
-
 					local firePos = inflictor.GetOrigin() + Vector(
 						NetProps.GetPropIntArray(inflictor, "m_fireXDelta", i),
 						NetProps.GetPropIntArray(inflictor, "m_fireYDelta", i),
@@ -1251,28 +1270,44 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 		}
 	}
 
-	if(BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim) && BotAI.IsEntityValid(attacker)) {
-		if (attacker.GetClassname() == "infected") {
-			if(BotAI.IsPlayerReviving(victim)) {
-				local falledPlayer = null;
-				local player = BotAI.getPlayerRevived(victim);
-				if(!player.IsIncapacitated() && !player.IsHangingFromLedge()) {
-					local findPlayer = null;
-					while(findPlayer = Entities.FindByClassnameWithin(findPlayer, "player", victim.GetOrigin(), 220)) {
-						if(BotAI.IsAlive(findPlayer) && (findPlayer.IsIncapacitated() || findPlayer.IsHangingFromLedge()))
-							falledPlayer = findPlayer;
+	if(BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim)) {
+		if (BotAI.IsEntityValid(attacker)) {
+			if (attacker.GetClassname() == "infected") {
+				if(BotAI.IsPlayerReviving(victim)) {
+					local falledPlayer = null;
+					local player = BotAI.getPlayerRevived(victim);
+					if(!player.IsIncapacitated() && !player.IsHangingFromLedge()) {
+						local findPlayer = null;
+						while(findPlayer = Entities.FindByClassnameWithin(findPlayer, "player", victim.GetOrigin(), 220)) {
+							if(BotAI.IsAlive(findPlayer) && (findPlayer.IsIncapacitated() || findPlayer.IsHangingFromLedge()))
+								falledPlayer = findPlayer;
+						}
+					} else {
+						falledPlayer = player;
+					}
+
+					if(BotAI.IsPlayerEntityValid(falledPlayer)) {
+						RushVictim(falledPlayer, 210);
+						return false;
 					}
 				} else {
-					falledPlayer = player;
+					BotAI.BotAttack(victim, attacker);
 				}
+			} else if (BotAI.FireProtect && (damageTable.DamageType & DMG_BURN)) {
+				damageTable.DamageDone = 0;
+				return false;
+			} else if (attacker.GetClassname() == "player" || attacker.GetClassname() == "witch") {
 
-				if(BotAI.IsPlayerEntityValid(falledPlayer)) {
-					RushVictim(falledPlayer, 210);
-					return false;
-				}
-			} else {
-				BotAI.BotAttack(victim, attacker);
+			} else if (BotAI.NonAliveProtect) {
+				damageTable.DamageDone = 0;
+				return false;
 			}
+		} else if (BotAI.NonAliveProtect) {
+			damageTable.DamageDone = 0;
+			return false;
+		} else if (BotAI.FireProtect && (damageTable.DamageType & DMG_BURN)) {
+			damageTable.DamageDone = 0;
+			return false;
 		}
 	}
 
@@ -1306,7 +1341,7 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 		return false;
 	}
 
-	if(BotAI.IsEntitySI(victim) && victim.GetZombieType() == 8 && victim.GetLastKnownArea() != null && victim.GetLastKnownArea().IsUnderwater() && damageTable.DamageType & DMG_BURN) {
+	if(BotAI.IsEntitySI(victim) && victim.GetZombieType() == 8 && victim.GetLastKnownArea() != null && victim.GetLastKnownArea().IsUnderwater() && (damageTable.DamageType & DMG_BURN)) {
 		damageTable.DamageDone *= 0.75;
 	}
 
@@ -1332,20 +1367,19 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 			if (BotAI.playerLive <= 2) {
 				damageTable.DamageDone *= 1.5;
 			}
-		}
-
-
-		if(className == "infected") {
+		} else if(className == "infected") {
 			damageTable.DamageDone *= BotAI.CommonDamageMultiplier;
-		}
+		} else if(victim.IsValid() && className == "witch") {
+			if (damageTable.DamageDone > 1) {
+				damageTable.DamageDone *= BotAI.WitchDamageMultiplier;
 
-		if(damageTable.DamageDone > 1 && victim.IsValid() && className == "witch") {
-			damageTable.DamageDone *= BotAI.WitchDamageMultiplier;
-
-			if(!BotAI.witchKilling(victim) && !BotAI.witchRetreat(victim) && !BotAI.witchRunning(victim)) {
-				damageTable.DamageDone == 0;
-				return false;
+				if(!BotAI.witchKilling(victim) && !BotAI.witchRetreat(victim) && !BotAI.witchRunning(victim)) {
+					damageTable.DamageDone == 0;
+					return false;
+				}
 			}
+		} else {
+			damageTable.DamageDone *= BotAI.NonAliveDamageMultiplier;
 		}
 	}
 

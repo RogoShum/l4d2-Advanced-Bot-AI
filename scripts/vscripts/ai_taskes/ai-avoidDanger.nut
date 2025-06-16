@@ -18,8 +18,15 @@ class::AITaskAvoidDanger extends AITaskSingle {
 		}
 
 		foreach(danger in BotAI.groundList) {
-			if (BotAI.IsEntityValid(danger) && BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 270)
-				dangerous[dangerous.len()] <- danger;
+			if (BotAI.IsEntityValid(danger) && BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 270) {
+				local dangerName = danger.GetClassname();
+				local fireProtect = (dangerName == "env_entity_igniter" || dangerName == "entityflame" || dangerName == "inferno") && BotAI.FireProtect;
+				local acidProtect = dangerName == "insect_swarm" && BotAI.AcidProtect;
+
+				if (!fireProtect && !acidProtect) {
+					dangerous[dangerous.len()] <- danger;
+				}
+			}
 		}
 
 		foreach(special in BotAI.SpecialList) {
@@ -62,7 +69,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 					continue;
 
 				local name = danger.GetClassname();
-				
+
 				if (BotAI.BotDebugMode) {
 					//DebugDrawText(player.EyePosition() + Vector(0, 0, height), "Avoid: " + name, false, 0.5);
 					height += 10;
@@ -260,6 +267,8 @@ class::AITaskAvoidDanger extends AITaskSingle {
 								if (BotAI.BotCombatSkill == 3 && nexDis < 70) {
 									player.SetOrigin(targetDirection + player.GetOrigin());
 								} else if (BotAI.BotCombatSkill == 4 && nexDis < 100) {
+									player.SetOrigin(targetDirection + player.GetOrigin());
+								} else if (BotAI.BotCombatSkill >= 5 && nexDis < 120) {
 									player.SetOrigin(targetDirection + player.GetOrigin());
 								} else {
 									vecList[vecList.len()] <- targetDirection;

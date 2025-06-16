@@ -104,6 +104,7 @@ function BotAI::playerKey(player) {
 }
 
 function BotAI::saveBackpack() {
+	local props = {};
 	foreach(bot, prop in BotAI.BotLinkGasCan) {
 		if(BotAI.IsEntityValid(bot) && BotAI.IsEntityValid(prop)) {
 			local key = BotAI.playerKey(bot);
@@ -112,11 +113,13 @@ function BotAI::saveBackpack() {
 				clazz = prop.GetClassname()
 			}
 
-			SaveTable("botai_backpack_" + key, value);
+
 			Msg("[Bot AI] Saving props " + value.clazz + " with model " + value.modelName + "\n");
-			Msg("[Bot AI] key: " + key + "\n");
+			props[key] <- value;
 		}
 	}
+
+	SaveTable("botai_backpack", props);
 }
 
 function BotAI::loadBackpack() {
@@ -124,7 +127,6 @@ function BotAI::loadBackpack() {
 	RestoreTable("botai_backpack", map);
 	if(typeof map == "table")
 		BotAI.mapTransPack = map;
-	//if(BotAI.)
 	SaveTable("botai_backpack", map);
 }
 
@@ -1415,6 +1417,12 @@ function BotAI::applyDamage(owner, target, amount) {
 			damageType = BotAI.meleeDmg;
 			damagepos = BotAI.getEntityHeadPos(owner);
 			damagepos = Vector(damagepos.x, damagepos.y, owner.EyePosition().z);
+
+			if (target.GetClassname() == "witch") {
+				damageType = BotAI.witchMeleeDmg;
+			} else {
+				damageType = BotAI.meleeDmg;
+			}
 		} else {
 			damagepos = BotAI.getEntityHeadPos(target);
 		}
@@ -1431,12 +1439,19 @@ function BotAI::applyDamageEx(owner, target, amount, damageType, damagepos = nul
 	if (BotAI.IsAlive(target) || amount <= 0) {
 		local inflictor = owner;
 		local weaponType = owner.GetActiveWeapon().GetClassname();
+		local weapon = owner.GetActiveWeapon();
 
 		if(weaponType == "weapon_chainsaw" || weaponType == "weapon_melee") {
 			inflictor = owner.GetActiveWeapon();
+
+			if (target.GetClassname() == "witch") {
+				damageType = BotAI.witchMeleeDmg;
+			} else {
+				damageType = BotAI.meleeDmg;
+			}
 		}
 
-		target.TakeDamageEx(inflictor, owner, owner.GetActiveWeapon(), Vector(0, 0, 0), damagepos, amount, damageType);
+		target.TakeDamageEx(inflictor, owner, weapon, Vector(0, 0, 0), damagepos, amount, damageType);
 	}
 }
 
@@ -1870,6 +1885,7 @@ function BotAI::CanSeeOtherEntityPrintName(player, distan = 999999, pri = 1, tra
 		printl("[Bot AI DEBUG] m_hOwner: " + NetProps.GetPropEntity(m_trace.enthit, "m_hOwner"));
 
 		if(m_trace.enthit.GetClassname() == "player") {
+			printl("[Bot AI DEBUG] Weapon: " + (m_trace.enthit.GetActiveWeapon() == null ? "None" : m_trace.enthit.GetActiveWeapon().GetClassname()));
 			if (m_trace.enthit.GetZombieType() == 1) {
 				printl("[Bot AI DEBUG] m_duration: " + NetProps.GetPropFloat(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_nextActivationTimer.m_duration"));
 				printl("[Bot AI DEBUG] m_timestamp: " + NetProps.GetPropFloat(NetProps.GetPropEntity(m_trace.enthit, "m_customAbility"), "m_nextActivationTimer.m_timestamp"));
