@@ -149,7 +149,12 @@ class::Navigator {
 		local speed = 1.0;
 		local friction = 1.0;
 		local nearTank = false;
-		if (BotAI.BotCombatSkill > 2 || BotAI.HasTank) {
+		local botskill = BotAI.BotCombatSkill;
+		if (botskill > 4) {
+			botskill = 4;
+		}
+
+		if (botskill > 2 || BotAI.HasTank) {
 			speed += 0.2;
 
 			foreach(danger in BotAI.SpecialList) {
@@ -160,8 +165,8 @@ class::Navigator {
 					}
 
 					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 200) {
-						speed += 0.2 + BotAI.BotCombatSkill * 0.3;
-						friction -= 0.2 * BotAI.BotCombatSkill;
+						speed += 0.2 + botskill * 0.3;
+						friction -= 0.1 * botskill;
 					}
 				}
 			}

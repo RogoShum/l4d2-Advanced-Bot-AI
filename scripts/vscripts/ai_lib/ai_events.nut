@@ -1167,6 +1167,16 @@ function VSLib::EasyLogic::Notifications::CanPickupObject::BotAIPickUp(vEntity, 
 	}
 }
 
+function BotAI::printlModifyReason(reason, table) {
+	if (!BotAI.BotDebugMode) {
+		return;
+	}
+	printl(">--------Damage Modify-------<");
+	printl("  >---  " + reason + "  ---<  ");
+	__DumpScope(1, table);
+	printl(">----------------------------<");
+}
+
 function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 	local attacker = damageTable.Attacker;
 	local inflictor = damageTable.Inflictor;
@@ -1187,14 +1197,15 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 
 		if(BotAI.IsPlayerEntityValid(victim) && victim.IsSurvivor() && IsPlayerABot(victim)) {
 			BotAI.setContext(victim, "BOTAI_KNOCK", 1.25);
-		}
 
-		if (BotAI.BotCombatSkill > 4) {
-			local damageReduction = (BotAI.BotCombatSkill - 4) / 4.0;
-			damageTable.DamageDone *= (1.0 - damageReduction);
+			if (BotAI.BotCombatSkill > 4) {
+				local damageReduction = (BotAI.BotCombatSkill - 4) / 4.0;
+				damageTable.DamageDone *= (1.0 - damageReduction);
 
-			if (damageTable.DamageDone <= 0) {
-				return false;
+				if (damageTable.DamageDone <= 0) {
+					BotAI.printlModifyReason("high skill", damageTable);
+					return false;
+				}
 			}
 		}
 	}
@@ -1239,13 +1250,13 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 
 		if(BotAI.isPlayerNearLadder(victim)) {
 			if(damageTable.DamageType & DMG_FALL) {
+				BotAI.printlModifyReason("near ladder", damageTable);
 				return false;
 			}
 		}
 
 		if(BotAI.FallProtect && damageTable.DamageDone >= 100) {
-			local noneAliveEntity = damageTable.Attacker == null ||
-			(damageTable.Attacker.GetClassname() != "player" && damageTable.Attacker.GetClassname() != "infected" && damageTable.Attacker.GetClassname() != "witch")
+			local noneAliveEntity = (attacker == null || (attacker.GetClassname() != "player" && attacker.GetClassname() != "infected" && attacker.GetClassname() != "witch"));
 
 			if(noneAliveEntity) {
 				local validPlayer = null;
@@ -1257,12 +1268,14 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 
 				if(validPlayer != null) {
 					victim.SetOrigin(validPlayer.GetOrigin());
+					BotAI.printlModifyReason("fall protect 1", damageTable);
 					return false;
 				} else {
 					local area = NavMesh.GetNearestNavArea(victim.GetOrigin(), 500, true, true);
 
 					if(area) {
 						victim.SetOrigin(area.FindRandomSpot());
+						BotAI.printlModifyReason("fall protect 2", damageTable);
 						return false;
 					}
 				}
@@ -1294,18 +1307,22 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 					BotAI.BotAttack(victim, attacker);
 				}
 			} else if (BotAI.FireProtect && (damageTable.DamageType & DMG_BURN)) {
+				BotAI.printlModifyReason("fire protect 1", damageTable);
 				damageTable.DamageDone = 0;
 				return false;
 			} else if (attacker.GetClassname() == "player" || attacker.GetClassname() == "witch") {
 
 			} else if (BotAI.NonAliveProtect) {
+				BotAI.printlModifyReason("non alive protect 1", damageTable);
 				damageTable.DamageDone = 0;
 				return false;
 			}
 		} else if (BotAI.NonAliveProtect) {
+			BotAI.printlModifyReason("non alive protect 2", damageTable);
 			damageTable.DamageDone = 0;
 			return false;
 		} else if (BotAI.FireProtect && (damageTable.DamageType & DMG_BURN)) {
+			BotAI.printlModifyReason("fire protect 2", damageTable);
 			damageTable.DamageDone = 0;
 			return false;
 		}
@@ -1315,6 +1332,7 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 		foreach(gas in BotAI.BotLinkGasCan) {
 			if(gas == victim) {
 				damageTable.DamageDone = 0;
+				BotAI.printlModifyReason("hit gas can", damageTable);
 				return false;
 			}
 		}

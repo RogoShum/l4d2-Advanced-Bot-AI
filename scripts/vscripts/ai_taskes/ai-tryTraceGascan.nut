@@ -120,7 +120,7 @@ class ::AITaskTryTraceGascan extends AITaskGroup {
 						printl("[Bot AI] Try Retake gas can " + gas_can);
 					}
 
-					BotAI.botRunPos(player, gas_can, "searchGascan+", 2, needGasCan);
+					BotAI.botRunPos(player, gas_can, "searchGascan+$", 2, needGasCan);
 				}
 			} else {
 				updating = false;

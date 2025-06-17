@@ -134,7 +134,7 @@ class ::AITaskSearchBody extends AITaskGroup
 							return !BotAI.Defibrillator || !BotAI.IsEntityValid(bo) || !BotAI.IsEntityValid(findDef) || findDef.GetOwnerEntity() != null || BotAI.HasItem(player, "defibrillator");
 						}
 
-						BotAI.botRunPos(player, findDef, "searchBody", 3, needSearch, 8000);
+						BotAI.botRunPos(player, findDef, "searchBody$", 3, needSearch, 8000);
 						return false;
 					}
 				} else {
@@ -179,8 +179,8 @@ class ::AITaskSearchBody extends AITaskGroup
 					player.SetOrigin(bo.GetOrigin());
 				}
 
-				if (BotAI.botRunPos(player, ironBanner, "searchBody", 3, needSearch, 15000)) {
-					BotAI.delayTimer(teleport, 30, player.tostring() + "searchBody");
+				if (BotAI.botRunPos(player, ironBanner, "searchBody$", 3, needSearch, 15000)) {
+					BotAI.delayTimer(teleport, 30, player.tostring() + "searchBody$");
 				}
 			} else if (distance <= 75) {
 				BotAI.getNavigator(player).stop();

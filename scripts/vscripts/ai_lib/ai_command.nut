@@ -539,7 +539,7 @@
 	BotAI.SaveSetting();
 }
 
-function BotAI::getDamageMultiplier(args, minValue = -16.0, maxValue = 99.0) {
+function BotAI::getDamageMultiplier(args, minValue = -16.0, maxValue = 999.0) {
 	local defaultMultiplier = 1.0;
 
     local input = "";

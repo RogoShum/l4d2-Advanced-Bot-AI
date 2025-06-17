@@ -78,13 +78,13 @@ class ::AITaskTryTakeGascan extends AITaskGroup
 				}
 
 				local navigator = BotAI.getNavigator(player);
-				if(!navigator.isMoving("useTarget+"))
+				if(!navigator.isMoving("useTarget+$"))
 					return true;
 
 				return false;
 			}
 
-			BotAI.botRunPos(player, Posi, "useTarget+", 2, changeOrNoNeed);
+			BotAI.botRunPos(player, Posi, "useTarget+$", 2, changeOrNoNeed);
 		}
 	}
 

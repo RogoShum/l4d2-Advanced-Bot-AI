@@ -1616,7 +1616,7 @@ function BotAI::AdjustBotState(args) {
 	foreach(player in BotAI.SurvivorBotList) {
 		if(!BotAI.IsPlayerEntityValid(player)) continue;
 		local navigator = BotAI.getNavigator(player);
-		if(navigator.isMoving("searchBody")) {
+		if(navigator.isMoving("searchBody$")) {
 			searchBody = true;
 		}
 	}

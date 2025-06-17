@@ -180,6 +180,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 						}
 
 						local isTarget = BotAI.IsTarget(player, danger);
+						local navigator = BotAI.getNavigator(player);
 
 						local closest = null;
 						local closestDistance = 2000;
@@ -192,11 +193,10 @@ class::AITaskAvoidDanger extends AITaskSingle {
 							}
 						}
 
-						if (BotAI.IsEntityValid(closest) && closestDistance <= 250) {
+						if (BotAI.IsEntityValid(closest) && closestDistance <= 250 && isTarget) {
 							local function changeOrDieOrRun() {
 								if (!BotAI.IsEntityValid(danger) || !BotAI.IsAlive(danger)) return true;
 								if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 100) return true;
-								local navigator = BotAI.getNavigator(player);
 								if (!navigator.isMoving("followPlayer"))
 									return true;
 								if (!BotAI.IsEntityValid(closest) || !BotAI.IsAlive(closest)) return true;
@@ -207,57 +207,61 @@ class::AITaskAvoidDanger extends AITaskSingle {
 
 							BotAI.botRunPos(player, closest, "followPlayer", 4, changeOrDieOrRun);
 						} else if (nexDis < innerCircle && isTarget) {
-							local navigator = BotAI.getNavigator(player);
 							navigator.clearPath("followPlayer");
-							player.UseAdrenaline(1.0);
+							//player.UseAdrenaline(1.0);
+							local tpRadius = 200;
+							local hasObstacle = false;
+							local tankToMe = BotAI.normalize(player.GetOrigin() - danger.GetOrigin());
+
+							for(local i = -1; i < 1; ++i) {
+								local angleVec = BotAI.rotateVector(tankToMe, i * 30);
+								local dist = BotAI.GetDistanceToWall(player, angleVec);
+
+								if(dist <= 50) {
+									hasObstacle = true;
+									tpRadius = 400;
+								}
+							}
 
 							local targetDirection = null;
-							local tpRadius = 200;
-							if (BotAI.BotCombatSkill > 3) {
-								tpRadius = 200;
-							}
 
 							for (local count = 0; count < 5; ++count) {
 								local randomSpot = player.TryGetPathableLocationWithin(tpRadius);
-								local spotColor = Vector(255, 255, 25);
+								local spotDirection = randomSpot - player.GetOrigin();
+								local spotColor =  Vector(255, 25, 25);
+								local failReason = "";
 
-								if (targetDirection == null && ((BotAI.distanceof(danger.GetOrigin(), randomSpot) > 180 && !canHitTank(randomSpot)
-								&& !isTankBetweenHeights(randomSpot)) || (BotAI.BotCombatSkill >= 3 && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 140))) {
-									local spotDirection = randomSpot - player.GetOrigin();
-									local maxWallDist = 170;
-
-									local currentDist = BotAI.GetDistanceToWall(player, spotDirection);
-									if (currentDist <= maxWallDist) {
-										local bestDir = null;
-										local bestDot = -2;
-
-										for(local i = 0; i < 12; ++i) {
-											local angleVec = BotAI.rotateVector(spotDirection, i * 30);
-											local dist = BotAI.GetDistanceToWall(player, angleVec);
-
-											if(dist > maxWallDist) {
-												local dot = spotDirection.Dot(angleVec);
-												if (dot > bestDot) {
-													bestDot = dot;
-													bestDir = angleVec;
-												}
+								if (BotAI.distanceof(danger.GetOrigin(), randomSpot) > 180 && (!isTankBetweenHeights(randomSpot) || (BotAI.BotCombatSkill >= 3 && BotAI.distanceof(danger.GetOrigin(), randomSpot) > 140))) {
+									if (hasObstacle) {
+										if (BotAI.VectorDotProduct(BotAI.normalize(tankToMe), BotAI.normalize(spotDirection)) < 0) {
+											if (targetDirection == null) {
+												targetDirection = spotDirection;
+												spotColor = Vector(25, 255, 25);
+												failReason = "right";
+											} else {
+												failReason = "√ 1";
 											}
-										}
-
-										if (bestDir != null) {
-											targetDirection = bestDir;
 										} else {
+											failReason = "wrong dir";
+										}
+									} else if (!canHitTank(randomSpot)) {
+										if (targetDirection == null) {
 											targetDirection = spotDirection;
+											spotColor = Vector(25, 255, 25);
+											failReason = "right";
+										} else {
+											failReason = "√ 2";
 										}
 									} else {
-										targetDirection = spotDirection;
+										failReason = "can hit tank";
 									}
 								} else {
-									spotColor = Vector(255, 25, 25);
+									failReason = "not far enough";
 								}
 
 								if (BotAI.BotDebugMode) {
-									DebugDrawCircle(randomSpot, spotColor, 0, 10, true, 0.5);
+									DebugDrawText(randomSpot + Vector(0, 0, 10), failReason, false, 1.0);
+									DebugDrawCircle(randomSpot, spotColor, 0, 10, true, 1.0);
 								}
 							}
 
@@ -283,23 +287,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 								}
 							}
 
-							if (BotAI.IsEntityValid(closest)) {
-								local function changeOrDieOrRun() {
-									if (!BotAI.IsEntityValid(danger) || !BotAI.IsAlive(danger)) return true;
-									if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 100) return true;
-									local navigator = BotAI.getNavigator(player);
-									if (!navigator.isMoving("followPlayer"))
-										return true;
-
-									if (!BotAI.IsEntityValid(closest) || !BotAI.IsAlive(closest)) return true;
-									if (BotAI.distanceof(closest.GetOrigin(), player.GetOrigin()) < 100) return true;
-
-									return false;
-								}
-
-								BotAI.botRunPos(player, closest, "followPlayer", 4, changeOrDieOrRun);
-							} else if (!hasRock) {
-								local navigator = BotAI.getNavigator(player);
+							if (!hasRock) {
 								navigator.clearPath("followPlayer");
 								//vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
 								local randomSpot = player.TryGetPathableLocationWithin(300);

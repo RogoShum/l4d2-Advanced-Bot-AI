@@ -51,7 +51,7 @@ class ::AITaskSearchEntity extends AITaskSingle {
 			foreach(entity in BotAI.searchedEntity[player.GetEntityIndex()]) {
 				if(!BotAI.IsEntityValid(entity) || entity.GetOwnerEntity() != null) continue;
 				local navigator = BotAI.getNavigator(player);
-				local searchBody = navigator.isMoving("searchBody") || navigator.justDone("searchBody");
+				local searchBody = navigator.isMoving("searchBody$") || navigator.justDone("searchBody$");
 				local name = entity.GetClassname();
 
 				if(name in enumBombSpawn && !("slot2" in invPlayer)) {
@@ -95,7 +95,7 @@ class ::AITaskSearchEntity extends AITaskSingle {
 		foreach(entity in BotAI.humanSearchedEntity) {
 			if(!BotAI.IsEntityValid(entity) || entity.GetOwnerEntity() != null) continue;
 			local navigator = BotAI.getNavigator(player);
-			local searchBody = navigator.isMoving("searchBody") || navigator.justDone("searchBody");
+			local searchBody = navigator.isMoving("searchBody$") || navigator.justDone("searchBody$");
 			local name = entity.GetClassname();
 			if(name in enumBombSpawn && !("slot2" in invPlayer)) {
 				items[player] <- entity;
