@@ -148,13 +148,14 @@ class::Navigator {
 
 		local speed = 1.0;
 		local friction = 1.0;
-
+		local nearTank = false;
 		if (BotAI.BotCombatSkill > 2 || BotAI.HasTank) {
 			speed += 0.2;
 
 			foreach(danger in BotAI.SpecialList) {
 				if (danger.GetClassname() == "player" && danger.GetZombieType() == 8) {
 					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 260) {
+						nearTank = true;
 						friction -= 0.05;
 					}
 
@@ -188,7 +189,7 @@ class::Navigator {
 				DebugDrawLine(player.EyePosition(), goalPos, 0, 0, 255, true, 0.2);
 			}
 
-			if (BotAI.distanceof(player.GetOrigin(), goalPos) > 10) {
+			if ((movingID.find("{") == null || nearTank) && BotAI.distanceof(player.GetOrigin(), goalPos) > 10) {
 				BotAI.botCmdMove(player, goalPos, movingID.find("^") != null);
 			} else if (movingID.find("#") != null) {
 				player.OverrideFriction(0.5, 10);

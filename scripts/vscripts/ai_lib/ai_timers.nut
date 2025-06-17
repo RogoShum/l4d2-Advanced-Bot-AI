@@ -21,7 +21,7 @@ function BotAI::moveFunc() {
 			if(BotAI.hasContext(player, "BOTAI_KNOCK") || player.IsIncapacitated() || player.IsDominatedBySpecialInfected() || BotAI.isPlayerBeingRevived(player) || BotAI.IsPlayerReviving(player)) {
 				NetProps.SetPropVector(player, "m_vecBaseVelocity", Vector(0, 0, 0));
 				BotAI.botMoveMap[player] = Vector(0, 0, 0);
-				BotAI.getNavigator(player).clearPath("botMove^+");
+				BotAI.getNavigator(player).clearPath("botMove{+");
 				continue;
 			}
 
@@ -53,12 +53,12 @@ function BotAI::moveFunc() {
 					}
 				}
 
-				BotAI.botRunPos(player, player.GetOrigin() + appliedVec, "botMove^+", 7, feelingSafe);
+				BotAI.botRunPos(player, player.GetOrigin() + appliedVec, "botMove{+", 7, feelingSafe);
 				BotAI.botMoveMap[player] = vec * 0.8;
-			} else if (BotAI.getNavigator(player).hasPath("botMove^+")) {
+			} else if (BotAI.getNavigator(player).hasPath("botMove{+")) {
 				NetProps.SetPropVector(player, "m_vecBaseVelocity", Vector(0, 0, 0));
 				BotAI.botMoveMap[player] = Vector(0, 0, 0);
-				BotAI.getNavigator(player).clearPath("botMove^+");
+				BotAI.getNavigator(player).clearPath("botMove{+");
 			}
 		}
 	}
