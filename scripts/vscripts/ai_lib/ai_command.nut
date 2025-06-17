@@ -1224,15 +1224,15 @@ function BotAI::displayOptionMenuBotTeleport(player, args, args1) {
 	}
 
 	local function top(menu) {
-		menu.AddOption("0", normal);
-		menu.AddOption("5", high);
-		menu.AddOption("9", ultra);
-		menu.AddOption("12", extreme);
-		menu.AddOption("17", pro);
+		menu.AddOption("0(s)", normal);
+		menu.AddOption("5(s)", high);
+		menu.AddOption("9(s)", ultra);
+		menu.AddOption("12(s)", extreme);
+		menu.AddOption("17(s)", pro);
 	}
 
 	local function bot(menu) {
-		menu.AddOption("999", pro_);
+		menu.AddOption("999(s)", pro_);
 		menu.AddOption("emp_1", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNextNext);
 		menu.AddOption("emp_0", BotEmptyCmd);
