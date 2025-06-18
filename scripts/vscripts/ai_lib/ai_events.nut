@@ -96,6 +96,11 @@
 	local bot = GetPlayerFromUserID(event.userid);
 	local player = GetPlayerFromUserID(event.subject);
 
+	if (BotAI.IsPlayerEntityValid(bot) && IsPlayerABot(bot) && BotAI.IsEntityValid(BotAI.backpack(bot))) {
+		local prop = BotAI.backpack(bot);
+		BotAI.attachmentProp(bot, prop);
+	}
+
 	if(BotAI.IsPlayerEntityValid(bot) && IsPlayerABot(bot) && BotAI.IsPlayerEntityValid(player)) {
 		local lastTime = BotAI.getBotHealingTime(bot);
 		if(Time() - lastTime >= 2.5) {
@@ -457,12 +462,24 @@
 }
 
 ::BotAI.Events.OnGameEvent_heal_begin <- function(event) {
-	BotAI.setBotHealingTime(GetPlayerFromUserID(event.userid), Time());
-	BotAI.SetBotHealing(GetPlayerFromUserID(event.userid), GetPlayerFromUserID(event.subject));
+	local user = GetPlayerFromUserID(event.userid);
+	BotAI.setBotHealingTime(user, Time());
+	BotAI.SetBotHealing(user, GetPlayerFromUserID(event.subject));
+
+	if (BotAI.IsPlayerEntityValid(user) && IsPlayerABot(user) && BotAI.IsEntityValid(BotAI.backpack(user)) && event.userid != event.subject) {
+		local prop = BotAI.backpack(user);
+		BotAI.attachmentProp(user, prop, true);
+	}
 }
 
 ::BotAI.Events.OnGameEvent_heal_end <- function(event) {
-	BotAI.SetBotHealing(GetPlayerFromUserID(event.userid), null);
+	local bot = GetPlayerFromUserID(event.userid);
+	BotAI.SetBotHealing(bot, null);
+
+	if (BotAI.IsPlayerEntityValid(bot) && IsPlayerABot(bot) && BotAI.IsEntityValid(BotAI.backpack(bot))) {
+		local prop = BotAI.backpack(bot);
+		BotAI.attachmentProp(bot, prop);
+	}
 }
 
 ::BotAI.Events.OnGameEvent_witch_harasser_set <- function(event) {
@@ -926,6 +943,10 @@
 	BotAI.SaveUseTarget();
 	BotAI.GiveUpPlayer(false);
 	BotAI.saveBackpack();
+}
+
+::BotAI.Events.OnGameEvent_server_pre_shutdown <- function(event) {
+	printl("服务器关闭测试")
 }
 
 ::BotAI.Events.OnGameEvent_molotov_thrown <- function(event) {
@@ -1398,6 +1419,16 @@ function VSLib::EasyLogic::OnTakeDamage::BotAITakeDamage(damageTable) {
 			}
 		} else {
 			damageTable.DamageDone *= BotAI.NonAliveDamageMultiplier;
+		}
+
+		if (damageTable.DamageDone <= 0) {
+			local heal = victim.GetHealth() - damageTable.DamageDone;
+			if (heal > victim.GetMaxHealth()) {
+				heal = victim.GetMaxHealth();
+			}
+
+			victim.SetHealth(heal);
+			return false;
 		}
 	}
 

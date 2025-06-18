@@ -170,7 +170,7 @@ function BotAI::BotTakeGasCan(bot, gascan) {
 
 	if(gascan.GetOwnerEntity() == null && BotAI.backpack(bot) != gascan && (!(gascan in BotAI.waitingToPick) || BotAI.waitingToPick[gascan] < 0)) {
 		DoEntFire("!self", "SetParent", "!activator", 0.0, bot, gascan);
-		DoEntFire("!self", "SetParentAttachment", "medkit", 0.02, bot, gascan);
+		BotAI.attachmentProp(bot, gascan);
 		BotAI.BotLinkGasCan[bot] <- gascan;
 		if(!(gascan in BotAI.waitingToPick))
 			BotAI.waitingToPick[gascan] <- -1;
@@ -178,6 +178,27 @@ function BotAI::BotTakeGasCan(bot, gascan) {
 	}
 
 	return false;
+}
+
+function BotAI::attachmentProp(bot, prop, healing = false) {
+	prop.SetOrigin(bot.GetCenter());
+	if (healing) {
+		if (bot.LookupAttachment("legL") != 0) {
+			DoEntFire("!self", "SetParentAttachment", "legL", 0.02, bot, prop);
+		} else if (bot.LookupAttachment("L_weapon_bone") != 0) {
+			DoEntFire("!self", "SetParentAttachment", "L_weapon_bone", 0.02, bot, prop);
+		}
+	} else {
+		if (bot.LookupAttachment("medkit") != 0) {
+			DoEntFire("!self", "SetParentAttachment", "medkit", 0.02, bot, prop);
+		} else if (bot.LookupAttachment("molotov") != 0) {
+			DoEntFire("!self", "SetParentAttachment", "molotov", 0.02, bot, prop);
+		} else if (bot.LookupAttachment("pills") != 0) {
+			DoEntFire("!self", "SetParentAttachment", "pills", 0.02, bot, prop);
+		} else {
+			DoEntFire("!self", "SetParentAttachment", "attach_R_shoulderBladeAim", 0.02, bot, prop);
+		}
+	}
 }
 
 function BotAI::getMeleeSound(modelName) {

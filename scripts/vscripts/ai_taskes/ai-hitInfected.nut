@@ -82,7 +82,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 			selected = BotAI.dangerInfected[player];
 		}
 
-		local dist = 300 + BotAI.BotCombatSkill * 120;
+		local dist = 180 + BotAI.BotCombatSkill * 120;
 		local entS = null;
 		local highestPriority = -1;
 		local awareAngle = 0.9397;
@@ -113,7 +113,7 @@ class ::AITaskHitInfected extends AITaskSingle {
 					BotAI.BotRetreatFrom(player, infected);
 					dist = 800;
 				} else {
-					dist = 300 + BotAI.BotCombatSkill * 120;
+					dist = 180 + BotAI.BotCombatSkill * 120;
 				}
 
 				local currentPriority = 0;
