@@ -2435,9 +2435,7 @@ function BotAI::vomitBomb(vomitjar) {
 	}
 }
 
-function BotAI::GetDistanceToGround(entity)
-{
-	BotAI.debugCall("GetDistanceToGround");
+function BotAI::GetDistanceToGround(entity) {
 	local startPt = entity.GetOrigin();
 	local endPt = startPt + Vector(0, 0, -9999999);
 

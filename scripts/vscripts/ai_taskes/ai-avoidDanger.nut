@@ -220,6 +220,10 @@ class::AITaskAvoidDanger extends AITaskSingle {
 								if(dist <= 50) {
 									hasObstacle = true;
 									tpRadius = 400;
+									if (BotAI.BotDebugMode) {
+										DebugDrawLine(player.EyePosition(), player.EyePosition() + BotAI.normalize(angleVec).Scale(dist), 25, 255, 25, true, 1.0);
+										DebugDrawLine(player.EyePosition() + BotAI.normalize(angleVec).Scale(dist), player.EyePosition() + BotAI.normalize(angleVec).Scale(200), 255, 25, 25, true, 1.0);
+									}
 								}
 							}
 
@@ -237,20 +241,20 @@ class::AITaskAvoidDanger extends AITaskSingle {
 											if (targetDirection == null) {
 												targetDirection = spotDirection;
 												spotColor = Vector(25, 255, 25);
-												failReason = "right";
+												failReason = "right 1";
 											} else {
-												failReason = "√ 1";
+												failReason = "skip 1";
 											}
 										} else {
 											failReason = "wrong dir";
 										}
-									} else if (!canHitTank(randomSpot)) {
+									} else if (!canHitTank(randomSpot) && BotAI.VectorDotProduct(BotAI.normalize(tankToMe), BotAI.normalize(spotDirection)) > 0.2) {
 										if (targetDirection == null) {
 											targetDirection = spotDirection;
 											spotColor = Vector(25, 255, 25);
-											failReason = "right";
+											failReason = "right 2";
 										} else {
-											failReason = "√ 2";
+											failReason = "skip 2";
 										}
 									} else {
 										failReason = "can hit tank";

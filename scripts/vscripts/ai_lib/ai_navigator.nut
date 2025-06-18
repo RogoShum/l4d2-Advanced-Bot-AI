@@ -165,8 +165,8 @@ class::Navigator {
 					}
 
 					if (BotAI.distanceof(danger.GetOrigin(), player.GetOrigin()) < 200) {
-						speed += 0.2 + botskill * 0.3;
-						friction -= 0.1 * botskill;
+						speed += 0.2 + botskill * 0.15;
+						friction -= 0.07 * botskill;
 					}
 				}
 			}
