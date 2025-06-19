@@ -291,7 +291,7 @@ class::AITaskAvoidDanger extends AITaskSingle {
 								}
 							}
 
-							if (!hasRock) {
+							if (!hasRock && nexDis < innerCircle) {
 								navigator.clearPath("followPlayer");
 								//vecList[vecList.len()] <- BotAI.normalize(player.GetOrigin() - danger.GetOrigin()).Scale(30);
 								local randomSpot = player.TryGetPathableLocationWithin(300);
