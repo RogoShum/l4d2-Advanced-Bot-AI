@@ -351,8 +351,8 @@ function BotAI::createPlayerTargetTimer(player) {
 
 		local selected = null;
 		local closestCom = null;
-		local selectedDis = 70 + BotAI.BotCombatSkill * 17;
-		local closestDis = 140 + BotAI.BotCombatSkill * 19;
+		local selectedDis = 50 + BotAI.BotCombatSkill * 20;
+		local closestDis = 120 + BotAI.BotCombatSkill * 25;
 
 		local awareAngle = 0.996;
 		local dangerAwareAngle = 0.94;
@@ -374,7 +374,7 @@ function BotAI::createPlayerTargetTimer(player) {
 		local takingAidKit = BotAI.isTakingItem(player, "first_aid_kit");
 		if (moving || healingAnyOne || takingAidKit) {
 			awareAngle -= 2.0;
-			selectedDis -= BotAI.BotCombatSkill * 10 + 10;
+			selectedDis -= BotAI.BotCombatSkill * 10;
 			closestDis -= 75;
 		}
 

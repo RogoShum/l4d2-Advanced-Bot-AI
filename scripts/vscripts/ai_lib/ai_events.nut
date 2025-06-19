@@ -197,17 +197,22 @@
 
 		local pass = false;
 		local function counterSpecial(target, sight) {
+			local skillTest = BotAI.BotCombatSkill;
+			if (skillTest > 4) {
+				skillTest = 4;
+			}
+
 			if(BotAI.IsEntitySurvivor(target) && target.IsDominatedBySpecialInfected()) {
 				local realTarget = target.GetSpecialInfectedDominatingMe();
 				if(realTarget.GetZombieType() == 5) {
 					realTarget.TakeDamage(BotAI.getDamage(weaponName)*0.7, BotAI.headshotDmg, p);
 					pass = true;
-				} else if(realTarget.GetZombieType() == 1 && RandomInt(0, abs(BotAI.BotCombatSkill - 4) * 1.8) == 0) {
+				} else if(realTarget.GetZombieType() == 1 && RandomInt(0, abs(skillTest - 4) * 2) == 0) {
 					BotAI.breakTongue(realTarget);
 				}
 			}
 
-			if(sight && RandomInt(0, abs(BotAI.BotCombatSkill - 4) * 1.5) == 0 && BotAI.IsEntitySI(target) && target.GetZombieType() == 1) {
+			if(sight && RandomInt(0, abs(skillTest - 4) * 1.5) == 0 && BotAI.IsEntitySI(target) && target.GetZombieType() == 1) {
 				BotAI.breakTongue(target);
 			}
 
@@ -504,7 +509,7 @@
 	if(!("victim" in event) || event.victim == null || !("userid" in event) || event.userid == null)
 		return;
 
-	if (BotAI.BotCombatSkill > 3) {
+	if (BotAI.BotCombatSkill > 2) {
 		local victim = GetPlayerFromUserID(event.victim);
 
 		if (BotAI.IsEntitySurvivorBot(victim)) {
@@ -513,10 +518,11 @@
 			if ("slot1" in inventory) {
 				local offhandItem = inventory["slot1"];
 				if (offhandItem.GetClassname() == "weapon_melee") {
+					local damageAmount = (BotAI.BotCombatSkill - 2) * 150;
 					local attacker = GetPlayerFromUserID(event.userid);
 					local damagePos = BotAI.getEntityHeadPos(victim);
 					damagePos = Vector(damagePos.x, damagePos.y, victim.EyePosition().z);
-					BotAI.applyDamageEx(victim, attacker, 300, BotAI.meleeDmg, damagePos);
+					BotAI.applyDamageEx(victim, attacker, damageAmount, BotAI.meleeDmg, damagePos);
 					BotAI.spawnParticle("blood_impact_infected_01", attacker.GetOrigin() + Vector(0, 0, 50), attacker);
 					BotAI.spawnParticle("blood_melee_slash_TP_swing", attacker.GetOrigin() + Vector(0, 0, 50), attacker);
 					BotAI.playSound(victim, BotAI.getMeleeSound(offhandItem.GetModelName()));
@@ -531,16 +537,17 @@
 		return;
 
 	local victim = GetPlayerFromUserID(event.victim);
-	if (BotAI.BotCombatSkill > 3 && BotAI.IsEntitySurvivorBot(victim)) {
+	if (BotAI.BotCombatSkill > 2 && BotAI.IsEntitySurvivorBot(victim)) {
 		local inventory = BotAI.GetHeldItems(victim);
 
 		if ("slot1" in inventory) {
 			local offhandItem = inventory["slot1"];
 			if (offhandItem.GetClassname() == "weapon_melee") {
+				local damageAmount = (BotAI.BotCombatSkill - 2) * 150;
 				local attacker = GetPlayerFromUserID(event.userid);
 				local damagePos = BotAI.getEntityHeadPos(victim);
 				damagePos = Vector(damagePos.x, damagePos.y, victim.EyePosition().z);
-				BotAI.applyDamageEx(victim, attacker, 300, BotAI.meleeDmg, damagePos);
+				BotAI.applyDamageEx(victim, attacker, damageAmount, BotAI.meleeDmg, damagePos);
 				BotAI.spawnParticle("blood_impact_infected_01", attacker.GetOrigin() + Vector(0, 0, 50), attacker);
 				BotAI.spawnParticle("blood_melee_slash_TP_swing", attacker.GetOrigin() + Vector(0, 0, 50), attacker);
 				BotAI.playSound(victim, BotAI.getMeleeSound(offhandItem.GetModelName()));
@@ -936,6 +943,7 @@
 	BotAI.SaveSetting();
 	BotAI.SaveUseTarget();
 	BotAI.GiveUpPlayer(false);
+	BotAI.saveBackpack(true);
 }
 
 ::BotAI.Events.OnGameEvent_map_transition <- function(event) {
@@ -943,10 +951,6 @@
 	BotAI.SaveUseTarget();
 	BotAI.GiveUpPlayer(false);
 	BotAI.saveBackpack();
-}
-
-::BotAI.Events.OnGameEvent_server_pre_shutdown <- function(event) {
-	printl("服务器关闭测试")
 }
 
 ::BotAI.Events.OnGameEvent_molotov_thrown <- function(event) {

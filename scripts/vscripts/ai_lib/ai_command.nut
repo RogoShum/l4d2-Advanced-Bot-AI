@@ -1079,7 +1079,7 @@ function BotAI::displayOptionMenuBotCombat(player, args, args1) {
 		combatSkill(7);
 	}
 	local function promaxplus(player, args, args1) {
-		combatSkill(99);
+		combatSkill(10);
 	}
 
 	local function top(menu) {
@@ -1092,7 +1092,7 @@ function BotAI::displayOptionMenuBotCombat(player, args, args1) {
 
 	local function bot(menu) {
 		menu.AddOption("7", promax);
-		menu.AddOption("99", promaxplus);
+		menu.AddOption("10", promaxplus);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenu);
 		menu.AddOption("emp_0", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_exit"), BotExitMenuCmd);

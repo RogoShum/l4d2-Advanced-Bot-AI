@@ -103,19 +103,25 @@ function BotAI::playerKey(player) {
 	return null;
 }
 
-function BotAI::saveBackpack() {
+function BotAI::saveBackpack(roundEnd = false) {
 	local props = {};
-	foreach(bot, prop in BotAI.BotLinkGasCan) {
-		if(BotAI.IsEntityValid(bot) && BotAI.IsEntityValid(prop)) {
-			local key = BotAI.playerKey(bot);
-			local value = {
-				modelName = prop.GetModelName()
-				clazz = prop.GetClassname()
+
+	if (roundEnd) {
+		Msg("[Bot AI] Saving props backup.\n");
+		props = BotAI.mapTransPackBackup;
+	} else {
+		foreach(bot, prop in BotAI.BotLinkGasCan) {
+			if(BotAI.IsEntityValid(bot) && BotAI.IsEntityValid(prop)) {
+				local key = BotAI.playerKey(bot);
+				local value = {
+					modelName = prop.GetModelName()
+					clazz = prop.GetClassname()
+				}
+
+
+				Msg("[Bot AI] Saving props " + value.clazz + " with model " + value.modelName + "\n");
+				props[key] <- value;
 			}
-
-
-			Msg("[Bot AI] Saving props " + value.clazz + " with model " + value.modelName + "\n");
-			props[key] <- value;
 		}
 	}
 
@@ -125,9 +131,13 @@ function BotAI::saveBackpack() {
 function BotAI::loadBackpack() {
 	local map = {};
 	RestoreTable("botai_backpack", map);
-	if(typeof map == "table")
+	if(typeof map == "table") {
 		BotAI.mapTransPack = map;
-	SaveTable("botai_backpack", map);
+		foreach (key, value in map) {
+			BotAI.mapTransPackBackup[key] <- value;
+		}
+	}
+	SaveTable("botai_backpack", {});
 }
 
 function BotAI::BotPerformanceCmd() {

@@ -94,6 +94,7 @@ if (!("VSLib" in getroottable())) {
 			insect_swarm = "insect_swarm"
 		}
 		mapTransPack = {}
+		mapTransPackBackup = {}
 		scavenge_start = false
 		HasTank = false
 		MapName = " "
