@@ -1086,6 +1086,10 @@ function ChatTriggers::botkeepalive( player, args, text ) {
 	BotAliveCmd( player, args, text );
 }
 
+function ChatTriggers::bot_tts( player, args, text ) {
+	BotTeleportToSaferoomCmd( player, args, text );
+}
+
 function ChatTriggers::botbackpack( player, args, text ) {
 	BotBackPackCmd( player, args, text );
 }

@@ -358,11 +358,11 @@ function BotAI::createPlayerTargetTimer(player) {
 		local dangerAwareAngle = 0.94;
 
 		if (BotAI.BotCombatSkill == 1) {
-			awareAngle = 0.707;
-			dangerAwareAngle = 0.26;
+			awareAngle = 0.9397;
+			dangerAwareAngle = 0.707;
 		} else if (BotAI.BotCombatSkill == 2) {
-			awareAngle = 0.0;
-			dangerAwareAngle = -0.26;
+			awareAngle = 0.707;
+			dangerAwareAngle = 0.0;
 		} else if (BotAI.BotCombatSkill >= 3) {
 			awareAngle = -2.0;
 			dangerAwareAngle = -2.0;

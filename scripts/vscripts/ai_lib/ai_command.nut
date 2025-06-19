@@ -396,6 +396,29 @@
 	BotAI.SaveSetting();
 }
 
+::BotTeleportToSaferoomCmd <- function ( speaker, args  , args1) {
+	BotExitMenuCmd(speaker, args, args1);
+	local player = speaker;
+	if (typeof player == "VSLIB_PLAYER") {
+		player = player.GetBaseEntity();
+	}
+
+	if(!ABA_IsAdmin(speaker)) {
+		BotAI.SendPlayer(player, "botai_admin_only");
+		return;
+	}
+
+	if(BotAI.TeleportToSaferoom) {
+		BotAI.TeleportToSaferoom = false;
+		BotAI.SendPlayer(player, "botai_bot_teleport_to_saferoom_off");
+	} else {
+		BotAI.TeleportToSaferoom = true;
+		BotAI.SendPlayer(player, "botai_bot_teleport_to_saferoom_on");
+	}
+
+	BotAI.SaveSetting();
+}
+
 ::BotPathFindingCmd <- function ( speaker, args , args1) {
 	BotExitMenuCmd(speaker, args, args1);
 	local player = speaker;
@@ -1043,7 +1066,7 @@ function BotAI::displayOptionMenuNextNextNext(player, args, args1) {
 	}
 
 	local function bot(menu) {
-		menu.AddOption("emp_1", BotEmptyCmd);
+		menu.AddOption(BotAI.fromParams(BotAI.TeleportToSaferoom, lang)+I18n.getTranslationKeyByLang(lang, "menu_teleport_to_saferoom"), BotTeleportToSaferoomCmd);
 		menu.AddOption("emp_2", BotEmptyCmd);
 		menu.AddOption(I18n.getTranslationKeyByLang(lang, "menu_pre"), BotAI.displayOptionMenuNextNext);
 		menu.AddOption("emp_0", BotEmptyCmd);

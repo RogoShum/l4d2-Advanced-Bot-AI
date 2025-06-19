@@ -202,6 +202,7 @@ if (!("VSLib" in getroottable())) {
 		ABA_Admins = {}
 		NoticeConfig = true
 		NeedBotAlive = true
+		TeleportToSaferoom = true
 	}
 
 	::BotAI.AITaskList <- {
@@ -458,6 +459,7 @@ BotAI.witchMeleeDmg <- -2145386492;
         "\nMelee = " + BotAI.Melee.tostring() +
         "\nNoticeConfig = " + BotAI.NoticeConfig.tostring() +
         "\nNeedBotAlive = " + BotAI.NeedBotAlive.tostring() +
+	    "\nTeleportToSaferoom = " + BotAI.TeleportToSaferoom.tostring() +
         "\nBackPack = " + BotAI.BackPack.tostring();
 
     printl("[Bot AI] Save settings...");
@@ -1636,44 +1638,6 @@ function BotAI::AdjustBotState(args) {
 		}
 	}
 
-	foreach(bot in BotAI.SurvivorBotList) {
-		if(!BotAI.IsPlayerEntityValid(bot) || bot.IsIncapacitated() || bot.IsHangingFromLedge() || bot.IsDominatedBySpecialInfected()) continue;
-		local vehicleDis = 300;
-		local vehicleTarget = null;
-
-		foreach(sur in BotAI.SurvivorHumanList) {
-			if(!BotAI.IsAlive(sur)) continue;
-
-			local disToHuman = BotAI.distanceof(sur.GetOrigin(), bot.GetOrigin());
-
-			if (disToHuman <= vehicleDis) {
-				vehicleTarget = sur;
-				vehicleDis = disToHuman;
-			}
-		}
-
-		if (vehicleTarget != null && Director.IsFinaleVehicleReady()) {
-			if (vehicleDis < 300) {
-				if (vehicleDis > 40) {
-					local humanLastMesh = vehicleTarget.GetLastKnownArea();
-					//                                                                                                 RESCUE_VEHICLE
-					if (humanLastMesh != null && "HasSpawnAttributes" in humanLastMesh && humanLastMesh.HasSpawnAttributes(1 << 15)) {
-						bot.SetOrigin(vehicleTarget.GetOrigin());
-					}
-				}
-			} else {
-				local function changeAndUse() {
-					if(!BotAI.IsAlive(bot)) return true;
-					if(!BotAI.IsAlive(vehicleTarget)) return true;
-
-					return false;
-				}
-
-				BotAI.botRunPos(bot, vehicleTarget, "finalVehicle", 4, changeAndUse);
-			}
-		}
-	}
-
 	local needRecall = Director.HasAnySurvivorLeftSafeArea();
 	local display = null;
 	while(display = Entities.FindByClassname(display, "terror_gamerules")) {
@@ -1683,6 +1647,80 @@ function BotAI::AdjustBotState(args) {
 
 	if(BotAI.UseTarget != null && BotAI.NeedGasFinding)
 		needRecall = false;
+
+	local vehicleMan = null;
+	local shouldTeleport = true;
+
+	if (BotAI.TeleportToSaferoom && needRecall) {
+		foreach(sur in BotAI.SurvivorList) {
+			if(!BotAI.IsAlive(sur)) continue;
+			local atVehicle = false;
+			local surLastMesh = sur.GetLastKnownArea();
+
+			if (Director.IsFinaleVehicleReady()) {
+				//                                                                                            RESCUE_VEHICLE
+				if (surLastMesh != null && "HasSpawnAttributes" in surLastMesh && surLastMesh.HasSpawnAttributes(1 << 15)) {
+					atVehicle = true;
+				}
+			} else if (BotAI.IsPlayerAtCheckPoint(sur) && BotAI.isNearCheckPoint(sur, 50)) {
+				atVehicle = true;
+			}
+			
+
+			if (atVehicle) {
+				vehicleMan = sur;
+			} else if(!IsPlayerABot(sur)) {
+				shouldTeleport = false;
+			}
+		}
+	}
+
+	foreach(bot in BotAI.SurvivorBotList) {
+		if(!BotAI.IsPlayerEntityValid(bot) || bot.IsIncapacitated() || bot.IsHangingFromLedge() || bot.IsDominatedBySpecialInfected()) continue;
+		
+		if (!BotAI.TeleportToSaferoom) {
+			local vehicleDis = 300;
+			local vehicleTarget = null;
+
+			foreach(sur in BotAI.SurvivorHumanList) {
+				if(!BotAI.IsAlive(sur)) continue;
+
+				local disToHuman = BotAI.distanceof(sur.GetOrigin(), bot.GetOrigin());
+
+				if (disToHuman <= vehicleDis) {
+					vehicleTarget = sur;
+					vehicleDis = disToHuman;
+				}
+			}
+
+			if(vehicleTarget != null && Director.IsFinaleVehicleReady()) {
+				if (vehicleDis < 300) {
+					if (vehicleDis > 40) {
+						local humanLastMesh = vehicleTarget.GetLastKnownArea();
+						//                                                                                                 RESCUE_VEHICLE
+						if (humanLastMesh != null && "HasSpawnAttributes" in humanLastMesh && humanLastMesh.HasSpawnAttributes(1 << 15)) {
+							bot.SetOrigin(vehicleTarget.GetOrigin());
+						}
+					}
+				} else {
+					local function changeAndUse() {
+						if(!BotAI.IsAlive(bot)) return true;
+						if(!BotAI.IsAlive(vehicleTarget)) return true;
+
+						return false;
+					}
+
+					BotAI.botRunPos(bot, vehicleTarget, "finalVehicle", 4, changeAndUse);
+				}
+			}
+		} else if (shouldTeleport && vehicleMan != null) {
+			if (Director.IsFinaleVehicleReady() && BotAI.distanceof(vehicleMan.GetOrigin(), bot.GetOrigin()) > 50) {
+				bot.SetOrigin(vehicleMan.GetOrigin() + Vector(0, 0, 5));
+			} else if (!BotAI.IsPlayerAtCheckPoint(bot)) {
+				bot.SetOrigin(vehicleMan.GetOrigin() + Vector(0, 0, 5));
+			}
+		}
+	}
 
 	foreach(player in BotAI.SurvivorHumanList) {
 		if(BotAI.IsPlayerEntityValid(player)) {
@@ -1727,7 +1765,7 @@ function BotAI::AdjustBotState(args) {
 					}
 				}
 
-				if (tpPoint != null && Director.IsAnySurvivorInExitCheckpoint() && BotAI.IsPlayerAtCheckPoint(tpPoint) && !BotAI.isNearCheckPoint(bot, 300)) {
+				if (!BotAI.TeleportToSaferoom && tpPoint != null && BotAI.IsPlayerAtCheckPoint(tpPoint) && !BotAI.isNearCheckPoint(bot, 300)) {
 					local function changeAndUse() {
 						local alive = !BotAI.IsAlive(bot);
 						local out = !Director.IsAnySurvivorInExitCheckpoint();

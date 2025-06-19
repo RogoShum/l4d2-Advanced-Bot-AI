@@ -249,12 +249,10 @@ function BotAI::IsTriggerUsable(trigger) {
 
 			if (m_usable == 1 && BotAI.IsEntityValid(glowEntity))
 				return true;
-		}
-		else if(trigger.GetClassname() == "func_button_timed") {
+		} else if(trigger.GetClassname() == "func_button_timed") {
 			if (m_usable == 1 && !BotAI.IsButtonPressed(trigger))
 				return true;
-		}
-		else if(trigger.GetClassname() == "trigger_finale") {
+		} else if(trigger.GetClassname() == "trigger_finale") {
 			if(!BotAI.FinaleStart && !BotAI.IsButtonPressed(trigger))
 				return true;
 		}
