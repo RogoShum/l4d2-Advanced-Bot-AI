@@ -128,9 +128,10 @@
 }
 
 ::BotAI.Events.OnGameEvent_bullet_impact <- function(event) {
-	if (BotAI.BotCombatSkill < 1) {
+	if (BotAI.BotCombatSkill < 1 || !BotAI.SpreadCompensation) {
 		return;
 	}
+
 	local bot = GetPlayerFromUserID(event.userid);
 	local vec = Vector(event.x, event.y, event.z);
 	if(BotAI.IsEntitySurvivorBot(bot)) {
@@ -142,7 +143,7 @@
 			local TtoI = BotAI.distanceof(target.GetCenter(), vec);
 			local TtoB = BotAI.distanceof(target.GetCenter(), bot.EyePosition());
 			local ItoB = BotAI.distanceof(vec, bot.EyePosition());
-			if(TtoI < 200 || TtoB + 200 > ItoB) {
+			if(TtoI < 50 || TtoB + 50 > ItoB) {
 				r = 0;
 				g = 255;
 			} else if (bot.GetActiveWeapon() != null) {
@@ -316,11 +317,11 @@
 		return;
 
 	if(BotAI.IsEntityValid(victim)
-		&& (victim.GetClassname() == "witch" || victim.GetClassname() == "infected" || (victim.GetClassname() == "player" && !victim.IsSurvivor()))
+		&& victim.GetClassname() == "witch"
 		&& IsPlayerABot(p)
 		&& p.IsSurvivor()) {
 		local weapon = p.GetActiveWeapon();
-		if(!weaponName.find("melee") != null && !weaponName.find("chainsaw") != null) {
+		if(weaponName.find("melee") == null && weaponName.find("chainsaw") == null) {
 			local count = 1;
 			local mult = 0.35;
 			if(weapon && weaponName.find("shotgun") != null) {
@@ -347,22 +348,10 @@
 				BotAI.applyDamage(p, victim, health);
 			}
 
-			if(victim.GetClassname() == "witch") {
-				if(BotAI.witchRunning(victim) || BotAI.witchRetreat(victim)) {
-					hit(BotAI.getDamage(weaponName) * count * mult * 0.5);
-				} else if (BotAI.witchKilling(victim)) {
-					hit(BotAI.getDamage(weaponName) * count * mult * 1.4);
-				}
-			}
-
-			if(victim.GetClassname() == "infected") {
-				hit(BotAI.getDamage(weaponName) * count * mult);
-			}
-
-			if(victim.GetClassname() == "player") {
-				if(victim.GetZombieType() != 8) {
-					hit(BotAI.getDamage(weaponName) * count * mult * 0.9);
-				}
+			if(BotAI.witchRunning(victim) || BotAI.witchRetreat(victim)) {
+				hit(BotAI.getDamage(weaponName) * count * mult * 0.5);
+			} else if (BotAI.witchKilling(victim)) {
+				hit(BotAI.getDamage(weaponName) * count * mult * 1.4);
 			}
 		}
 	}
@@ -1088,6 +1077,10 @@ function ChatTriggers::botkeepalive( player, args, text ) {
 
 function ChatTriggers::bot_tts( player, args, text ) {
 	BotTeleportToSaferoomCmd( player, args, text );
+}
+
+function ChatTriggers::bot_sc( player, args, text ) {
+	BotSpreadCompensationCmd( player, args, text );
 }
 
 function ChatTriggers::botbackpack( player, args, text ) {

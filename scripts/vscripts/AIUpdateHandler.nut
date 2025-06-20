@@ -203,6 +203,7 @@ if (!("VSLib" in getroottable())) {
 		NoticeConfig = true
 		NeedBotAlive = true
 		TeleportToSaferoom = true
+		SpreadCompensation = true
 	}
 
 	::BotAI.AITaskList <- {
@@ -460,6 +461,7 @@ BotAI.witchMeleeDmg <- -2145386492;
         "\nNoticeConfig = " + BotAI.NoticeConfig.tostring() +
         "\nNeedBotAlive = " + BotAI.NeedBotAlive.tostring() +
 	    "\nTeleportToSaferoom = " + BotAI.TeleportToSaferoom.tostring() +
+		"\nSpreadCompensation = " + BotAI.SpreadCompensation.tostring() +
         "\nBackPack = " + BotAI.BackPack.tostring();
 
     printl("[Bot AI] Save settings...");
@@ -1665,7 +1667,7 @@ function BotAI::AdjustBotState(args) {
 			} else if (BotAI.IsPlayerAtCheckPoint(sur) && BotAI.isNearCheckPoint(sur, 50)) {
 				atVehicle = true;
 			}
-			
+
 
 			if (atVehicle) {
 				vehicleMan = sur;
@@ -1676,9 +1678,11 @@ function BotAI::AdjustBotState(args) {
 	}
 
 	foreach(bot in BotAI.SurvivorBotList) {
-		if(!BotAI.IsPlayerEntityValid(bot) || bot.IsIncapacitated() || bot.IsHangingFromLedge() || bot.IsDominatedBySpecialInfected()) continue;
-		
+		if(!BotAI.IsPlayerEntityValid(bot) || bot.IsDominatedBySpecialInfected()) continue;
+
 		if (!BotAI.TeleportToSaferoom) {
+			if (bot.IsIncapacitated() || bot.IsHangingFromLedge()) continue;
+
 			local vehicleDis = 300;
 			local vehicleTarget = null;
 
