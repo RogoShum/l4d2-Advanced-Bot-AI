@@ -202,7 +202,7 @@ if (!("VSLib" in getroottable())) {
 		ABA_Admins = {}
 		NoticeConfig = true
 		NeedBotAlive = true
-		TeleportToSaferoom = true
+		TeleportToSaferoom = false
 		SpreadCompensation = true
 	}
 

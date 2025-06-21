@@ -61,7 +61,7 @@ class ::AITaskCheckToThrowBomb extends AITaskGroup {
 			}
 
 			if (bot.IsIncapacitated() || bot.IsHangingFromLedge()) {
-				
+
 			} else {
 				aliveCount++;
 			}
