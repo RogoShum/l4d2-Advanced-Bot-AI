@@ -6,7 +6,8 @@ let refreshLibrary = () => {};
 	const loading = (on, title) => { $('loading').classList.toggle('idle', !on); if (title) $('loadTitle').textContent = title; if (on) $('loading').classList.remove('gone'); };
 	const db = await new Promise((resolve, reject) => { const r = indexedDB.open('l4d2-replay-library'); r.onupgradeneeded = () => { r.result.createObjectStore('recent', {keyPath:'id'}); r.result.createObjectStore('settings'); }; r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error); });
 	const get = (store, key) => new Promise((resolve, reject) => { const r = db.transaction(store).objectStore(store)[key === undefined ? 'getAll' : 'get'](key); r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error); });
-	const put = (store, value, key) => new Promise((resolve, reject) => { const tx = db.transaction(store, 'readwrite'); tx.objectStore(store).put(value, key); tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
+	const write = (store, change) => new Promise((resolve, reject) => { const tx = db.transaction(store, 'readwrite'); change(tx.objectStore(store)); tx.oncomplete = resolve; tx.onabort = () => reject(tx.error); });
+	const put = (store, value, key) => write(store, s => s.put(value, key));
 	let recent = await get('recent'), root = await get('settings', 'gameDirectory'), recordingLocation = await get('settings', 'recordingLocation');
 	let service = null, loader = null, disposeReplay = null, pending = null, busy = false, current = null, shown = false;
 	let scene = null;
@@ -92,11 +93,6 @@ let refreshLibrary = () => {};
 		const handle = await api('recording', path ? {path} : {}); if (!handle) return;
 		await load({name:handle.name, url:'api/recording?path=' + encodeURIComponent(handle.path)}, handle);
 	}
-	async function openRecent(entry) {
-		if (entry.handle.service) return openServiceRecording(entry.handle.path);
-		if (await entry.handle.queryPermission({mode:'read'}) !== 'granted' && await entry.handle.requestPermission({mode:'read'}) !== 'granted') return;
-		recordingLocation = entry.handle; await put('settings', recordingLocation, 'recordingLocation'); await load(await entry.handle.getFile(), entry.handle);
-	}
 	async function associate(action) {
 		if (busy) return;
 		try {
@@ -135,7 +131,7 @@ let refreshLibrary = () => {};
 	$('openRecording').onclick = run(async () => {
 		if (service) return openServiceRecording();
 		const [handle] = await showOpenFilePicker({id:'l4d2-recording', ...(recordingLocation ? {startIn:recordingLocation} : {}), types:[{description:'L4D2 录像', accept:{'application/octet-stream':['.l4d2replay']}}], multiple:false});
-		recordingLocation = handle; await put('settings', recordingLocation, 'recordingLocation'); await load(await handle.getFile(), handle);
+		await openHandle(handle);
 	});
 	function online(entry) {
 		const base = new URL(storage.baseUrl || './',location.href);
@@ -153,12 +149,37 @@ let refreshLibrary = () => {};
 		for (const r of rows) {
 			const el = document.createElement('div'); el.className = 'lib' + (r.name === current ? ' cur' : '');
 			const name = document.createElement('b'); name.textContent = r.name.replace(/\.l4d2replay$/, ''); name.title = r.name;
-			const meta = document.createElement('span'); meta.className = 'meta'; meta.textContent = r.duration ? fmtTime(r.duration, 0) : size(r.size);
+			const meta = document.createElement('span'); meta.className = 'meta'; meta.textContent = r.duration ? fmtTime(r.duration, 0) : r.size != null ? size(r.size) : '';
 			const sub = document.createElement('span'); sub.textContent = (r.modified ? when(r.modified) : '') + (seen.has(r.name) && r.name !== current ? ' · 看过' : '') + (r.name === current ? ' · 正在播放' : '');
+			if (r.needsPermission) sub.textContent += (sub.textContent ? ' · ' : '') + '需授权';
 			const extra = document.createElement('span'); extra.className = 'meta'; extra.textContent = r.map || '';
 			el.append(name, meta, sub, extra); el.onclick = run(() => r.open()); list.append(el);
 		}
-		if (!rows.length) { const empty = document.createElement('div'); empty.className = 'muted'; empty.style.padding = '14px 10px'; empty.textContent = library.length ? '没有匹配的录像' : '录像目录里还没有 .l4d2replay 文件'; list.append(empty); }
+		if (!rows.length) {
+			const empty = document.createElement('div'); empty.className = 'muted'; empty.style.padding = '14px 10px';
+			const message = staticLibrary || service ? '录像目录里还没有 .l4d2replay 文件' : '没有找到录像。可以在下方选择录像目录，或打开 .l4d2replay 文件。';
+			empty.textContent = library.length ? '没有匹配的录像' : message; list.append(empty);
+		}
+	}
+	// Listing the library never asks for permission. null means the file is gone; undefined means access needs authorization.
+	async function readableFile(handle, directory, entries) {
+		try { if (await handle.queryPermission({mode:'read'}) === 'granted') return await handle.getFile(); }
+		catch (e) { if (e.name === 'NotFoundError') return null; if (e.name !== 'NotAllowedError') throw e; }
+		if (directory && !entries.has(handle.name)) {
+			const relative = await directory.resolve(handle);
+			if (relative?.length === 1 && !entries.has(relative[0])) return null;
+		}
+	}
+	async function forgetRecent(entries) {
+		if (!entries.length) return;
+		await write('recent', store => {
+			for (const entry of entries) {
+				const lookup = store.get(entry.id);
+				// Another tab may already have opened a new file with the same name.
+				lookup.onsuccess = () => { if (lookup.result?.openedAt === entry.openedAt) store.delete(entry.id); };
+			}
+		});
+		recent = recent.filter(entry => !entries.includes(entry));
 	}
 	refreshLibrary = async () => {
 		try {
@@ -176,14 +197,37 @@ let refreshLibrary = () => {};
 				library = result.recordings.filter(r => !/\.live\.l4d2replay$/i.test(r.name)).map(r => ({...r, name:live.has(r.name) ? r.name + '（录制中）' : r.name, modified:r.modified * 1000, open:() => openServiceRecording(r.path)}));
 			} else {
 				// Opened as a local file: list a chosen recordings folder (File System Access), plus recent files.
-				const dir = await get('settings', 'recordingDirectory'), granted = dir && await dir.queryPermission({mode:'read'}) === 'granted', rows = [];
-				// <name>.live.l4d2replay is the snapshot index of a recording still being written: not listed itself;
-				// the recording is listed as live and opened together with it.
-				const handles = [];
-				if (granted) for await (const handle of dir.values()) if (handle.kind === 'file' && /\.l4d2replay$/i.test(handle.name)) handles.push(handle);
-				const liveHandles = new Map(handles.filter(h => /\.live\.l4d2replay$/i.test(h.name)).map(h => [h.name.replace(/\.live\.l4d2replay$/i, '.l4d2replay'), h]));
-				for (const handle of handles) if (!/\.live\.l4d2replay$/i.test(handle.name)) { const f = await handle.getFile(), live = liveHandles.get(handle.name); rows.push({name:live ? handle.name + '（录制中）' : handle.name, size:f.size, modified:f.lastModified, open:() => openHandle(handle, live)}); }
-				for (const r of recent) if (!rows.some(x => x.name === r.name)) rows.push({name:r.name, duration:r.duration, map:r.map, modified:r.openedAt, open:() => openRecent(r)});
+				let dir = await get('settings', 'recordingDirectory'), granted = false;
+				const handles = new Map(), rows = [], missing = [];
+				if (dir) {
+					try {
+						granted = await dir.queryPermission({mode:'read'}) === 'granted';
+						if (granted) for await (const h of dir.values()) if (h.kind === 'file' && /\.l4d2replay$/i.test(h.name)) handles.set(h.name, h);
+					} catch (e) {
+						if (e.name === 'NotFoundError') { dir = null; await write('settings', s => s.delete('recordingDirectory')); }
+						else if (e.name !== 'NotAllowedError') throw e;
+						granted = false; handles.clear();
+					}
+				}
+				for (const [name, handle] of handles) {
+					if (/\.live\.l4d2replay$/i.test(name)) continue;
+					const f = await readableFile(handle);
+					if (f === null) { handles.delete(name); continue; }
+					const live = handles.get(name.replace(/\.l4d2replay$/i, '.live.l4d2replay'));
+					rows.push({name:live ? name + '（录制中）' : name, size:f?.size, modified:f?.lastModified || 0, needsPermission:!f, open:() => openHandle(handle, live)});
+				}
+				for (const r of recent) {
+					const file = r.handle.service ? undefined : await readableFile(r.handle, granted ? dir : null, handles);
+					const needsPermission = !r.handle.service && file === undefined;
+					if (file === null) { missing.push(r); continue; }
+					if (handles.has(r.name)) continue;
+					rows.push({name:r.name, duration:r.duration, map:r.map, modified:r.openedAt, needsPermission, open:() => r.handle.service ? openServiceRecording(r.handle.path) : openHandle(r.handle)});
+				}
+				await forgetRecent(missing);
+				const last = recordingLocation;
+				if (last?.kind === 'file' && await readableFile(last, granted ? dir : null, handles) === null && recordingLocation === last) {
+					recordingLocation = null; await write('settings', s => s.delete('recordingLocation'));
+				}
 				rows.sort((a, b) => b.modified - a.modified); library = rows;
 				$('libDir').textContent = granted ? '目录：' + dir.name : dir ? '录像目录需要重新授权' : '最近打开（可选择录像目录）';
 				$('pickDirectory').hidden = false; $('pickDirectory').textContent = granted ? '更换目录…' : dir ? '授权录像目录' : '选择录像目录…';
@@ -192,14 +236,30 @@ let refreshLibrary = () => {};
 		} catch (e) { showError(e); }
 	};
 	async function openHandle(handle, liveHandle) {
+		let file, live;
+		try {
+			if (await handle.queryPermission({mode:'read'}) !== 'granted' && await handle.requestPermission({mode:'read'}) !== 'granted') return;
+			// Read the live index first so every chunk it lists is inside the recording snapshot.
+			live = liveHandle && await readableFile(liveHandle);
+			file = await handle.getFile();
+		} catch (e) {
+			if (e.name !== 'NotFoundError') throw e;
+			await forgetRecent(recent.filter(r => r.handle === handle));
+			await refreshLibrary(); hint('录像文件已移动或删除，列表已更新。'); return;
+		}
+		if (live) { file.liveFile = live; file.liveHandle = liveHandle; }
 		recordingLocation = handle; await put('settings', handle, 'recordingLocation');
-		// The live index first, then the recording: every chunk it lists is then inside the file snapshot.
-		const live = liveHandle ? await liveHandle.getFile() : null, file = await handle.getFile(); if (live) { file.liveFile = live; file.liveHandle = liveHandle; }
 		await load(file, handle);
 	}
 	$('pickDirectory').onclick = run(async () => {
 		let dir = await get('settings', 'recordingDirectory');
-		if (dir && await dir.queryPermission({mode:'read'}) !== 'granted' && $('pickDirectory').textContent === '授权录像目录') { if (await dir.requestPermission({mode:'read'}) !== 'granted') return; }
+		if (dir && $('pickDirectory').textContent === '授权录像目录') {
+			try { if (await dir.requestPermission({mode:'read'}) !== 'granted') { $('pickDirectory').textContent = '更换目录…'; return; } }
+			catch (e) {
+				if (e.name !== 'NotFoundError') throw e;
+				await write('settings', s => s.delete('recordingDirectory'));
+			}
+		}
 		else { dir = await showDirectoryPicker({id:'l4d2-recordings', mode:'read', ...(recordingLocation ? {startIn:recordingLocation} : {})}); await put('settings', dir, 'recordingDirectory'); }
 		await refreshLibrary();
 	});
