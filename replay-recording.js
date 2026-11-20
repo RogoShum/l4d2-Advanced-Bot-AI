@@ -63,11 +63,11 @@ globalThis.ReplayChunks = class {
 	}
 	async readManifest({magic,start,size}) {
 		if (magic.startsWith('{')) throw Error('这是正在录制的录像的实时索引（.live.l4d2replay），请在录像库里打开同名录像（标着“录制中”）');
-		if (magic !== 'L4D2RPLY' && magic !== 'L4D2RPLZ') throw Error('不是 L4D2 录像文件');
-		// L4D2RPLZ (export_web.py): the manifest JSON is deflate-compressed for streaming.
-		let text = await this.read(start,size);
-		if (magic === 'L4D2RPLZ') text = await new Response(new Blob([text]).stream().pipeThrough(new DecompressionStream('deflate'))).arrayBuffer();
-		return JSON.parse(new TextDecoder().decode(text));
+		if (magic !== 'L4D2RPLZ' || start < 16 || !size) throw Error('请选择已结束的新格式单关录像');
+		const bytes = await this.read(start,size);
+		const manifest = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'))).json();
+		if (manifest.frameEncoding?.codec !== 'zstd') throw Error('录像分块编码无效');
+		return manifest;
 	}
 	static async pack(files) {
 		if (files.length < 2) throw Error('请至少选择两份单关录像');
@@ -92,14 +92,6 @@ globalThis.ReplayChunks = class {
 			for (let i = 0; i < entries.length; i++) {
 				const entry = entries[i];
 				if (i === chapter) chapterOffset = at;
-				if (!Number.isFinite(entry.duration)) {
-					const known = this.source.durations?.[i];
-					if (Number.isFinite(known)) entry.duration = known;
-					else {
-						const reader = new ReplayChunks(this.source); reader.offset = at; reader.length = entry.length;
-						entry.duration = (await reader.readManifest(await reader.header())).duration;
-					}
-				}
 				if (!Number.isFinite(entry.duration) || entry.duration < 0) throw Error('关卡时长无效');
 				at += entry.length;
 			}
@@ -108,7 +100,7 @@ globalThis.ReplayChunks = class {
 		}
 		// A recording still being written has no manifest yet (header offset 0): recording.py keeps a JSON
 		// snapshot next to it, <name>.live.l4d2replay, whose chunk offsets point into this file.
-		const manifest = header.magic === 'L4D2RPLY' && !header.start && !header.size ? await this.readLive() : await this.readManifest(header);
+		const manifest = header.magic === 'L4D2RPLZ' && !header.start && !header.size ? await this.readLive() : await this.readManifest(header);
 		this.metadata = new Map(manifest.entities.map(entity => [entity.id, entity]));
 		this.manifest = {fields:manifest.fields, chunks:manifest.chunks, duration:manifest.duration, frameEncoding:manifest.frameEncoding};
 		this.throwables = [];
@@ -121,7 +113,7 @@ globalThis.ReplayChunks = class {
 			this.throwables.push({meta, kind, index, duration, latest:Math.fround(latest), impact:undefined});
 		}
 		const compressed = manifest.deaths.inline ? Uint8Array.from(atob(manifest.deaths.inline), c => c.charCodeAt(0)) : await this.read(manifest.deaths.offset, manifest.deaths.length), stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('deflate'));
-		manifest.deaths = ReplayChunks.decode(await new Response(stream).arrayBuffer());
+		manifest.deaths = ReplayChunks.decodeDeaths(await new Response(stream).arrayBuffer());
 		manifest.bounds = [...manifest.bounds.min, ...manifest.bounds.max];
 		return manifest;
 	}
@@ -135,12 +127,12 @@ globalThis.ReplayChunks = class {
 		const url = new URL(this.source.url, self.location.href), path = url.searchParams.get('path'), live = name => name.replace(/\.l4d2replay$/i, '.live.l4d2replay');
 		if (path) url.searchParams.set('path', live(path)); else url.pathname = live(url.pathname);
 		const response = await fetch(url, {cache:'no-store'});
-		if (!response.ok) throw Error('这份录像还在录制中，但没有实时索引（录制工具较旧，或录制刚开始还没写出第一段）');
+		if (!response.ok) throw Error('这份录像还在录制中，但没有实时索引（录制刚开始时，请等第一段写完再打开）');
 		const manifest = await response.json();
 		this.length = Infinity;
 		return manifest;
 	}
-	static decode(buffer) {
+	static decodeDeaths(buffer) {
 		const view = new DataView(buffer), bytes = new Uint8Array(buffer), decoder = new TextDecoder(); let offset = 0;
 		const count = () => { let value = 0, shift = 0, byte; do { byte = view.getUint8(offset++); value |= (byte & 127) << shift; shift += 7; } while (byte & 128); return value >>> 0; };
 		function value() {
@@ -164,10 +156,8 @@ globalThis.ReplayChunks = class {
 			const entry = this.manifest.chunks[index];
 			const pending = (async () => {
 				const packing = this.manifest.frameEncoding;
-				if (packing && index && !this.opening) await this.block(0);
+				if (index && !this.opening) await this.block(0);
 				const bytes = await this.read(entry.offset, entry.length);
-				if (!packing) return ReplayChunks.decode(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'))).arrayBuffer());
-				if (packing.codec !== 'zstd') throw Error('不支持的录像分块编码：' + packing.codec);
 				this.zstd ||= ReplayZstd();
 				const reader = new ReplayFrameCodec(this.zstd(new Uint8Array(bytes)),packing.strings);
 				const frames = reader.frames(this.manifest.fields,index ? this.opening : null);

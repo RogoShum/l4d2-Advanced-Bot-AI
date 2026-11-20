@@ -57,7 +57,7 @@ function replayWorker() {
 		delete map.brushModels;
 	}
 	function describeModel(model) {
-		// Same as recording.py ModelFiles.model: virtualmodel include order, merged pose parameter ranges.
+		// Source virtualmodel include order determines the merged pose parameter ranges.
 		const poseParameters = [], byName = new Map(), visit = (animation, seen = new Set()) => {
 			if (!animation || seen.has(animation)) return; seen.add(animation);
 			for (const pose of animation.poseParameters || []) { const key = pose.name.toLowerCase(), current = byName.get(key); if (!current) { const copy = {name:pose.name, start:pose.start, end:pose.end, loop:pose.loop}; byName.set(key, copy); poseParameters.push(copy); } else { const low = Math.min(current.start, current.end, pose.start, pose.end), high = Math.max(current.start, current.end, pose.start, pose.end); current.start = low; current.end = high; } }
@@ -76,9 +76,8 @@ function replayWorker() {
 		await Promise.all(Array.from({length:3}, async () => {
 			while (pending.length) { const path = pending.shift(); models[path] = await library.model(path); progress('模型与材质 ' + (++complete) + ' / ' + paths.size); }
 		}));
-		// Published recordings (publish_web.py) carry model paths only; rebuild the per-model
-		// metadata recording.py extracted (bones, hitboxes, pose parameters, collision) from local files.
-		for (const descriptor of manifest.models) if (descriptor && !descriptor.bones && descriptor.path?.endsWith('.mdl') && models[descriptor.path]?.bones) Object.assign(descriptor, describeModel(models[descriptor.path]));
+		// The recording stores model paths. Rigging and collision come from the mounted game.
+		for (const descriptor of manifest.models) if (descriptor.path.endsWith('.mdl') && models[descriptor.path]?.bones) Object.assign(descriptor, describeModel(models[descriptor.path]));
 		brushModels(map, models);
 		[map.flashlight, map.flashlightGlow] = await Promise.all([library.texture('effects/flashlight001'), library.material('particle/flashlight_glow')]);
 		map.viewmodels = {}; map.hudIcons = await library.hudIcons(manifest,map.viewmodels);

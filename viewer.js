@@ -10,7 +10,7 @@ let refreshLibrary = () => {};
 	let recent = await get('recent'), root = await get('settings', 'gameDirectory'), recordingLocation = await get('settings', 'recordingLocation');
 	let service = null, loader = null, disposeReplay = null, pending = null, busy = false, current = null, shown = false;
 	let scene = null;
-	// Static hosting (export_web.py output on any Range-capable static server):
+	// Static hosting (publish_web.py):
 	// viewer.html?replay=<recording url>, library from index.json (publish_web.py).
 	const params = new URLSearchParams(location.search); let staticLibrary = null, storage = {};
 	const s3tc = (() => { try { return !!document.createElement('canvas').getContext('webgl2')?.getExtension('WEBGL_compressed_texture_s3tc'); } catch { return false; } })();
@@ -51,7 +51,7 @@ let refreshLibrary = () => {};
 		shown = false; await new Promise(resolve => requestAnimationFrame(resolve));
 		let recording = null;
 		try {
-			const started = performance.now(), result = await loader.request('load', {source:file.url ? {url:file.url, size:file.size, partSize:file.partSize, durations:file.durations} : {file, durations:file.durations, live:file.liveFile || null, liveHandle:file.liveHandle || null, handle:file.liveFile && handle && typeof handle.getFile === 'function' ? handle : null},chapter}); recording = result.recording;
+			const started = performance.now(), result = await loader.request('load', {source:file.url ? {url:file.url, size:file.size, partSize:file.partSize} : {file, live:file.liveFile || null, liveHandle:file.liveHandle || null, handle:file.liveFile && handle && typeof handle.getFile === 'function' ? handle : null},chapter}); recording = result.recording;
 			if (token !== latestLoad) { recording.dispose(); return; }
 			const summary = recording.manifest.summary, name = summary.map;
 			globalThis.__loadTiming = {load:Math.round(performance.now() - started)};
@@ -74,7 +74,6 @@ let refreshLibrary = () => {};
 				if (performance.now() - preparedAt > 8) { await new Promise(resolve => requestAnimationFrame(resolve)); preparedAt = performance.now(); }
 			}
 			const chapters = result.chapters || [{map:name,duration:summary.duration}];
-			file.durations = chapters.map(c => c.duration);
 			let duration = 0;
 			const entries = chapters.map(c => { const entry = {...c,start:duration}; duration += c.duration; return entry; });
 			const campaign = {entries, index:chapter, offset:entries[chapter].start, duration,
