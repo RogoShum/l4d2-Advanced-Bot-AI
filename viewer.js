@@ -18,9 +18,12 @@ let refreshLibrary = () => {};
 	const serviceRoot = path => ({service:location.origin, path, name:path.split(/[\\/]/).at(-1)});
 	function controls(value) {
 		busy = value;
-		for (const id of ['changeDirectory', 'openRecording', 'gameDirectory', 'welcomeLibrary','chapterSelect']) $(id).disabled = value;
+		for (const id of ['changeDirectory', 'changeDirectoryOnce', 'openRecording', 'gameDirectory', 'gameDirectoryOnce', 'welcomeLibrary','chapterSelect']) $(id).disabled = value;
 		$('gameDirectory').textContent = root ? (loader ? '游戏目录：' + root.name : '授权并关联：' + root.name) : '关联游戏目录';
 		$('gameDirectory').hidden = !!loader && (!!service || !!staticLibrary);
+		const showReadOnce = !!staticLibrary && !!window.showDirectoryPicker;
+		$('gameDirectoryOnce').hidden = !showReadOnce || !!loader;
+		$('changeDirectoryOnce').hidden = !showReadOnce;
 		$('gameDir').textContent = root ? (root.path || root.name) : '未关联';
 	}
 	async function mount(chosen) {
@@ -92,21 +95,20 @@ let refreshLibrary = () => {};
 		if (await entry.handle.queryPermission({mode:'read'}) !== 'granted' && await entry.handle.requestPermission({mode:'read'}) !== 'granted') return;
 		recordingLocation = entry.handle; await put('settings', recordingLocation, 'recordingLocation'); await load(await entry.handle.getFile(), entry.handle);
 	}
-	async function associate(change) {
+	async function associate(action) {
 		if (busy) return;
 		try {
 			let chosen;
 			if (service) { controls(true); const result = await api('game-directory', {}); if (!result) return; chosen = serviceRoot(result.gameDirectory); }
-			else if (!window.showDirectoryPicker) chosen = await pickFolderFiles();
-			else { chosen = change || !root?.requestPermission ? await showDirectoryPicker({id:'l4d2-game', mode:'read', ...(root?.requestPermission ? {startIn:root} : {})}) : root; if (await chosen.requestPermission({mode:'read'}) !== 'granted') return; }
+			else if (action === 'files' || !window.showDirectoryPicker) chosen = await pickFolderFiles();
+			else { chosen = action === 'change' || !root?.requestPermission ? await showDirectoryPicker({id:'l4d2-game', mode:'read', ...(root?.requestPermission ? {startIn:root} : {})}) : root; if (await chosen.requestPermission({mode:'read'}) !== 'granted') return; }
 			if (!chosen) return;
 			controls(true); loading(true, '载入游戏资源'); await mount(chosen); if (!chosen.files) await put('settings', root, 'gameDirectory');
 			if (pending) { const next = pending; pending = null; await load(next.file, next.handle); }
 			else if (!shown) { loading(false, 'L4D2 实机回放'); status('游戏目录已关联。打开录像库选择一局录像。'); }
 		} catch (e) { if (e.name !== 'AbortError') showError(e); } finally { controls(false); }
 	}
-	// Browsers without showDirectoryPicker (Firefox, Safari): <input webkitdirectory>. The browser
-	// lists the folder's files; only the ones the replay needs are read, locally. Not remembered.
+	// A folder input gives this tab a file list. The loader reads the game assets it needs locally.
 	function pickFolderFiles() {
 		return new Promise(resolve => {
 			const input = document.createElement('input'); input.type = 'file'; input.webkitdirectory = true; input.multiple = true;
@@ -114,9 +116,10 @@ let refreshLibrary = () => {};
 			input.oncancel = () => resolve(null); input.click();
 		});
 	}
-	const gameFolderHelp = '请选择本机的 Left 4 Dead 2 游戏目录（包含 left4dead2 文件夹的那一层，例如 Steam\steamapps\common\Left 4 Dead 2）。地图、人物与材质只在你的浏览器里读取，不会上传。';
+	const gameFolderHelp = '请选择 Steam/steamapps/common/Left 4 Dead 2，即包含 left4dead2 文件夹的那一层。游戏资源只在本机读取。' + (window.showDirectoryPicker ? '如果浏览器提示目录包含系统文件，取消后点“仅本次读取”。' : '');
 	const run = fn => async (...args) => { try { await fn(...args); } catch (e) { if (e.name !== 'AbortError') showError(e); } };
-	$('gameDirectory').onclick = () => associate(false); $('changeDirectory').onclick = () => associate(true);
+	$('gameDirectory').onclick = () => associate(); $('changeDirectory').onclick = () => associate('change');
+	$('gameDirectoryOnce').onclick = $('changeDirectoryOnce').onclick = () => associate('files');
 	$('welcomeLibrary').onclick = () => togglePop('libraryBtn', 'libraryPop', true) && refreshLibrary();
 	$('packRecording').onclick = () => $('packFiles').click();
 	$('packFiles').onchange = run(async e => {
