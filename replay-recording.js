@@ -63,7 +63,8 @@ globalThis.ReplayChunks = class {
 	}
 	async readManifest({magic,start,size}) {
 		if (magic.startsWith('{')) throw Error('这是正在录制的录像的实时索引（.live.l4d2replay），请在录像库里打开同名录像（标着“录制中”）');
-		if (magic !== 'L4D2RPLZ' || start < 16 || !size) throw Error('请选择已结束的新格式单关录像');
+		if (magic !== 'L4D2RPLZ') throw Error('无法识别录像文件头');
+		if (start < 16 || !size) throw Error('录像索引无效');
 		const bytes = await this.read(start,size);
 		const manifest = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'))).json();
 		if (manifest.frameEncoding?.codec !== 'zstd') throw Error('录像分块编码无效');
@@ -75,6 +76,7 @@ globalThis.ReplayChunks = class {
 		for (const file of files) {
 			const reader = new ReplayChunks({file}), header = await reader.header();
 			if (header.magic === 'L4D2PACK') throw Error(file.name + ' 已是关卡包，请选择单关录像');
+			if (header.magic === 'L4D2RPLZ' && !header.start && !header.size) throw Error(file.name + ' 仍在录制，结束后可以打包');
 			const {map,duration} = await reader.readManifest(header);
 			entries.push({file,chapter:{map,name:file.name,length:file.size,duration}});
 		}

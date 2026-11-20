@@ -241,7 +241,7 @@ body.noui #squad,body.noui #drawer,body.noui #miniWrap,body.noui #top .tools,bod
  <div class="row"><label for="fogMode" title="雾的距离从跟随的生还者处算起（与游戏中玩家视角一致），不从远处的镜头算起">雾</label><select id="fogMode"><option value="map">地图原值</option><option value="half">减弱一半</option><option value="off">关闭</option></select></div>
  <div class="row"><label for="timeOfDay">时间 · <span id="timeOfDayLabel">12:00</span></label><input type="range" id="timeOfDay" min="0" max="24" step="0.1" style="width:140px"></div>
  <hr>
- <div class="row"><label>游戏目录</label><span><button class="btn" id="changeDirectory">更换</button> <button class="btn" id="changeDirectoryOnce" hidden>仅本次读取</button></span></div>
+ <div class="row"><label>游戏目录</label><button class="btn" id="changeDirectory">更换</button></div>
  <div class="muted" id="gameDir" style="font-size:11px;padding:0 4px;word-break:break-all"></div>
  <div class="muted" id="assetStatus" style="font-size:11px;padding:6px 4px 0"></div>
 </div>
@@ -273,7 +273,7 @@ body.noui #squad,body.noui #drawer,body.noui #miniWrap,body.noui #top .tools,bod
 </div>
 
 <div id="loading" class="idle"><div class="card glass"><div class="spinner"></div><h2 id="loadTitle">L4D2 实机回放</h2><p data-status id="status">正在连接本地服务…</p>
- <div class="actions"><button class="btn primary" id="welcomeLibrary"><svg class="i"><use href="#i-folder"/></svg>打开录像库</button><button class="btn" id="gameDirectory">关联游戏目录</button><button class="btn" id="gameDirectoryOnce" hidden>仅本次读取</button></div><div class="progress"><i></i></div></div></div>
+ <div class="actions"><button class="btn primary" id="welcomeLibrary"><svg class="i"><use href="#i-folder"/></svg>打开录像库</button><button class="btn" id="gameDirectory">关联游戏目录</button></div><div class="progress"><i></i></div></div></div>
 <div id="hint" class="glass gone"></div>
 <div id="error"></div>
 

@@ -54,20 +54,6 @@ globalThis.SourceIO = {
 		const shader = word().toLowerCase(); if (tokens[i++] !== '{') return {shader, values: {}}; return {shader, values: object()};
 	}
 };
-// A game folder chosen with <input webkitdirectory> (browsers without showDirectoryPicker):
-// the same handle interface over the selected File objects. Paths are relative to the chosen folder.
-globalThis.SourceFileList = class {
-	constructor(files, name = '', tree = null) {
-		this.kind = 'directory'; this.name = name;
-		if (tree) { this.tree = tree; return; }
-		this.tree = {dirs:new Map(), files:new Map()};
-		for (const {path, file} of files) { const parts = path.split('/'); let node = this.tree; for (const part of parts.slice(0, -1)) { const key = part.toLowerCase(); if (!node.dirs.has(key)) node.dirs.set(key, {name:part, dirs:new Map(), files:new Map()}); node = node.dirs.get(key); } node.files.set(parts.at(-1).toLowerCase(), file); }
-	}
-	static missing() { const error = Error('NotFound'); error.name = 'NotFoundError'; return error; }
-	async getDirectoryHandle(name) { const node = this.tree.dirs.get(name.toLowerCase()); if (!node) throw SourceFileList.missing(); return new SourceFileList(null, node.name, node); }
-	async getFileHandle(name) { const file = this.tree.files.get(name.toLowerCase()); if (!file) throw SourceFileList.missing(); return {kind:'file', name:file.name, getFile:async () => file}; }
-	async *entries() { for (const node of this.tree.dirs.values()) yield [node.name, {kind:'directory'}]; for (const file of this.tree.files.values()) yield [file.name, {kind:'file'}]; }
-};
 
 globalThis.SourceAssets = class {
 	constructor(root, progress = () => {}) { this.root = root; this.progress = progress; this.sources = []; this.embedded = new Map(); this.files = new Map(); this.materials = new Map(); this.textures = new Map(); this.models = new Map(); this.animations = new Map(); this.warnings = new Set(); }

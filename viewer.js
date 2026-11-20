@@ -5,10 +5,11 @@ let refreshLibrary = () => {};
 	const status = text => { $('status').textContent = text; };
 	const loading = (on, title) => { $('loading').classList.toggle('idle', !on); if (title) $('loadTitle').textContent = title; if (on) $('loading').classList.remove('gone'); };
 	const db = await new Promise((resolve, reject) => { const r = indexedDB.open('l4d2-replay-library'); r.onupgradeneeded = () => { r.result.createObjectStore('recent', {keyPath:'id'}); r.result.createObjectStore('settings'); }; r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error); });
-	const get = (store, key) => new Promise((resolve, reject) => { const r = db.transaction(store).objectStore(store)[key === undefined ? 'getAll' : 'get'](key); r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error); });
+	const get = (store, key) => new Promise((resolve, reject) => { const r = db.transaction(store).objectStore(store)[key === undefined ? 'getAllKeys' : 'get'](key); r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error); });
 	const write = (store, change) => new Promise((resolve, reject) => { const tx = db.transaction(store, 'readwrite'); change(tx.objectStore(store)); tx.oncomplete = resolve; tx.onabort = () => reject(tx.error); });
 	const put = (store, value, key) => write(store, s => s.put(value, key));
-	let recent = await get('recent'), root = await get('settings', 'gameDirectory'), recordingLocation = await get('settings', 'recordingLocation');
+	const seen = new Set(await get('recent'));
+	let root = await get('settings', 'gameDirectory');
 	let service = null, loader = null, disposeReplay = null, pending = null, busy = false, current = null, shown = false;
 	let scene = null;
 	// Static hosting (publish_web.py):
@@ -19,12 +20,9 @@ let refreshLibrary = () => {};
 	const serviceRoot = path => ({service:location.origin, path, name:path.split(/[\\/]/).at(-1)});
 	function controls(value) {
 		busy = value;
-		for (const id of ['changeDirectory', 'changeDirectoryOnce', 'openRecording', 'gameDirectory', 'gameDirectoryOnce', 'welcomeLibrary','chapterSelect']) $(id).disabled = value;
+		for (const id of ['changeDirectory', 'openRecording', 'gameDirectory', 'welcomeLibrary','chapterSelect']) $(id).disabled = value;
 		$('gameDirectory').textContent = root ? (loader ? '游戏目录：' + root.name : '授权并关联：' + root.name) : '关联游戏目录';
 		$('gameDirectory').hidden = !!loader && (!!service || !!staticLibrary);
-		const showReadOnce = !!staticLibrary && !!window.showDirectoryPicker;
-		$('gameDirectoryOnce').hidden = !showReadOnce || !!loader;
-		$('changeDirectoryOnce').hidden = !showReadOnce;
 		$('gameDir').textContent = root ? (root.path || root.name) : '未关联';
 	}
 	async function mount(chosen) {
@@ -58,7 +56,11 @@ let refreshLibrary = () => {};
 			globalThis.__loadTiming = {load:Math.round(performance.now() - started)};
 			const gl = $('world').getContext('webgl2', {antialias:false, alpha:false, depth:false, stencil:false, powerPreference:'high-performance'}); if (!gl) throw Error('浏览器不支持 WebGL 2');
 			scene = {G:result.G, models:result.models, renderer:new ReplayRenderer(gl, result.G, result.models)};
-			const id = handle.path || file.name, entry = {id, name:file.name, map:name, duration:summary.duration, openedAt:Date.now(), handle}; if (!handle.static) { await put('recent', entry); recent = recent.filter(r => r.id !== id); recent.push(entry); } current = file.name;
+			if (!handle.static) {
+				const id = handle.path || file.name;
+				if (!seen.has(id)) { await put('recent', {id}); seen.add(id); }
+			}
+			current = file.name;
 			status('创建场景…'); await new Promise(resolve => requestAnimationFrame(resolve));
 			const sceneStarted = performance.now(), materials = new Set(scene.G.world.map(group => group.material)); let preparedAt = sceneStarted;
 			for (const [path, model] of Object.entries(scene.models)) {
@@ -98,26 +100,19 @@ let refreshLibrary = () => {};
 		try {
 			let chosen;
 			if (service) { controls(true); const result = await api('game-directory', {}); if (!result) return; chosen = serviceRoot(result.gameDirectory); }
-			else if (action === 'files' || !window.showDirectoryPicker) chosen = await pickFolderFiles();
-			else { chosen = action === 'change' || !root?.requestPermission ? await showDirectoryPicker({id:'l4d2-game', mode:'read', ...(root?.requestPermission ? {startIn:root} : {})}) : root; if (await chosen.requestPermission({mode:'read'}) !== 'granted') return; }
-			if (!chosen) return;
-			controls(true); loading(true, '载入游戏资源'); await mount(chosen); if (!chosen.files) await put('settings', root, 'gameDirectory');
+			else {
+				if (!window.showDirectoryPicker) throw Error('关联游戏目录需要支持目录访问的桌面版 Chrome 或 Edge。');
+				chosen = action === 'change' || !root?.requestPermission ? await showDirectoryPicker({id:'l4d2-game', mode:'read', ...(root?.requestPermission ? {startIn:root} : {})}) : root;
+				if (await chosen.requestPermission({mode:'read'}) !== 'granted') return;
+			}
+			controls(true); loading(true, '载入游戏资源'); await mount(chosen); if (!service) await put('settings', root, 'gameDirectory');
 			if (pending) { const next = pending; pending = null; await load(next.file, next.handle); }
 			else { loading(false, 'L4D2 实机回放'); status('游戏目录已关联。打开录像库选择一局录像。'); }
 		} catch (e) { if (e.name !== 'AbortError') showError(e); } finally { controls(false); }
 	}
-	// A folder input gives this tab a file list. The loader reads the game assets it needs locally.
-	function pickFolderFiles() {
-		return new Promise(resolve => {
-			const input = document.createElement('input'); input.type = 'file'; input.webkitdirectory = true; input.multiple = true;
-			input.onchange = () => { const files = [...input.files]; if (!files.length) return resolve(null); const name = files[0].webkitRelativePath.split('/')[0]; resolve({name, files:files.map(file => ({path:file.webkitRelativePath.split('/').slice(1).join('/'), file}))}); };
-			input.oncancel = () => resolve(null); input.click();
-		});
-	}
-	const gameFolderHelp = '请选择 Steam/steamapps/common/Left 4 Dead 2，即包含 left4dead2 文件夹的那一层。游戏资源只在本机读取。' + (window.showDirectoryPicker ? '如果浏览器提示目录包含系统文件，取消后点“仅本次读取”。' : '');
+	const gameFolderHelp = '请选择 Steam/steamapps/common/Left 4 Dead 2，即包含 left4dead2 文件夹的那一层。游戏资源只在本机读取。';
 	const run = fn => async (...args) => { try { await fn(...args); } catch (e) { if (e.name !== 'AbortError') showError(e); } };
 	$('gameDirectory').onclick = () => associate(); $('changeDirectory').onclick = () => associate('change');
-	$('gameDirectoryOnce').onclick = $('changeDirectoryOnce').onclick = () => associate('files');
 	$('welcomeLibrary').onclick = () => togglePop('libraryBtn', 'libraryPop', true) && refreshLibrary();
 	$('packRecording').onclick = () => $('packFiles').click();
 	$('packFiles').onchange = run(async e => {
@@ -130,7 +125,7 @@ let refreshLibrary = () => {};
 	});
 	$('openRecording').onclick = run(async () => {
 		if (service) return openServiceRecording();
-		const [handle] = await showOpenFilePicker({id:'l4d2-recording', ...(recordingLocation ? {startIn:recordingLocation} : {}), types:[{description:'L4D2 录像', accept:{'application/octet-stream':['.l4d2replay']}}], multiple:false});
+		const [handle] = await showOpenFilePicker({id:'l4d2-recording', types:[{description:'L4D2 录像', accept:{'application/octet-stream':['.l4d2replay']}}], multiple:false});
 		await openHandle(handle);
 	});
 	function online(entry) {
@@ -142,44 +137,22 @@ let refreshLibrary = () => {};
 	}
 	const size = n => n > 1e6 ? (n / 1e6).toFixed(1) + ' MB' : Math.round(n / 1e3) + ' KB';
 	const when = ms => { const d = new Date(ms), now = new Date(), same = d.toDateString() === now.toDateString(); return (same ? '今天 ' : (d.getMonth() + 1) + '月' + d.getDate() + '日 ') + d.toTimeString().slice(0, 5); };
-	let library = [];
+	let library = [], libraryEmpty = '录像目录里还没有 .l4d2replay 文件';
 	function renderLibrary() {
-		const query = $('libSearch').value.trim().toLowerCase(), list = $('libList'), seen = new Set(recent.map(r => r.name)); list.replaceChildren();
+		const query = $('libSearch').value.trim().toLowerCase(), list = $('libList'); list.replaceChildren();
 		const rows = library.filter(r => !query || r.name.toLowerCase().includes(query));
 		for (const r of rows) {
 			const el = document.createElement('div'); el.className = 'lib' + (r.name === current ? ' cur' : '');
 			const name = document.createElement('b'); name.textContent = r.name.replace(/\.l4d2replay$/, ''); name.title = r.name;
 			const meta = document.createElement('span'); meta.className = 'meta'; meta.textContent = r.duration ? fmtTime(r.duration, 0) : r.size != null ? size(r.size) : '';
-			const sub = document.createElement('span'); sub.textContent = (r.modified ? when(r.modified) : '') + (seen.has(r.name) && r.name !== current ? ' · 看过' : '') + (r.name === current ? ' · 正在播放' : '');
-			if (r.needsPermission) sub.textContent += (sub.textContent ? ' · ' : '') + '需授权';
+			const sub = document.createElement('span'); sub.textContent = (r.modified ? when(r.modified) : '') + (seen.has(r.path || r.name) && r.name !== current ? ' · 看过' : '') + (r.name === current ? ' · 正在播放' : '');
 			const extra = document.createElement('span'); extra.className = 'meta'; extra.textContent = r.map || '';
 			el.append(name, meta, sub, extra); el.onclick = run(() => r.open()); list.append(el);
 		}
 		if (!rows.length) {
 			const empty = document.createElement('div'); empty.className = 'muted'; empty.style.padding = '14px 10px';
-			const message = staticLibrary || service ? '录像目录里还没有 .l4d2replay 文件' : '没有找到录像。可以在下方选择录像目录，或打开 .l4d2replay 文件。';
-			empty.textContent = library.length ? '没有匹配的录像' : message; list.append(empty);
+			empty.textContent = library.length ? '没有匹配的录像' : libraryEmpty; list.append(empty);
 		}
-	}
-	// Listing the library never asks for permission. null means the file is gone; undefined means access needs authorization.
-	async function readableFile(handle, directory, entries) {
-		try { if (await handle.queryPermission({mode:'read'}) === 'granted') return await handle.getFile(); }
-		catch (e) { if (e.name === 'NotFoundError') return null; if (e.name !== 'NotAllowedError') throw e; }
-		if (directory && !entries.has(handle.name)) {
-			const relative = await directory.resolve(handle);
-			if (relative?.length === 1 && !entries.has(relative[0])) return null;
-		}
-	}
-	async function forgetRecent(entries) {
-		if (!entries.length) return;
-		await write('recent', store => {
-			for (const entry of entries) {
-				const lookup = store.get(entry.id);
-				// Another tab may already have opened a new file with the same name.
-				lookup.onsuccess = () => { if (lookup.result?.openedAt === entry.openedAt) store.delete(entry.id); };
-			}
-		});
-		recent = recent.filter(entry => !entries.includes(entry));
 	}
 	refreshLibrary = async () => {
 		try {
@@ -196,40 +169,32 @@ let refreshLibrary = () => {};
 				const live = new Set(result.recordings.filter(r => /\.live\.l4d2replay$/i.test(r.name)).map(r => r.name.replace(/\.live\.l4d2replay$/i, '.l4d2replay')));
 				library = result.recordings.filter(r => !/\.live\.l4d2replay$/i.test(r.name)).map(r => ({...r, name:live.has(r.name) ? r.name + '（录制中）' : r.name, modified:r.modified * 1000, open:() => openServiceRecording(r.path)}));
 			} else {
-				// Opened as a local file: list a chosen recordings folder (File System Access), plus recent files.
 				let dir = await get('settings', 'recordingDirectory'), granted = false;
-				const handles = new Map(), rows = [], missing = [];
+				const rows = [];
 				if (dir) {
 					try {
 						granted = await dir.queryPermission({mode:'read'}) === 'granted';
-						if (granted) for await (const h of dir.values()) if (h.kind === 'file' && /\.l4d2replay$/i.test(h.name)) handles.set(h.name, h);
+						if (granted) {
+							const handles = new Map();
+							for await (const h of dir.values()) if (h.kind === 'file' && /\.l4d2replay$/i.test(h.name)) handles.set(h.name, h);
+							for (const [name, handle] of handles) {
+								if (/\.live\.l4d2replay$/i.test(name)) continue;
+								let file;
+								try { file = await handle.getFile(); }
+								catch (e) { if (e.name === 'NotFoundError') continue; throw e; }
+								const live = handles.get(name.replace(/\.l4d2replay$/i, '.live.l4d2replay'));
+								rows.push({name:live ? name + '（录制中）' : name, size:file.size, modified:file.lastModified, open:() => openHandle(handle, live)});
+							}
+						}
 					} catch (e) {
 						if (e.name === 'NotFoundError') { dir = null; await write('settings', s => s.delete('recordingDirectory')); }
 						else if (e.name !== 'NotAllowedError') throw e;
-						granted = false; handles.clear();
+						granted = false; rows.length = 0;
 					}
 				}
-				for (const [name, handle] of handles) {
-					if (/\.live\.l4d2replay$/i.test(name)) continue;
-					const f = await readableFile(handle);
-					if (f === null) { handles.delete(name); continue; }
-					const live = handles.get(name.replace(/\.l4d2replay$/i, '.live.l4d2replay'));
-					rows.push({name:live ? name + '（录制中）' : name, size:f?.size, modified:f?.lastModified || 0, needsPermission:!f, open:() => openHandle(handle, live)});
-				}
-				for (const r of recent) {
-					const file = r.handle.service ? undefined : await readableFile(r.handle, granted ? dir : null, handles);
-					const needsPermission = !r.handle.service && file === undefined;
-					if (file === null) { missing.push(r); continue; }
-					if (handles.has(r.name)) continue;
-					rows.push({name:r.name, duration:r.duration, map:r.map, modified:r.openedAt, needsPermission, open:() => r.handle.service ? openServiceRecording(r.handle.path) : openHandle(r.handle)});
-				}
-				await forgetRecent(missing);
-				const last = recordingLocation;
-				if (last?.kind === 'file' && await readableFile(last, granted ? dir : null, handles) === null && recordingLocation === last) {
-					recordingLocation = null; await write('settings', s => s.delete('recordingLocation'));
-				}
-				rows.sort((a, b) => b.modified - a.modified); library = rows;
-				$('libDir').textContent = granted ? '目录：' + dir.name : dir ? '录像目录需要重新授权' : '最近打开（可选择录像目录）';
+				library = rows.sort((a, b) => b.modified - a.modified);
+				libraryEmpty = !dir ? '请选择存放录像的 record 文件夹。' : !granted ? '请授权读取录像目录。' : '录像目录里还没有 .l4d2replay 文件';
+				$('libDir').textContent = dir ? '目录：' + dir.name : '未选择录像目录';
 				$('pickDirectory').hidden = false; $('pickDirectory').textContent = granted ? '更换目录…' : dir ? '授权录像目录' : '选择录像目录…';
 			}
 			renderLibrary();
@@ -240,15 +205,16 @@ let refreshLibrary = () => {};
 		try {
 			if (await handle.queryPermission({mode:'read'}) !== 'granted' && await handle.requestPermission({mode:'read'}) !== 'granted') return;
 			// Read the live index first so every chunk it lists is inside the recording snapshot.
-			live = liveHandle && await readableFile(liveHandle);
+			if (liveHandle) {
+				try { live = await liveHandle.getFile(); }
+				catch (e) { if (e.name !== 'NotFoundError') throw e; }
+			}
 			file = await handle.getFile();
 		} catch (e) {
 			if (e.name !== 'NotFoundError') throw e;
-			await forgetRecent(recent.filter(r => r.handle === handle));
 			await refreshLibrary(); hint('录像文件已移动或删除，列表已更新。'); return;
 		}
 		if (live) { file.liveFile = live; file.liveHandle = liveHandle; }
-		recordingLocation = handle; await put('settings', handle, 'recordingLocation');
 		await load(file, handle);
 	}
 	$('pickDirectory').onclick = run(async () => {
@@ -260,7 +226,7 @@ let refreshLibrary = () => {};
 				await write('settings', s => s.delete('recordingDirectory'));
 			}
 		}
-		else { dir = await showDirectoryPicker({id:'l4d2-recordings', mode:'read', ...(recordingLocation ? {startIn:recordingLocation} : {})}); await put('settings', dir, 'recordingDirectory'); }
+		else { dir = await showDirectoryPicker({id:'l4d2-recordings', mode:'read'}); await put('settings', dir, 'recordingDirectory'); }
 		await refreshLibrary();
 	});
 	$('libSearch').oninput = renderLibrary;
