@@ -1,0 +1,106 @@
+{
+ "recordings": [
+  {
+   "name": "C1",
+   "replay": "record/c1.3e8050ab4e96aedb.l4d2replay",
+   "map": "c1m1_hotel",
+   "duration": 2114.066827,
+   "size": 49030862
+  },
+  {
+   "name": "C2",
+   "replay": "record/c2.a2a148164ccfe02a.l4d2replay",
+   "map": "c2m1_highway",
+   "duration": 3189.9334710000003,
+   "size": 76939822
+  },
+  {
+   "name": "C3",
+   "replay": "record/c3.f703e2c07b550b9f.l4d2replay",
+   "map": "c3m1_plankcountry",
+   "duration": 2245.633447,
+   "size": 57684202
+  },
+  {
+   "name": "C4",
+   "replay": "record/c4.1d363cce1489199a.l4d2replay",
+   "map": "c4m1_milltown_a",
+   "duration": 5063.133659,
+   "size": 109206588
+  },
+  {
+   "name": "C5",
+   "replay": "record/c5.d98646fb0fcc4418.l4d2replay",
+   "map": "c5m1_waterfront",
+   "duration": 2791.200096,
+   "size": 79442398
+  },
+  {
+   "name": "C6",
+   "replay": "record/c6.dc3019412ab2c924.l4d2replay",
+   "map": "c6m1_riverbank",
+   "duration": 1376.3000670000001,
+   "size": 35776092
+  },
+  {
+   "name": "C7",
+   "replay": "record/c7.3d314a7bb39d5240.l4d2replay",
+   "map": "c7m1_docks",
+   "duration": 2158.600131,
+   "size": 58355063
+  },
+  {
+   "name": "C8",
+   "replay": "record/c8.60f6f3ff2a2ea39a.l4d2replay",
+   "map": "c8m1_apartment",
+   "duration": 2095.600113,
+   "size": 57607461
+  },
+  {
+   "name": "C9",
+   "replay": "record/c9.8b5306df4c4fbdcb.l4d2replay",
+   "map": "c9m1_alleys",
+   "duration": 1158.466687,
+   "size": 29135442
+  },
+  {
+   "name": "C10",
+   "replay": "record/c10.904ab159ade52e06.l4d2replay",
+   "map": "c10m1_caves",
+   "duration": 2293.333466,
+   "size": 58278010
+  },
+  {
+   "name": "C11",
+   "replay": "record/c11.b28d147f56703dec.l4d2replay",
+   "map": "c11m1_greenhouse",
+   "duration": 3573.0002210000002,
+   "size": 85608160
+  },
+  {
+   "name": "C12",
+   "replay": "record/c12.c13beccb5b6c68ce.l4d2replay",
+   "map": "c12m1_hilltop",
+   "duration": 2073.566773,
+   "size": 58315523
+  },
+  {
+   "name": "C13",
+   "replay": "record/c13.d9bd4f45b3b7a1be.l4d2replay",
+   "map": "c13m1_alpinecreek",
+   "duration": 3189.100214,
+   "size": 90079195
+  },
+  {
+   "name": "C14",
+   "replay": "record/c14.606d045562fa88a0.l4d2replay",
+   "map": "c14m1_junkyard",
+   "duration": 4578.966877999999,
+   "size": 127841400
+  }
+ ],
+ "storage": {
+  "mode": "parts",
+  "partSize": 1048576
+ }
+}
