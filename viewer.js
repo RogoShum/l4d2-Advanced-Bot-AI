@@ -29,7 +29,10 @@ let refreshLibrary = () => {};
 	async function mount(chosen) {
 		const next = new ReplayLoader(status);
 		try { await next.request('mount', {root:chosen, compressed:s3tc}); } catch (e) { next.dispose(); throw e; }
-		if (disposeReplay) { disposeReplay(); disposeReplay = null; }
+		if (disposeReplay) {
+			disposeReplay(); disposeReplay = null; current = null; shown = false;
+			document.body.classList.add('empty');
+		}
 		if (scene) { scene.renderer.dispose(); scene = null; }
 		if (loader) loader.dispose(); loader = next; root = chosen;
 	}
@@ -105,7 +108,7 @@ let refreshLibrary = () => {};
 			if (!chosen) return;
 			controls(true); loading(true, '载入游戏资源'); await mount(chosen); if (!chosen.files) await put('settings', root, 'gameDirectory');
 			if (pending) { const next = pending; pending = null; await load(next.file, next.handle); }
-			else if (!shown) { loading(false, 'L4D2 实机回放'); status('游戏目录已关联。打开录像库选择一局录像。'); }
+			else { loading(false, 'L4D2 实机回放'); status('游戏目录已关联。打开录像库选择一局录像。'); }
 		} catch (e) { if (e.name !== 'AbortError') showError(e); } finally { controls(false); }
 	}
 	// A folder input gives this tab a file list. The loader reads the game assets it needs locally.
