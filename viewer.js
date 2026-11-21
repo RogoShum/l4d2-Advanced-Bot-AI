@@ -10,7 +10,8 @@ let refreshLibrary = () => {};
 	const write = (store, change) => new Promise((resolve, reject) => { const tx = db.transaction(store, 'readwrite'); change(tx.objectStore(store)); tx.oncomplete = resolve; tx.onabort = () => reject(tx.error); });
 	const put = (store, value, key) => write(store, s => s.put(value, key));
 	const seen = new Set(await get('recent'));
-	let root = await get('settings', 'gameDirectory');
+	const savedDirectory = await get('settings', 'gameDirectory');
+	let root = savedDirectory?.kind === 'directory' ? savedDirectory : null;
 	let service = null, loader = null, disposeReplay = null, pending = null, busy = false, current = null, shown = false;
 	let scene = null;
 	// Static hosting (publish_web.py):
@@ -35,7 +36,7 @@ let refreshLibrary = () => {};
 		}
 		if (scene) { scene.renderer.dispose(); scene = null; }
 		if (loader) loader.dispose(); loader = next;
-		root = chosen.files ? {name:chosen.name} : chosen;
+		root = chosen;
 	}
 	let loadQueue = Promise.resolve(), latestLoad = 0;
 	function load(file, handle, chapter = 0, start = 0, play = false, speed = 1) {
@@ -97,20 +98,6 @@ let refreshLibrary = () => {};
 		const handle = await api('recording', path ? {path} : {}); if (!handle) return;
 		await load({name:handle.name, url:'api/recording?path=' + encodeURIComponent(handle.path)}, handle);
 	}
-	function pickGameDirectory() {
-		return new Promise(resolve => {
-			const input = document.createElement('input');
-			input.type = 'file'; input.webkitdirectory = true; input.multiple = true;
-			input.oncancel = () => resolve(null);
-			input.onchange = () => {
-				if (!input.files.length) return resolve(null);
-				const name = input.files[0].webkitRelativePath.split('/')[0];
-				const files = Array.from(input.files, file => ({path:file.webkitRelativePath.slice(name.length + 1), file}));
-				resolve({name, files});
-			};
-			input.click();
-		});
-	}
 	async function associate(action) {
 		if (busy) return;
 		controls(true);
@@ -120,12 +107,13 @@ let refreshLibrary = () => {};
 				const result = await api('game-directory', {});
 				if (!result) return;
 				chosen = serviceRoot(result.gameDirectory);
-			} else if (action !== 'change' && root?.requestPermission) {
-				if (await root.requestPermission({mode:'read'}) !== 'granted') return;
-				chosen = root;
 			} else {
-				chosen = await pickGameDirectory();
-				if (!chosen) return;
+				if (!window.showDirectoryPicker) throw Error('关联游戏目录需要支持目录访问的桌面版 Chrome 或 Edge。');
+				chosen = root;
+				if (action === 'change' || !root?.requestPermission) {
+					chosen = await showDirectoryPicker({id:'l4d2-game', mode:'read', ...(root?.requestPermission ? {startIn:root} : {})});
+				}
+				if (await chosen.requestPermission({mode:'read'}) !== 'granted') return;
 			}
 			loading(true, '载入游戏资源'); await mount(chosen);
 			if (!service) await put('settings', root, 'gameDirectory');
@@ -133,7 +121,6 @@ let refreshLibrary = () => {};
 			else showWelcome();
 		} catch (e) { if (e.name !== 'AbortError') showError(e); } finally { controls(false); }
 	}
-	const gameFolderHelp = '请选择 Steam/steamapps/common/Left 4 Dead 2，即包含 left4dead2 文件夹的那一层。游戏资源只在本机读取。';
 	const run = fn => async (...args) => { try { await fn(...args); } catch (e) { if (e.name !== 'AbortError') showError(e); } };
 	$('gameDirectory').onclick = () => associate(); $('changeDirectory').onclick = () => associate('change');
 	$('welcomeLibrary').onclick = () => togglePop('libraryBtn', 'libraryPop', true) && refreshLibrary();
@@ -183,7 +170,7 @@ let refreshLibrary = () => {};
 				$('libDir').textContent = '在线回放'; $('pickDirectory').hidden = true; $('openRecording').hidden = true;
 				library = staticLibrary.map(r => ({...r,name:r.name || r.replay.split('/').at(-1), open:() => {
 					const entry = online(r);
-					if (!loader) { pending = entry; closePops(); status('已选择 ' + entry.file.name + '。' + gameFolderHelp); return; }
+					if (!loader) closePops();
 					return load(entry.file,entry.handle);
 				}}));
 			} else if (service) {
@@ -268,21 +255,18 @@ let refreshLibrary = () => {};
 			}
 			// Test hook (headless tests only): game files through a same-origin serve.py-style API.
 			if (params.has('testGameService')) root = {service:location.origin, path:'', name:'test'};
-			if (root?.service && params.has('testGameService') || root?.queryPermission && await root.queryPermission({mode:'read'}) === 'granted') {
-				loading(true, '载入游戏资源'); status('读取本机游戏目录…');
-				try { await mount(root); } finally { controls(false); }
-				if (pending) { const next = pending; pending = null; await run(load)(next.file, next.handle); } else showWelcome();
-			} else { controls(false); loading(false, root ? '需要重新授权游戏目录' : '需要本机游戏目录'); status((root ? '已记住游戏目录，点击“授权并关联”恢复访问。' : '') + gameFolderHelp); }
-			return;
+		} else {
+			const r = await fetch('api/session').catch(() => null);
+			if (r?.ok) { service = await r.json(); root = service.gameDirectory ? serviceRoot(service.gameDirectory) : null; }
 		}
 	}
-	if (location.protocol === 'http:' || location.protocol === 'https:') { const r = await fetch('api/session').catch(() => null); if (r?.ok) { service = await r.json(); root = service.gameDirectory ? serviceRoot(service.gameDirectory) : null; } }
-	if (!service && (!window.showDirectoryPicker || !window.showOpenFilePicker)) throw Error('请通过 serve.py 打开播放器，或使用桌面版 Edge / Chrome 直接打开 HTML。');
-	if (root && (service || await root.queryPermission?.({mode:'read'}) === 'granted')) {
+	if (!staticLibrary && !service && (!window.showDirectoryPicker || !window.showOpenFilePicker)) throw Error('请通过 serve.py 打开播放器，或使用桌面版 Edge / Chrome 直接打开 HTML。');
+	if (root && (root.service || await root.queryPermission({mode:'read'}) === 'granted')) {
 		loading(true, '载入游戏资源'); status('读取游戏目录…');
 		try { await mount(root); } finally { controls(false); }
-		const open = new URLSearchParams(location.search).get('open');
-		if (open && service) await run(openServiceRecording)(open);
+		const open = params.get('open');
+		if (pending) { const next = pending; pending = null; await run(load)(next.file, next.handle); }
+		else if (open && service) await run(openServiceRecording)(open);
 		else showWelcome();
 	} else { controls(false); loading(false, 'L4D2 实机回放'); status(root ? '已记住游戏目录，点击“授权并关联”恢复访问。' : '先关联游戏目录，再打开 .l4d2replay 录像。资源仅在本机读取。'); }
 })().catch(showError);
