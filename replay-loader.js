@@ -8,7 +8,7 @@ globalThis.ReplayLoader = class {
 		}).join(',') + '}';
 		const geometry = {prepareWorld:ReplayRenderer.prepareWorld, transform:ReplayRenderer.transform, point:ReplayRenderer.point, modelMaterial:ReplayRenderer.modelMaterial, transparent:ReplayRenderer.prototype.transparent};
 		const definitions = [
-			'SourceIO=' + object(SourceIO), 'SourceDirectory=' + SourceDirectory.toString(), 'SourceAssets=' + SourceAssets.toString(),
+			'SourceIO=' + object(SourceIO), 'SourceDirectory=' + SourceDirectory.toString(), 'SourceFileList=' + SourceFileList.toString(), 'SourceAssets=' + SourceAssets.toString(),
 			'SourceTexture=' + object(SourceTexture), 'SourceAnimation=' + object(SourceAnimation), 'SourcePhysics=' + object(SourcePhysics),
 			'SourceSprite=' + object(SourceSprite), 'SourceParticles=' + object(SourceParticles), 'SourceModel=' + object(SourceModel),
 			'ReplayFrameCodec=' + ReplayFrameCodec.toString(), 'ReplayZstd=' + ReplayZstd.toString(),
@@ -139,7 +139,13 @@ function replayWorker() {
 		queue = queue.then(async () => {
 			try {
 				let result;
-				if (data.type === 'mount') { SourceTexture.compressed = !!data.compressed; const root = data.root.service ? new SourceDirectory(data.root.service, '', data.root.name) : data.root; mounted = await new SourceAssets(root, progress).mount(); }
+				if (data.type === 'mount') {
+					SourceTexture.compressed = !!data.compressed;
+					let root = data.root;
+					if (root.service) root = new SourceDirectory(root.service, '', root.name);
+					else if (root.files) root = new SourceFileList(root.name, root.files);
+					mounted = await new SourceAssets(root, progress).mount();
+				}
 				else if (data.type === 'load') result = await load(data.source,data.chapter);
 				else if (data.type === 'seek') result = await recordings.get(data.id).seek(data.time);
 				else if (data.type === 'release') { recordings.get(data.id)?.dispose(); recordings.delete(data.id); }

@@ -55,6 +55,39 @@ globalThis.SourceIO = {
 	}
 };
 
+// The folder picker supplies local File objects with paths relative to the game directory.
+globalThis.SourceFileList = class {
+	constructor(name, files = []) {
+		this.name = name; this.kind = 'directory';
+		this.dirs = new Map(); this.files = new Map();
+		for (const entry of files) {
+			const parts = entry.path.split('/'), filename = parts.pop();
+			let dir = this;
+			for (const part of parts) {
+				const key = part.toLowerCase();
+				let child = dir.dirs.get(key);
+				if (!child) { child = new SourceFileList(part); dir.dirs.set(key, child); }
+				dir = child;
+			}
+			dir.files.set(filename.toLowerCase(), entry.file);
+		}
+	}
+	async getDirectoryHandle(name) {
+		const dir = this.dirs.get(name.toLowerCase());
+		if (!dir) throw new DOMException(name, 'NotFoundError');
+		return dir;
+	}
+	async getFileHandle(name) {
+		const file = this.files.get(name.toLowerCase());
+		if (!file) throw new DOMException(name, 'NotFoundError');
+		return {kind:'file', name:file.name, getFile:async () => file};
+	}
+	async *entries() {
+		for (const dir of this.dirs.values()) yield [dir.name, dir];
+		for (const file of this.files.values()) yield [file.name, {kind:'file'}];
+	}
+};
+
 globalThis.SourceAssets = class {
 	constructor(root, progress = () => {}) { this.root = root; this.progress = progress; this.sources = []; this.embedded = new Map(); this.files = new Map(); this.materials = new Map(); this.textures = new Map(); this.models = new Map(); this.animations = new Map(); this.warnings = new Set(); }
 	async file(path) {
